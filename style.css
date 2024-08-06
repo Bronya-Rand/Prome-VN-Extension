@@ -1,1 +1,54 @@
-/* All style elements for your extension go here */
+/* Prome UI Settings */
+.prome-drawer-content {
+    gap: 8px;
+    display: flex;
+    flex-direction: column;
+}
+
+.prome_vn_block {
+    width: 100%;
+}
+
+/* Prome Letterbox Settings */
+body.hLetterBox #visual-novel-letterbox-one {
+    width: 100vw;
+    height: var(--prom-letterbox-size);
+    top: 0;
+    position: absolute;
+    background-color: var(--prom-letterbox-color);
+    z-index: 3;
+    justify-content: center;
+    align-items: center;
+}
+body.hLetterBox #visual-novel-letterbox-two {
+    width: 100vw;
+    height: var(--prom-letterbox-size);
+    bottom: 0;
+    position: absolute;
+    background-color: var(--prom-letterbox-color);
+    z-index: 3;
+    justify-content: center;
+    align-items: center;
+}
+.vLetterBox #visual-novel-letterbox-one {
+    width: var(--prom-letterbox-size);
+    height: 100vh;
+    top: 0;
+    left: 0;
+    position: fixed;
+    background-color: var(--prom-letterbox-color);
+    z-index: 3;
+    justify-content: center;
+    align-items: center;
+}
+.vLetterBox #visual-novel-letterbox-two {
+    width: var(--prom-letterbox-size);
+    height: 100vh;
+    top: 0;
+    right: 0;
+    position: fixed;
+    background-color: var(--prom-letterbox-color);
+    z-index: 3;
+    justify-content: center;
+    align-items: center;
+}

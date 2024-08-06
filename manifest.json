@@ -1,11 +1,11 @@
 {
-    "display_name": "Name Displayed in SillyTavern",
-    "loading_order": 9,
+    "display_name": "Prome Visual Novel Extension",
+    "loading_order": 5,
     "requires": [],
     "optional": [],
     "js": "index.js",
     "css": "style.css",
-    "author": "yourNameHere",
+    "author": "Bronya-Rand",
     "version": "1.0.0",
-    "homePage": "yourUrlHere"
+    "homePage": "https://github.com/Bronya-Rand/Prome-VN-Extension"
 }

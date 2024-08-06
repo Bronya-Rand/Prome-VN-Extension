@@ -1,0 +1,61 @@
+<!-- Prome Visual Novel Extension Settings -->
+<!-- This is the settings for the Prome Visual Novel Extension. -->
+<!-- Brought to you by Bronya Rand herself. Bronya: :BronyaUhhhhh: -->
+
+<div class="prome-vn-settings">
+    <div class="inline-drawer">
+        <div class="inline-drawer-toggle inline-drawer-header">
+            <b>Prome (Visual Novel Extension)</b>
+            <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
+        </div>
+
+        <div class="inline-drawer-content">
+            <div class="prome-drawer-content">
+                <small class="flex-container justifyCenter">Brought to you by Bronya Rand and Prometheus.</small>
+
+                <label class="checkbox_label" for="prome-enable-vn" title="Toggle the Prome VN UI.">
+                    <input id="prome-enable-vn" type="checkbox" />
+                    <span data-i18n="Enable Prome VN Mode">Enable Prome VN Mode</span>
+                </label>
+
+                <div class="prome_vn_block flex-container flexFlowColumn">
+                    <label for="prome-letterbox-mode" data-i18n="Letterbox Mode">Letterbox Mode</label>
+                    <small data-i18n="Select the letterbox mode for the Prome VN UI.">Select the letterbox mode for the Prome VN UI.</small>
+                    <select id="prome-letterbox-mode">
+                        <option value="0" data-i18n="None">None</option>
+                        <option value="1" data-i18n="Horizontal Letterbox">Horizontal Letterbox</option>
+                        <option value="2" data-i18n="Vertical Letterbox">Vertical Letterbox</option>
+                    </select>
+                </div>
+
+                <div class="prome_vn_block flex-container flexFlowRow">
+                    <div class="prome_vn_block flex-container flexFlowColumn">
+                        <label for="prome-letterbox-color" class="title_restorable">
+                            <span data-i18n="Letterbox Color">Letterbox Color</span>
+                            <div id="prome-letterbox-color-restore" title="Restore default value" class="right_menu_button">
+                                <i class="fa-solid fa-clock-rotate-left fa-sm"></i>
+                            </div>
+                        </label>
+                        <small data-i18n="Select the color of the letterbox.">Select the color of the letterbox.</small>
+                        <div class="flex-container flexFlowRow">
+                            <toolcool-color-picker id="prome-letterbox-color-picker"></toolcool-color-picker>
+                        </div>
+                    </div>
+                
+                    <div class="prome_vn_block flex-container flexFlowColumn">
+                        <label for="prome-letterbox-size" class="title_restorable">
+                            <span data-i18n="Letterbox Size">Letterbox Size</span>
+                            <div id="prome-letterbox-size-restore" title="Restore default value" class="right_menu_button">
+                                <i class="fa-solid fa-clock-rotate-left fa-sm"></i>
+                            </div>
+                        </label>
+                        <small data-i18n="Set the size of the letterbox.">Set the size of the letterbox.</small>
+                        <input class="neo-range-slider" id="prome-letterbox-size" type="range" min="1" max="50" step="1" />
+                        <input class="neo-range-input" id="prome-letterbox-size-counter" type="number" min="1" max="50" step="1" data-for="prome-letterbox-size"/>
+                    </div>  
+                </div>  
+            </div> 
+        </div>
+        
+    </div>
+</div>
