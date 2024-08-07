@@ -1,7 +1,11 @@
 import { extension_settings } from "../../../extensions.js";
 import { saveSettingsDebounced } from "../../../../script.js";
 import { power_user } from "../../../power-user.js";
-import { isMobile } from "../../../RossAscends-mods.js";
+import { SlashCommand } from "../../../slash-commands/SlashCommand.js";
+import { ARGUMENT_TYPE, SlashCommandNamedArgument } from '../../../slash-commands/SlashCommandArgument.js';
+import { SlashCommandParser } from '../../../slash-commands/SlashCommandParser.js';
+import { SlashCommandEnumValue, enumTypes } from '../../../slash-commands/SlashCommandEnumValue.js';
+
 
 const extensionName = "Prome-VN-Extension";
 const extensionFolderPath = `scripts/extensions/third-party/${extensionName}`;
@@ -38,6 +42,44 @@ async function loadSettings() {
   applyLetterboxMode();
   applyLetterboxColor();
   applyLetterboxSize();
+}
+
+function prepareSlashCommands() {
+  SlashCommandParser.addCommandObject(SlashCommand.fromProps({
+      name: 'letterbox',
+      /** @type {(args: { mode: string | undefined }) => void} */
+      callback: async (args, _) => {
+        if (args.mode === 'horizontal') {
+          switchLetterboxMode(VN_MODES.HORIZONTAL);
+        } else if (args.mode === 'vertical') {
+          switchLetterboxMode(VN_MODES.VERTICAL);
+        } else if (args.mode === 'off') {
+          switchLetterboxMode(VN_MODES.NONE);
+        }
+        return extension_settings[extensionName].letterboxMode;
+      },
+      namedArgumentList: [
+        SlashCommandNamedArgument.fromProps({
+          name: 'mode',
+          description: 'The mode to switch to.',
+          isRequired: true,
+          typeList: [ARGUMENT_TYPE.STRING],
+          enumList: [
+            new SlashCommandEnumValue("off", "Turn off letterbox mode.", enumTypes.namedArgument),
+            new SlashCommandEnumValue("horizontal", "Enable horizontal letterboxes.", enumTypes.namedArgument),
+            new SlashCommandEnumValue("vertical", "Enable vertical letterboxes.", enumTypes.namedArgument),
+          ],
+        }),
+      ],
+      helpString: 'Switches the letterbox mode.',
+  }));
+}
+
+function switchLetterboxMode(mode) {
+  extension_settings[extensionName].letterboxMode = mode;
+  saveSettingsDebounced();
+  $("#prome-letterbox-mode").val(mode).trigger("change");
+  applyLetterboxMode();
 }
 
 function resetLetterBoxSize() {
@@ -111,10 +153,6 @@ function isLetterboxModeEnabled() {
   return Boolean(extension_settings[extensionName].letterboxMode !== VN_MODES.NONE);
 }
 
-function isVNMode() {
-  return Boolean(!isMobile() && extension_settings[extensionName].enableVN_UI);
-}
-
 // Selects the Letterbox Mode
 function onLetterbox_Select() {
   const value = Number(this.value);
@@ -159,4 +197,5 @@ jQuery(async () => {
 
   addLetterbox();
   loadSettings();
+  prepareSlashCommands();
 });
