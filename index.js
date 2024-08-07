@@ -3,7 +3,7 @@ import { saveSettingsDebounced } from "../../../../script.js";
 import { power_user } from "../../../power-user.js";
 import { isMobile } from "../../../RossAscends-mods.js";
 
-const extensionName = "prome-vn-extension";
+const extensionName = "Prome-VN-Extension";
 const extensionFolderPath = `scripts/extensions/third-party/${extensionName}`;
 const defaultSettings = {
   enableVN_UI: false,
@@ -137,6 +137,15 @@ function onVNUI_Click(event) {
 
 // This function is called when the extension is loaded
 jQuery(async () => {
+  function addLetterbox() {
+    const letterboxHtml = `
+      <div id="visual-novel-letterbox-one"></div>
+      <div id="visual-novel-letterbox-two"></div>
+    `;
+
+    $("body").append(letterboxHtml);
+  }
+
   const settingsHtml = await $.get(`${extensionFolderPath}/settings.html`);
 
   $("#extensions_settings").append(settingsHtml);
@@ -148,5 +157,6 @@ jQuery(async () => {
   $("#prome-letterbox-size-restore").on("click", resetLetterBoxSize);
   $("#prome-letterbox-color-restore").on("click", resetLetterBoxColor);
 
+  addLetterbox();
   loadSettings();
 });
