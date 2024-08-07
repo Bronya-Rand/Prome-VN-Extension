@@ -26,6 +26,9 @@ async function loadSettings() {
   extension_settings[extensionName] = extension_settings[extensionName] || {};
   if (Object.keys(extension_settings[extensionName]).length === 0) {
     Object.assign(extension_settings[extensionName], defaultSettings);
+    if (power_user.waifuMode) {
+      extension_settings[extensionName].enableVN_UI = power_user.waifuMode;
+    }
   }
 
   // Prome Updates

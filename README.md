@@ -5,14 +5,24 @@ The Prome Visual Novel Extension is a extension for SillyTavern that remodernize
 ## Why Prome?
 > Prometheus: Boom...
 
+## Previews
+
+| Horizontal | Vertical |
+| :--------: | :------: |
+| ![horizontal.png](./.github/horizontal.png) | ![vertical.png](./.github/vertical.png) | 
+
 ## Features
 
 1. Same features as the original VN mode.
 2. Letterbox Mode - Make your VN experience more 'cinematic.'
+   > This feature can be toggled to be horizontal, vertical or none at all. It can be size and color adjusted as needed.
+   <center>
+    <img src="./.github/settings.png"/>
+   </center>
 
 ## Prerequisites
 
-SillyTavern 1.12.4+
+A SillyTavern that supports extensions.
 
 ## Installation and Usage
 
@@ -20,11 +30,7 @@ SillyTavern 1.12.4+
 
 1. Click _Extensions_ then **Install Extension**
 2. Paste in the following **link** into the text field and click Save: `https://github.com/Bronya-Rand/Bronie-Parser-Extension`.
-3. Click down on the `Prome (Visual Novel Extension)` dropdown and toggle *Enable Prome VN Mode*. 
+3. Click down on the `Prome (Visual Novel Extension)` dropdown and toggle *Enable Prome VN Mode*.
+   > If you already have Visual Novel Mode on, you can skip this step.
 4. Profit.
-
-### Usage
-
-Letterbox Mode - Adds a more cinematic experience to the Visual Novel UI by adding black bars to the background.
-> This can be toggled to be horizontal, vertical or none at all. It can be size and color adjusted as needed.
 
