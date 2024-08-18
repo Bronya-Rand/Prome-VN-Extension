@@ -107,6 +107,7 @@ function resetLetterBoxColor () {
 function onLetterboxSize_Change() {
   const value = this.value;
   extension_settings[extensionName].letterboxSize = value;
+  $("#prome-letterbox-size").val(value);
   $("#prome-letterbox-size-counter").val(value);
   saveSettingsDebounced();
   applyLetterboxSize();
@@ -221,6 +222,7 @@ jQuery(async () => {
   $("#prome-letterbox-mode").on("change", onLetterbox_Select);
   $("#prome-letterbox-color-picker").on("change", onLetterboxColor_Change);
   $("#prome-letterbox-size").on("input", onLetterboxSize_Change);
+  $("#prome-letterbox-size-counter").on("input", onLetterboxSize_Change);
   $("#prome-letterbox-size-restore").on("click", resetLetterBoxSize);
   $("#prome-letterbox-color-restore").on("click", resetLetterBoxColor);
   $("#prome-hide-sheld").on("click", onSheld_Click);
