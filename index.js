@@ -14,6 +14,7 @@ const defaultSettings = {
   letterboxMode: 0,
   letterboxColor: "rgba(0, 0, 0, 1)",
   letterboxSize: 8,
+  hideSheld: false,
 };
 
 const VN_MODES = {
