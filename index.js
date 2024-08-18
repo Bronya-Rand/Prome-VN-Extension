@@ -37,6 +37,7 @@ async function loadSettings() {
   $("#prome-letterbox-color-picker").attr('color', extension_settings[extensionName].letterboxColor);
   $("#prome-letterbox-size").val(extension_settings[extensionName].letterboxSize).trigger("input");
   $("#prome-letterbox-size-counter").val(extension_settings[extensionName].letterboxSize);
+  $("#prome-hide-sheld").prop("checked", extension_settings[extensionName].hideSheld).trigger("input");
 
   // ST Main Updates
   $("#waifuMode").prop("checked", extension_settings[extensionName].enableVN_UI).trigger("input");
@@ -45,6 +46,9 @@ async function loadSettings() {
   applyLetterboxMode();
   applyLetterboxColor();
   applyLetterboxSize();
+
+  // Apply Sheld Visibility
+  applySheldVisibility();
 }
 
 function prepareSlashCommands() {
@@ -152,8 +156,22 @@ function applyLetterboxMode() {
   console.debug(`[${extensionName}] Letterbox Settings Applied`);
 }
 
+function applySheldVisibility() {
+  if (extension_settings[extensionName].hideSheld === (null || undefined)) {
+    console.debug(`[${extensionName}] hideSheld returned null or undefined.`);
+  }
+
+  console.debug(`[${extensionName}] Hide Sheld?: ${extension_settings[extensionName].hideSheld}`);
+
+  $('#sheld').toggleClass('displayNone', extension_settings[extensionName].hideSheld);
+}
+
 function isLetterboxModeEnabled() {
   return Boolean(extension_settings[extensionName].letterboxMode !== VN_MODES.NONE);
+}
+
+function isSheldVisible() {
+  return Boolean(!extension_settings[extensionName].hideSheld);
 }
 
 // Selects the Letterbox Mode
@@ -174,6 +192,14 @@ function onVNUI_Click(event) {
   // Hijack ST Main's Waifu Mode
   $('body').toggleClass('waifuMode', power_user.waifuMode);
   $('#waifuMode').prop('checked', power_user.waifuMode);
+}
+
+// Toggles Sheld Visibility
+function onSheld_Click(event) {
+  const value = Boolean($(event.target).prop("checked"));
+  extension_settings[extensionName].hideSheld = value;
+  saveSettingsDebounced();
+  applySheldVisibility();
 }
 
 // This function is called when the extension is loaded
@@ -197,8 +223,13 @@ jQuery(async () => {
   $("#prome-letterbox-size").on("input", onLetterboxSize_Change);
   $("#prome-letterbox-size-restore").on("click", resetLetterBoxSize);
   $("#prome-letterbox-color-restore").on("click", resetLetterBoxColor);
+  $("#prome-hide-sheld").on("click", onSheld_Click);
 
   addLetterbox();
   loadSettings();
   prepareSlashCommands();
+
+  if (!isSheldVisible()) {
+    toastr.info("Sheld is currently hidden by the Prome VN Extension.", "Head to Extensions > Prome (Visual Novel Extension) and uncheck 'Hide Sheld (Message Box)' to show it again.");
+  }
 });

@@ -15,7 +15,13 @@ The Prome Visual Novel Extension is a extension for SillyTavern that remodernize
 
 1. Same features as the original VN mode.
 2. Letterbox Mode - Make your VN experience more 'cinematic.'
-   > This feature can be toggled to be horizontal, vertical or none at all. It can be size and color adjusted as needed.
+   > This feature can be toggled to be horizontal or vertical and can be adjusted in size and color as needed.
+
+3. Sheld Visibility - Hide the Sheld (Message Box) to capture the moment of a given chat.
+   <center>
+    <img src="./.github/sheld_hide.png"/>
+   </center>
+All features and it's settings can be found under 'Extensions > Prome (Visual Novel Extension)'.
    <center>
     <img src="./.github/settings.png"/>
    </center>
