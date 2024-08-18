@@ -233,6 +233,6 @@ jQuery(async () => {
   prepareSlashCommands();
 
   if (!isSheldVisible()) {
-    toastr.info("Sheld is currently hidden by the Prome VN Extension.", "Head to Extensions > Prome (Visual Novel Extension) and uncheck 'Hide Sheld (Message Box)' to show it again.");
+    toastr.info("Head to Extensions > Prome (Visual Novel Extension) and uncheck 'Hide Sheld (Message Box)' to show it again.", "Sheld is currently hidden by the Prome VN Extension.");
   }
 });
