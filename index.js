@@ -1,5 +1,5 @@
-import { extension_settings } from "../../../extensions.js";
-import { saveSettingsDebounced } from "../../../../script.js";
+import { extension_settings, getContext } from "../../../extensions.js";
+import { saveSettingsDebounced, chat } from "../../../../script.js";
 import { power_user } from "../../../power-user.js";
 import { SlashCommand } from "../../../slash-commands/SlashCommand.js";
 import { ARGUMENT_TYPE, SlashCommandNamedArgument } from '../../../slash-commands/SlashCommandArgument.js';
@@ -15,6 +15,7 @@ const defaultSettings = {
   letterboxColor: "rgba(0, 0, 0, 1)",
   letterboxSize: 8,
   hideSheld: false,
+  spriteZoom: false,
 };
 
 const VN_MODES = {
@@ -39,6 +40,7 @@ async function loadSettings() {
   $("#prome-letterbox-size").val(extension_settings[extensionName].letterboxSize).trigger("input");
   $("#prome-letterbox-size-counter").val(extension_settings[extensionName].letterboxSize);
   $("#prome-hide-sheld").prop("checked", extension_settings[extensionName].hideSheld).trigger("input");
+  $("#prome-sprite-zoom").prop("checked", extension_settings[extensionName].spriteZoom).trigger("input");
 
   // ST Main Updates
   $("#waifuMode").prop("checked", extension_settings[extensionName].enableVN_UI).trigger("input");
@@ -50,6 +52,9 @@ async function loadSettings() {
 
   // Apply Sheld Visibility
   applySheldVisibility();
+
+  // Apply Sprite Zoom
+  applySpriteZoom();
 }
 
 function prepareSlashCommands() {
@@ -80,6 +85,16 @@ function prepareSlashCommands() {
         }),
       ],
       helpString: 'Switches the letterbox mode.',
+  }));
+
+  SlashCommandParser.addCommandObject(SlashCommand.fromProps({
+    name: 'sprite-zoom',
+    callback: async () => {
+      extension_settings[extensionName].spriteZoom = !extension_settings[extensionName].spriteZoom;
+      saveSettingsDebounced();
+      return extension_settings[extensionName].spriteZoom;
+    },
+    helpString: 'Toggles sprite zoom.',
   }));
 }
 
@@ -168,6 +183,16 @@ function applySheldVisibility() {
   $('#sheld').toggleClass('displayNone', extension_settings[extensionName].hideSheld);
 }
 
+function applySpriteZoom() {
+  if (extension_settings[extensionName].spriteZoom === (null || undefined)) {
+    console.debug(`[${extensionName}] spriteZoom returned null or undefined.`);
+  }
+
+  console.debug(`[${extensionName}] Sprite Zoom?: ${extension_settings[extensionName].spriteZoom}`);
+
+  $('body').toggleClass('spriteZoom', extension_settings[extensionName].spriteZoom);
+}
+
 function isLetterboxModeEnabled() {
   return Boolean(extension_settings[extensionName].letterboxMode !== VN_MODES.NONE);
 }
@@ -204,6 +229,14 @@ function onSheld_Click(event) {
   applySheldVisibility();
 }
 
+// Toggles Sprite Zoom
+function onSpriteZoom_Click(event) {
+  const value = Boolean($(event.target).prop("checked"));
+  extension_settings[extensionName].spriteZoom = value;
+  saveSettingsDebounced();
+  applySpriteZoom();
+}
+
 // This function is called when the extension is loaded
 jQuery(async () => {
   function addLetterbox() {
@@ -227,6 +260,7 @@ jQuery(async () => {
   $("#prome-letterbox-size-restore").on("click", resetLetterBoxSize);
   $("#prome-letterbox-color-restore").on("click", resetLetterBoxColor);
   $("#prome-hide-sheld").on("click", onSheld_Click);
+  $("#prome-sprite-zoom").on("click", onSpriteZoom_Click);
 
   addLetterbox();
   loadSettings();
@@ -236,3 +270,29 @@ jQuery(async () => {
     toastr.info("Head to Extensions > Prome (Visual Novel Extension) and uncheck 'Hide Sheld (Message Box)' to show it again.", "Sheld is currently hidden by the Prome VN Extension.");
   }
 });
+
+$(document).ready(() => {
+  function applyZoom() {
+      // Check if VN mode and sprite zoom has been enabled
+      if (!extension_settings[extensionName].enableVN_UI || !extension_settings[extensionName].spriteZoom) return;
+
+      const context = getContext();
+      const group = context.groups.find((x) => x.id === context.groupId);
+      if (!group) return;
+      const filteredMembers = group.members.filter((x) => !group.disabledMembers.includes(x));
+      if (filteredMembers.length === 0) return;
+
+      // get the last message of the last speaking character from chat
+      const lastMessagesWithoutUser = chat.filter((msg) => !msg.is_user && !msg.is_system && !msg.extra?.image);
+      if (lastMessagesWithoutUser.length === 0) return;
+
+      const lastMessage = lastMessagesWithoutUser[lastMessagesWithoutUser.length - 1];
+
+      var sprite = $("#visual-novel-wrapper [id='expression-" + lastMessage.name + ".png']");
+      sprite.addClass("prome-sprite-focus");
+
+      $("#visual-novel-wrapper .prome-sprite-focus").not(sprite).removeClass("prome-sprite-focus");
+  }
+
+  applyZoom();
+})
