@@ -16,6 +16,8 @@ const defaultSettings = {
   letterboxSize: 8,
   hideSheld: false,
   spriteZoom: false,
+  zoomSpeed: 0.6,
+  zoomAnimation: "ease",
 };
 
 const VN_MODES = {
@@ -39,8 +41,13 @@ async function loadSettings() {
   $("#prome-letterbox-color-picker").attr('color', extension_settings[extensionName].letterboxColor);
   $("#prome-letterbox-size").val(extension_settings[extensionName].letterboxSize).trigger("input");
   $("#prome-letterbox-size-counter").val(extension_settings[extensionName].letterboxSize);
+
   $("#prome-hide-sheld").prop("checked", extension_settings[extensionName].hideSheld).trigger("input");
+
   $("#prome-sprite-zoom").prop("checked", extension_settings[extensionName].spriteZoom).trigger("input");
+  $("#prome-sprite-zoom-speed").val(extension_settings[extensionName].zoomSpeed).trigger("input");
+  $("#prome-sprite-zoom-speed-counter").val(extension_settings[extensionName].zoomSpeed);
+  $("#prome-sprite-zoom-animation").val(extension_settings[extensionName].zoomAnimation).trigger("change");
 
   // ST Main Updates
   $("#waifuMode").prop("checked", extension_settings[extensionName].enableVN_UI).trigger("input");
@@ -54,6 +61,8 @@ async function loadSettings() {
   applySheldVisibility();
 
   // Apply Sprite Zoom
+  applySpriteZoomTimer();
+  applySpriteZoomAnimation();
   applySpriteZoom();
 }
 
@@ -68,6 +77,11 @@ function prepareSlashCommands() {
           switchLetterboxMode(VN_MODES.VERTICAL);
         } else if (args.mode === 'off') {
           switchLetterboxMode(VN_MODES.NONE);
+        }
+        if (args.mode !== 'off') {
+          toastr.success(`Letterbox mode is now set to ${args.mode} mode.`, "Letterbox Mode Status");
+        } else {
+          toastr.success(`Letterbox mode is now turned off.`, "Letterbox Mode Status");
         }
         return extension_settings[extensionName].letterboxMode;
       },
@@ -84,17 +98,48 @@ function prepareSlashCommands() {
           ],
         }),
       ],
-      helpString: 'Switches the letterbox mode.',
+      helpString: 'Switches the letterbox mode in the Prome VN UI.',
   }));
 
   SlashCommandParser.addCommandObject(SlashCommand.fromProps({
-    name: 'sprite-zoom',
+    name: 'focus-mode',
     callback: async () => {
-      extension_settings[extensionName].spriteZoom = !extension_settings[extensionName].spriteZoom;
-      saveSettingsDebounced();
+      switchFocusMode(!extension_settings[extensionName].spriteZoom);
+      toastr.success(`Focus Mode is now ${extension_settings[extensionName].spriteZoom ? 'enabled' : 'disabled'}.`, "Focus Mode Status");
       return extension_settings[extensionName].spriteZoom;
     },
-    helpString: 'Toggles sprite zoom.',
+    helpString: 'Toggles focus mode for the Prome VN UI.',
+  }));
+
+  SlashCommandParser.addCommandObject(SlashCommand.fromProps({
+    name: 'focus-mode-animation',
+    /** @type {(args: { animation: string | undefined }) => void} */
+    callback: async (args, _) => {
+      if (args.animation === 'ease' || args.animation === 'ease-in' || args.animation === 'ease-out' || args.animation === 'ease-in-out' || args.animation === 'linear') {
+        switchFocusModeAnimation(args.animation);
+        toastr.success(`Now set to ${args.animation}.`, "Focus Mode Animation Set");
+        return extension_settings[extensionName].zoomAnimation;
+      } else {
+        toastr.error('Please use "ease", "ease-in", "ease-out", "ease-in-out" or "linear".', "Invalid Animation");
+        return null;
+      }
+    },
+    namedArgumentList: [
+      SlashCommandNamedArgument.fromProps({
+        name: 'animation',
+        description: 'The animation to use for sprite zoom.',
+        isRequired: true,
+        typeList: [ARGUMENT_TYPE.STRING],
+        enumList: [
+          new SlashCommandEnumValue("ease", "Ease animation.", enumTypes.namedArgument),
+          new SlashCommandEnumValue("ease-in", "Ease-in animation.", enumTypes.namedArgument),
+          new SlashCommandEnumValue("ease-out", "Ease-out animation.", enumTypes.namedArgument),
+          new SlashCommandEnumValue("ease-in-out", "Ease-in-out animation.", enumTypes.namedArgument),
+          new SlashCommandEnumValue("linear", "Linear animation.", enumTypes.namedArgument),
+        ],
+      }),
+    ],
+    helpString: 'Switches the focus mode animation when "Focus Mode" is enabled.',
   }));
 }
 
@@ -105,6 +150,7 @@ function getLastChatMessage() {
   return reversedChat.filter((mes) => !mes.is_system && !mes.extra?.image);
 }
 
+/* Slash Commands */
 function switchLetterboxMode(mode) {
   extension_settings[extensionName].letterboxMode = mode;
   saveSettingsDebounced();
@@ -112,6 +158,21 @@ function switchLetterboxMode(mode) {
   applyLetterboxMode();
 }
 
+function switchFocusModeAnimation(animation) {
+  extension_settings[extensionName].zoomAnimation = animation;
+  saveSettingsDebounced();
+  $("#prome-sprite-zoom-animation").val(animation).trigger("change");
+  applySpriteZoomAnimation();
+}
+
+function switchFocusMode(mode) {
+  extension_settings[extensionName].spriteZoom = mode;
+  saveSettingsDebounced();
+  $("#prome-sprite-zoom").prop("checked", mode).trigger("input");
+  applySpriteZoom();
+}
+
+/* Letterbox Functions */
 function resetLetterBoxSize() {
   extension_settings[extensionName].letterboxSize = defaultSettings.letterboxSize;
   $("#prome-letterbox-size").val(defaultSettings.letterboxSize).trigger("input");
@@ -129,6 +190,10 @@ function resetLetterBoxColor () {
 // Changes the size of the letterbox
 function onLetterboxSize_Change() {
   const value = this.value;
+  if (value < 1 || value > 50) {
+    console.error(`[${extensionName}] Invalid letterbox size value: ${value}`);
+    return;
+  }
   extension_settings[extensionName].letterboxSize = value;
   $("#prome-letterbox-size").val(value);
   $("#prome-letterbox-size-counter").val(value);
@@ -180,6 +245,7 @@ function applyLetterboxMode() {
   console.debug(`[${extensionName}] Letterbox Settings Applied`);
 }
 
+/* Sheld Functions */
 function applySheldVisibility() {
   if (extension_settings[extensionName].hideSheld === (null || undefined)) {
     console.debug(`[${extensionName}] hideSheld returned null or undefined.`);
@@ -190,6 +256,7 @@ function applySheldVisibility() {
   $('#sheld').toggleClass('displayNone', extension_settings[extensionName].hideSheld);
 }
 
+/* Sprite Zoom Functions */
 function applySpriteZoom() {
   if (extension_settings[extensionName].spriteZoom === (null || undefined)) {
     console.debug(`[${extensionName}] spriteZoom returned null or undefined.`);
@@ -200,6 +267,35 @@ function applySpriteZoom() {
   $('body').toggleClass('spriteZoom', extension_settings[extensionName].spriteZoom);
 }
 
+function applySpriteZoomTimer() {
+  document.documentElement.style.setProperty('--prom-sprite-zoom-speed', `${extension_settings[extensionName].zoomSpeed}s`);
+}
+
+function onSpriteZoomTimer_Change() {
+  const value = this.value;
+  if (value < 0 || value > 1) {
+    console.error(`[${extensionName}] Invalid zoom speed value: ${value}`);
+    return;
+  }
+  extension_settings[extensionName].zoomSpeed = value;
+  $("#prome-sprite-zoom-speed").val(value);
+  $("#prome-sprite-zoom-speed-counter").val(value);
+  saveSettingsDebounced();
+  applySpriteZoomTimer();
+}
+
+function resetSpriteZoomTimer() {
+  extension_settings[extensionName].zoomSpeed = defaultSettings.zoomSpeed;
+  $("#prome-sprite-zoom-speed").val(defaultSettings.zoomSpeed).trigger("input");
+  $("#prome-sprite-zoom-speed-counter").val(defaultSettings.zoomSpeed);
+  saveSettingsDebounced();
+}
+
+function applySpriteZoomAnimation() {
+  document.documentElement.style.setProperty('--prom-sprite-zoom-animation', extension_settings[extensionName].zoomAnimation);
+}
+
+/* Helper Functions */
 function isLetterboxModeEnabled() {
   return Boolean(extension_settings[extensionName].letterboxMode !== VN_MODES.NONE);
 }
@@ -208,9 +304,13 @@ function isSheldVisible() {
   return Boolean(!extension_settings[extensionName].hideSheld);
 }
 
-// Selects the Letterbox Mode
+/* Event Handlers */
 function onLetterbox_Select() {
   const value = Number(this.value);
+  if (value < 0 || value > 2) {
+    console.error(`[${extensionName}] Invalid letterbox mode value: ${value}`);
+    return;
+  }
   extension_settings[extensionName].letterboxMode = value;
   saveSettingsDebounced();
   applyLetterboxMode();
@@ -242,6 +342,17 @@ function onSpriteZoom_Click(event) {
   extension_settings[extensionName].spriteZoom = value;
   saveSettingsDebounced();
   applySpriteZoom();
+}
+
+function onSpriteZoomAnimation_Select() {
+  const value = String(this.value);
+  if (value != "ease" && value != "ease-in" && value != "ease-out" && value != "ease-in-out") {
+    console.error(`[${extensionName}] Invalid sprite zoom animation value: ${value}`);
+    return
+  }
+  extension_settings[extensionName].zoomAnimation = value;
+  saveSettingsDebounced();
+  applySpriteZoomAnimation();
 }
 
 /* Listeners */
@@ -313,8 +424,14 @@ jQuery(async () => {
   $("#prome-letterbox-size-counter").on("input", onLetterboxSize_Change);
   $("#prome-letterbox-size-restore").on("click", resetLetterBoxSize);
   $("#prome-letterbox-color-restore").on("click", resetLetterBoxColor);
+
   $("#prome-hide-sheld").on("click", onSheld_Click);
+
   $("#prome-sprite-zoom").on("click", onSpriteZoom_Click);
+  $("#prome-sprite-zoom-speed").on("input", onSpriteZoomTimer_Change);
+  $("#prome-sprite-zoom-speed-counter").on("input", onSpriteZoomTimer_Change);
+  $("#prome-sprite-zoom-speed-restore").on("click", resetSpriteZoomTimer);
+  $("#prome-sprite-zoom-animation").on("change", onSpriteZoomAnimation_Select);
 
   addLetterbox();
   loadSettings();

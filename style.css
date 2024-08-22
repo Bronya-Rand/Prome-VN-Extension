@@ -55,7 +55,7 @@ body.waifuMode.vLetterBox #visual-novel-letterbox-two {
 
 /* Prome Sprite Focus (Multiple Characters) */
 #visual-novel-wrapper [id*='expression-'] {
-    transition: transform 0.25s ease;
+    transition: transform var(--prom-sprite-zoom-speed) var(--prom-sprite-zoom-animation);
     transform: scale(1.0);
 }
 
