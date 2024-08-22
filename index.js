@@ -1,5 +1,5 @@
 import { extension_settings, getContext } from "../../../extensions.js";
-import { saveSettingsDebounced, chat } from "../../../../script.js";
+import { saveSettingsDebounced, system_message_types } from "../../../../script.js";
 import { power_user } from "../../../power-user.js";
 import { SlashCommand } from "../../../slash-commands/SlashCommand.js";
 import { ARGUMENT_TYPE, SlashCommandNamedArgument } from '../../../slash-commands/SlashCommandArgument.js';
@@ -96,6 +96,13 @@ function prepareSlashCommands() {
     },
     helpString: 'Toggles sprite zoom.',
   }));
+}
+
+function getLastChatMessage() {
+  const context = getContext();
+  const reversedChat = context.chat.slice().reverse();
+
+  return reversedChat.filter((mes) => !mes.is_system && !mes.extra?.image);
 }
 
 function switchLetterboxMode(mode) {
@@ -237,6 +244,53 @@ function onSpriteZoom_Click(event) {
   applySpriteZoom();
 }
 
+/* Listeners */
+async function applyZoom() {
+  // grab the current chat/group chat
+  const context = getContext();
+  const group = context.groups.find((x) => x.id === context.groupId);
+  if (!group) return;
+
+  const filteredMembers = group.members.filter((x) => !group.disabled_members.includes(x));
+  if (filteredMembers.length <= 1) return;
+  
+  const lastMessagesWithoutSystem = getLastChatMessage();
+  // if there are no messages, remove the focus class
+  if (lastMessagesWithoutSystem.length === 0) {
+    $("#visual-novel-wrapper .prome-sprite-focus").removeClass("prome-sprite-focus");
+    return;
+  }
+
+  const lastMessage = lastMessagesWithoutSystem[0];
+  // if the last message is a user message, remove the focus class
+  if (lastMessage.is_user) {
+    $("#visual-novel-wrapper .prome-sprite-focus").removeClass("prome-sprite-focus");
+    return;
+  }
+
+  const spriteDiv = `#visual-novel-wrapper [id='expression-${lastMessage.name}.png']`;
+  let sprite = $(spriteDiv);
+
+  // apply focus class to the sprite
+  const applyFocusClass = () => {
+    sprite.addClass("prome-sprite-focus");
+    $("#visual-novel-wrapper .prome-sprite-focus").not(sprite).removeClass("prome-sprite-focus");
+  };
+
+  if (sprite.length === 0) {
+    // give time for the sprite to load on the page
+    const checkInterval = setInterval(() => {
+      sprite = $(spriteDiv);
+      if (sprite.length > 0) {
+        applyFocusClass();
+        clearInterval(checkInterval);
+      }
+    }, 100);
+  } else {
+    applyFocusClass();
+  }
+}
+
 // This function is called when the extension is loaded
 jQuery(async () => {
   function addLetterbox() {
@@ -271,28 +325,28 @@ jQuery(async () => {
   }
 });
 
-$(document).ready(() => {
-  function applyZoom() {
-      // Check if VN mode and sprite zoom has been enabled
-      if (!extension_settings[extensionName].enableVN_UI || !extension_settings[extensionName].spriteZoom) return;
+$(document).ready(function() {
+  // Listener for when a new message is sent
+  // Listen for new divs added/removed from the chat div
+  const chatObserver = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.type === 'childList') {
+        mutation.addedNodes.forEach((node) => {
+          if (node.classList.contains('mes')) {
+            // New div with class "mes" added
+            applyZoom();
+          }
+        });
+        mutation.removedNodes.forEach((node) => {
+          if (node.classList.contains('mes')) {
+            // Div with class "mes" removed
+            applyZoom();
+          }
+        });
+      } 
+    });
+  });
 
-      const context = getContext();
-      const group = context.groups.find((x) => x.id === context.groupId);
-      if (!group) return;
-      const filteredMembers = group.members.filter((x) => !group.disabledMembers.includes(x));
-      if (filteredMembers.length === 0) return;
-
-      // get the last message of the last speaking character from chat
-      const lastMessagesWithoutUser = chat.filter((msg) => !msg.is_user && !msg.is_system && !msg.extra?.image);
-      if (lastMessagesWithoutUser.length === 0) return;
-
-      const lastMessage = lastMessagesWithoutUser[lastMessagesWithoutUser.length - 1];
-
-      var sprite = $("#visual-novel-wrapper [id='expression-" + lastMessage.name + ".png']");
-      sprite.addClass("prome-sprite-focus");
-
-      $("#visual-novel-wrapper .prome-sprite-focus").not(sprite).removeClass("prome-sprite-focus");
-  }
-
-  applyZoom();
-})
+  const chatDiv = document.getElementById('chat');
+  chatObserver.observe(chatDiv, { childList: true });
+});
