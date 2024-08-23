@@ -21,6 +21,12 @@ The Prome Visual Novel Extension is a extension for SillyTavern that remodernize
    <center>
     <img src="./.github/sheld_hide.png"/>
    </center>
+4. [BETA] Focus Mode - Focuses the speaking character sprite in chat with different animations and animation speed.
+   > This feature is only supported in a Group Chat VN.
+   <center>
+    <img src="./.github/focus-mode.png"/>
+   </center>
+
 All features and it's settings can be found under 'Extensions > Prome (Visual Novel Extension)'.
    <center>
     <img src="./.github/settings.png"/>
