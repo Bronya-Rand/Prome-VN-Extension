@@ -16,7 +16,7 @@ body.waifuMode.hLetterBox #visual-novel-letterbox-one {
     top: 0;
     position: absolute;
     background-color: var(--prom-letterbox-color);
-    z-index: 3;
+    z-index: 29;
     justify-content: center;
     align-items: center;
 }
@@ -26,7 +26,7 @@ body.waifuMode.hLetterBox #visual-novel-letterbox-two {
     bottom: 0;
     position: absolute;
     background-color: var(--prom-letterbox-color);
-    z-index: 3;
+    z-index: 29;
     justify-content: center;
     align-items: center;
 }
@@ -37,7 +37,7 @@ body.waifuMode.vLetterBox #visual-novel-letterbox-one {
     left: 0;
     position: fixed;
     background-color: var(--prom-letterbox-color);
-    z-index: 3;
+    z-index: 29;
     justify-content: center;
     align-items: center;
 }
@@ -48,7 +48,18 @@ body.waifuMode.vLetterBox #visual-novel-letterbox-two {
     right: 0;
     position: fixed;
     background-color: var(--prom-letterbox-color);
-    z-index: 3;
+    z-index: 29;
     justify-content: center;
     align-items: center;
+}
+
+/* Prome Sprite Focus (Multiple Characters) */
+#visual-novel-wrapper [id*='expression-'] {
+    transition: transform var(--prom-sprite-zoom-speed) var(--prom-sprite-zoom-animation);
+    transform: scale(1.0);
+}
+
+/* Sprite Focus to Last Message Character on 'expression-holder' */
+body.waifuMode.spriteZoom .prome-sprite-focus {
+    transform: scale(1.05) !important;
 }
