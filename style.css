@@ -65,7 +65,7 @@ body.waifuMode.spriteZoom .prome-sprite-focus {
     transform: scale(1.05) !important;
 }
 
-/* Sprites not in focus are lower contrast to differentiate focused sprite */
+/* Sprites not in chat are lower contrast to differentiate focused sprite */
 body.waifuMode.spriteDefocusTint .prome-sprite-defocus {
     filter: brightness(0.5) !important;
 }

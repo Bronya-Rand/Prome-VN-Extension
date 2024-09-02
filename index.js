@@ -1,7 +1,8 @@
 /* ST Core Imports */
-import { extension_settings } from "../../../extensions.js";
-import { saveSettingsDebounced, event_types, eventSource } from "../../../../script.js";
+import { extension_settings, renderExtensionTemplateAsync } from "../../../extensions.js";
+import { saveSettingsDebounced } from "../../../../script.js";
 import { power_user } from "../../../power-user.js";
+import { POPUP_TYPE, callGenericPopup } from "../../../popup.js";
 
 /* Prome Core Imports */
 import {
@@ -119,6 +120,11 @@ function onVNUI_Click(event) {
   $("#waifuMode").prop("checked", power_user.waifuMode);
 }
 
+async function onKeybindListClick() {
+  const template = await renderExtensionTemplateAsync(`third-party/${extensionName}`, "keybinds");
+  await callGenericPopup(template, POPUP_TYPE.TEXT, '', {});
+}
+
 // This function is called when the extension is loaded
 jQuery(async () => {
   function addLetterbox() {
@@ -135,6 +141,8 @@ jQuery(async () => {
   $("#extensions_settings").append(settingsHtml);
 
   $("#prome-enable-vn").on("click", onVNUI_Click);
+  $("#prome-keybinds").on("click", onKeybindListClick);
+
   $("#prome-letterbox-mode").on("change", onLetterbox_Select);
   $("#prome-letterbox-color-picker").on("change", onLetterboxColor_Change);
   $("#prome-letterbox-size").on("input", onLetterboxSize_Change);
@@ -196,4 +204,13 @@ $(document).ready(function () {
   }
 
   attachChatObserver();
+});
+
+/* Keybinds */
+// Hide Sheld via Ctrl+F1
+$(document).keydown(function (event) {
+  if (event.which === 112 && event.ctrlKey) {
+    event.preventDefault();
+    $("#prome-hide-sheld").click();
+  }
 });
