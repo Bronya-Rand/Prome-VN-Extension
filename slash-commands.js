@@ -13,6 +13,9 @@ import { VN_MODES, extensionName } from "./constants.js";
 import { extension_settings } from "../../../extensions.js";
 import { saveSettingsDebounced } from "../../../../script.js";
 
+import { applyLetterboxMode } from "./letterbox.js";
+import { applySpriteZoomAnimation, applySpriteDefocusTint, applySpriteZoom } from "./focus.js";
+
 export function prepareSlashCommands() {
   SlashCommandParser.addCommandObject(
     SlashCommand.fromProps({
@@ -152,6 +155,25 @@ export function prepareSlashCommands() {
         'Switches the focus mode animation when "Focus Mode" is enabled.',
     })
   );
+
+  SlashCommandParser.addCommandObject(
+    SlashCommand.fromProps({
+      name: "defocus",
+      callback: async () => {
+        switchUnfocusMode();
+        toastr.success(
+          `Defocus tint is now ${
+            extension_settings[extensionName].spriteDefocusTint
+              ? "enabled"
+              : "disabled"
+          }.`,
+          "Defocus Tint Status"
+        );
+        return extension_settings[extensionName].spriteDefocusTint;
+      },
+      helpString: "Toggles defocus tint for the Prome VN UI.",
+    })
+  );
 }
 
 function switchLetterboxMode(mode) {
@@ -173,4 +195,11 @@ function switchFocusMode(mode) {
   saveSettingsDebounced();
   $("#prome-sprite-zoom").prop("checked", mode).trigger("input");
   applySpriteZoom();
+}
+
+function switchUnfocusMode() {
+  extension_settings[extensionName].spriteDefocusTint = !extension_settings[extensionName].spriteDefocusTint;
+  saveSettingsDebounced();
+  $("#prome-sprite-defocus-tint").prop("checked", extension_settings[extensionName].spriteDefocusTint).trigger("input");
+  applySpriteDefocusTint();
 }
