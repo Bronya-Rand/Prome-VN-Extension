@@ -8,6 +8,7 @@ import {
   SlashCommandEnumValue,
   enumTypes,
 } from "../../../slash-commands/SlashCommandEnumValue.js";
+
 import { VN_MODES, extensionName } from "./constants.js";
 import { extension_settings } from "../../../extensions.js";
 import { saveSettingsDebounced } from "../../../../script.js";
@@ -153,7 +154,6 @@ export function prepareSlashCommands() {
   );
 }
 
-/* Slash Commands */
 function switchLetterboxMode(mode) {
   extension_settings[extensionName].letterboxMode = mode;
   saveSettingsDebounced();

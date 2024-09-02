@@ -8,7 +8,6 @@ export function getLastChatMessage() {
   return reversedChat.filter((mes) => !mes.is_system && !mes.extra?.image);
 }
 
-/* Helper Functions */
 export function isLetterboxModeEnabled() {
   return Boolean(
     extension_settings[extensionName].letterboxMode !== VN_MODES.NONE
