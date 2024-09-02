@@ -18,6 +18,21 @@ export function applySpriteZoom() {
   );
 }
 
+export function applySpriteDefocusTint() {
+  if (extension_settings[extensionName].spriteDefocusTint === (null || undefined)) {
+    console.debug(`[${extensionName}] spriteDefocusTint returned null or undefined.`);
+  }
+
+  console.debug(
+    `[${extensionName}] Sprite Defocus Tint?: ${extension_settings[extensionName].spriteDefocusTint}`
+  );
+
+  $("body").toggleClass(
+    "spriteDefocusTint",
+    extension_settings[extensionName].spriteDefocusTint
+  );
+}
+
 export function applySpriteZoomTimer() {
   document.documentElement.style.setProperty(
     "--prom-sprite-zoom-speed",
@@ -58,6 +73,13 @@ export function onSpriteZoom_Click(event) {
   extension_settings[extensionName].spriteZoom = value;
   saveSettingsDebounced();
   applySpriteZoom();
+}
+
+export function onSpriteDefocusTint_Click(event) {
+  const value = Boolean($(event.target).prop("checked"));
+  extension_settings[extensionName].spriteDefocusTint = value;
+  saveSettingsDebounced();
+  applySpriteDefocusTint();
 }
 
 export function onSpriteZoomAnimation_Select() {

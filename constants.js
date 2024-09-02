@@ -9,6 +9,7 @@ export const defaultSettings = {
   spriteZoom: false,
   zoomSpeed: 0.6,
   zoomAnimation: "ease",
+  spriteDefocusTint: false,
 };
 
 export const VN_MODES = {

@@ -1,6 +1,6 @@
 /* ST Core Imports */
 import { extension_settings } from "../../../extensions.js";
-import { saveSettingsDebounced } from "../../../../script.js";
+import { saveSettingsDebounced, event_types, eventSource } from "../../../../script.js";
 import { power_user } from "../../../power-user.js";
 
 /* Prome Core Imports */
@@ -9,7 +9,7 @@ import {
   extensionFolderPath,
   defaultSettings,
 } from "./constants.js";
-import { applyZoom } from "./listeners.js";
+import { applyZoomDebounce, applyDefocusDebounce } from "./listeners.js";
 
 /* Prome Feature Imports */
 import { prepareSlashCommands } from "./slash-commands.js";
@@ -33,6 +33,8 @@ import {
   onSpriteZoomTimer_Change,
   resetSpriteZoomTimer,
   onSpriteZoomAnimation_Select,
+  applySpriteDefocusTint,
+  onSpriteDefocusTint_Click,
 } from "./focus.js";
 
 async function loadSettings() {
@@ -46,7 +48,10 @@ async function loadSettings() {
 
   // Prome Updates
   $("#prome-enable-vn")
-    .prop("checked", extension_settings[extensionName].enableVN_UI)
+    .prop(
+      "checked",
+      extension_settings[extensionName].enableVN_UI || power_user.waifuMode
+    )
     .trigger("input");
   $("#prome-letterbox-mode")
     .val(extension_settings[extensionName].letterboxMode)
@@ -78,6 +83,9 @@ async function loadSettings() {
   $("#prome-sprite-zoom-animation")
     .val(extension_settings[extensionName].zoomAnimation)
     .trigger("change");
+  $("#prome-sprite-defocus-tint")
+    .prop("checked", extension_settings[extensionName].spriteDefocusTint)
+    .trigger("input");
 
   // ST Main Updates
   $("#waifuMode")
@@ -96,6 +104,7 @@ async function loadSettings() {
   applySpriteZoomTimer();
   applySpriteZoomAnimation();
   applySpriteZoom();
+  applySpriteDefocusTint();
 }
 
 // Toggles Prome VN Mode
@@ -140,6 +149,7 @@ jQuery(async () => {
   $("#prome-sprite-zoom-speed-counter").on("input", onSpriteZoomTimer_Change);
   $("#prome-sprite-zoom-speed-restore").on("click", resetSpriteZoomTimer);
   $("#prome-sprite-zoom-animation").on("change", onSpriteZoomAnimation_Select);
+  $("#prome-sprite-defocus-tint").on("click", onSpriteDefocusTint_Click);
 
   addLetterbox();
   loadSettings();
@@ -154,27 +164,36 @@ jQuery(async () => {
 });
 
 $(document).ready(function () {
-  // Listener for when a new message is sent
-  // Listen for new divs added/removed from the chat div
-  const chatObserver = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      if (mutation.type === "childList") {
-        mutation.addedNodes.forEach((node) => {
-          if (node.classList.contains("mes")) {
-            // New div with class "mes" added
-            applyZoom();
-          }
-        });
-        mutation.removedNodes.forEach((node) => {
-          if (node.classList.contains("mes")) {
-            // Div with class "mes" removed
-            applyZoom();
-          }
-        });
-      }
-    });
-  });
+  function attachChatObserver() {
+    const chatDiv = document.getElementById("chat");
+    if (!chatDiv) return
 
-  const chatDiv = document.getElementById("chat");
-  chatObserver.observe(chatDiv, { childList: true });
+    // Listener for when a new message is sent
+    // Listen for new divs added/removed from the chat div
+    const chatObserver = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === "childList") {
+          setTimeout(() => {
+            mutation.addedNodes.forEach((node) => {
+              if (node.classList.contains("mes")) {
+                // New div with class "mes" added
+                applyDefocusDebounce();
+                applyZoomDebounce();
+              }
+            });
+            mutation.removedNodes.forEach((node) => {
+              if (node.classList.contains("mes")) {
+                // Div with class "mes" removed
+                applyDefocusDebounce();
+                applyZoomDebounce();
+              }
+            });
+          }, 1000);
+        }
+      });
+    });
+    chatObserver.observe(chatDiv, { childList: true });
+  }
+
+  attachChatObserver();
 });
