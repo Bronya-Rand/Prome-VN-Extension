@@ -27,85 +27,97 @@
                     <span data-i18n="Hide Sheld (Message Box)">Hide Sheld (Message Box)</span>
                 </label>
 
-                <!-- <label class="checkbox_label" for="prome-sprite-zoom" title="Enable sprite zoom animations in the Prome VN UI.">
-                    <input id="prome-sprite-zoom" type="checkbox" />
-                    <span data-i18n="Enable Sprite Zoom">Enable Sprite Zoom</span>
-                </label> -->
-
                 <div class="prome_vn_block flex-container flexFlowColumn">
-                    <label for="prome-letterbox-mode" data-i18n="Letterbox Mode">Letterbox Mode</label>
-                    <small data-i18n="Select the letterbox mode for the Prome VN UI.">Select the letterbox mode for the Prome VN UI.</small>
-                    <select id="prome-letterbox-mode">
-                        <option value="0" data-i18n="None">None</option>
-                        <option value="1" data-i18n="Horizontal Letterbox">Horizontal Letterbox</option>
-                        <option value="2" data-i18n="Vertical Letterbox">Vertical Letterbox</option>
-                    </select>
-                </div>
-
-                <div class="prome_vn_block flex-container flexFlowRow">
+                    <h4 data-i18n="Sprite Configuration">Letterbox Configuration</h4>
                     <div class="prome_vn_block flex-container flexFlowColumn">
-                        <label for="prome-letterbox-color" class="title_restorable">
-                            <span data-i18n="Letterbox Color">Letterbox Color</span>
-                            <div id="prome-letterbox-color-restore" title="Restore default value" class="right_menu_button">
-                                <i class="fa-solid fa-clock-rotate-left fa-sm"></i>
-                            </div>
-                        </label>
-                        <small data-i18n="Select the color of the letterbox.">Select the color of the letterbox.</small>
-                        <div class="flex-container flexFlowRow">
-                            <toolcool-color-picker id="prome-letterbox-color-picker"></toolcool-color-picker>
-                        </div>
+                        <label for="prome-letterbox-mode" data-i18n="Letterbox Mode">Letterbox Mode</label>
+                        <small data-i18n="Select the letterbox mode for the Prome VN UI.">Select the letterbox mode for the Prome VN UI.</small>
+                        <select id="prome-letterbox-mode">
+                            <option value="0" data-i18n="None">None</option>
+                            <option value="1" data-i18n="Horizontal Letterbox">Horizontal Letterbox</option>
+                            <option value="2" data-i18n="Vertical Letterbox">Vertical Letterbox</option>
+                        </select>
                     </div>
-                
-                    <div class="prome_vn_block flex-container flexFlowColumn">
-                        <label for="prome-letterbox-size" class="title_restorable">
-                            <span data-i18n="Letterbox Size">Letterbox Size</span>
-                            <div id="prome-letterbox-size-restore" title="Restore default value" class="right_menu_button">
-                                <i class="fa-solid fa-clock-rotate-left fa-sm"></i>
-                            </div>
-                        </label>
-                        <small data-i18n="Set the size of the letterbox.">Set the size of the letterbox.</small>
-                        <input class="neo-range-slider" id="prome-letterbox-size" type="range" min="1" max="50" step="1" />
-                        <input class="neo-range-input" id="prome-letterbox-size-counter" type="number" min="1" max="50" step="1" data-for="prome-letterbox-size"/>
-                    </div>  
-                </div>
-                
-                <div class="prome_vn_block flex-container flexFlowColumn">
-                    <label for="prome-sprite-zoom" data-i18n="Focus Mode">Focus Mode (BETA)</label>
-                    <small data-i18n="Focuses the current speaking character in a Group Chat in the Prome VN UI.">Focuses the current speaking character in a Group Chat in the Prome VN UI.</small>
-                    <label class="checkbox_label" for="prome-sprite-zoom">
-                        <input id="prome-sprite-zoom" type="checkbox" />
-                        <span data-i18n="Enable Focus Mode">Enable Focus Mode</span>
-                    </label>
-                    
-                    <div class="prome_vn_block flex-container flexFlowRow">
-                        <div class = "prome_vn_block flex-container flexFlowColumn">
-                            <label for="prome-sprite-zoom-animation" data-i18n="Focus Mode Animation">Focus Mode Animation</label>
-                            <small data-i18n="Select the animation for focus mode.">Select the animation for focus mode.</small>
-                            <select id="prome-sprite-zoom-animation">
-                                <option value="ease" data-i18n="Ease">Ease</option>
-                                <option value="ease-in" data-i18n="Ease-In">Ease-In</option>
-                                <option value="ease-out" data-i18n="Ease-Out">Ease-Out</option>
-                                <option value="ease-in-out" data-i18n="Ease-In-Out">Ease-In-Out</option>
-                                <option value="linear" data-i18n="Linear">Linear</option>
-                            </select>
-                        </div>
 
+                    <div class="prome_vn_block flex-container flexFlowRow">
                         <div class="prome_vn_block flex-container flexFlowColumn">
-                            <label for="prome-sprite-zoom-speed" class="title_restorable">
-                                <span data-i18n="Focus Mode Animation Speed">Focus Mode Animation Speed</span>
-                                <div id="prome-sprite-zoom-speed-restore" title="Restore default value" class="right_menu_button">
+                            <label for="prome-letterbox-color" class="title_restorable">
+                                <span data-i18n="Letterbox Color">Letterbox Color</span>
+                                <div id="prome-letterbox-color-restore" title="Restore default value" class="right_menu_button">
                                     <i class="fa-solid fa-clock-rotate-left fa-sm"></i>
                                 </div>
                             </label>
-                            <small data-i18n="Set the speed of the focus animation.">Set the speed of the focus animation.</small>
-                            <input class="neo-range-slider" id="prome-sprite-zoom-speed" type="range" min=".1" max="1.0" step=".01" />
-                            <input class="neo-range-input" id="prome-sprite-zoom-speed-counter" type="number" min=".01" max="1.0" step=".01" data-for="prome-sprite-zoom-speed"/>
+                            <small data-i18n="Select the color of the letterbox.">Select the color of the letterbox.</small>
+                            <div class="flex-container flexFlowRow">
+                                <toolcool-color-picker id="prome-letterbox-color-picker"></toolcool-color-picker>
+                            </div>
+                        </div>
+                    
+                        <div class="prome_vn_block flex-container flexFlowColumn">
+                            <label for="prome-letterbox-size" class="title_restorable">
+                                <span data-i18n="Letterbox Size">Letterbox Size</span>
+                                <div id="prome-letterbox-size-restore" title="Restore default value" class="right_menu_button">
+                                    <i class="fa-solid fa-clock-rotate-left fa-sm"></i>
+                                </div>
+                            </label>
+                            <small data-i18n="Set the size of the letterbox.">Set the size of the letterbox.</small>
+                            <input class="neo-range-slider" id="prome-letterbox-size" type="range" min="1" max="50" step="1" />
+                            <input class="neo-range-input" id="prome-letterbox-size-counter" type="number" min="1" max="50" step="1" data-for="prome-letterbox-size"/>
+                        </div>  
+                    </div>
+                </div>
+                
+                <div class="prome_vn_block flex-container flexFlowColumn">
+                    <h4 data-i18n="Sprite Configuration">Group Chat Configuration</h4>
+                    <label class="checkbox_label" for="prome-sprite-defocus-tint">
+                        <input id="prome-sprite-defocus-tint" type="checkbox" title="Darkens non-speaking (unfocused) characters."/>
+                        <span data-i18n="Darken Unfocused Character Sprites">Darken Character Sprites</span>
+                    </label>
+                    <small data-i18n="Darkens non-speaking (unfocused) characters.">Darkens non-speaking (unfocused) characters.</small>
+
+                    <label class="checkbox_label" for="prome-sprite-zoom">
+                        <input id="prome-sprite-zoom" type="checkbox" title="Focuses the current speaking character in chat."/>
+                        <span data-i18n="Enable Focus Mode">Enable Focus Mode (BETA)</span>
+                    </label>
+                    <small data-i18n="Focuses the current speaking character in chat.">Focuses the current speaking character in chat.</small>
+
+                    <div class="prome_vn_block flex-container flexFlowColumn">
+                        <h5 data-i18n="Focus Mode Settings">Focus Mode Settings</h5>
+                        <div class="prome_vn_block flex-container flexFlowRow">
+                            <div class = "prome_vn_block flex-container flexFlowColumn">
+                                <label for="prome-sprite-zoom-animation" data-i18n="Focus Mode Animation">Focus Mode Animation</label>
+                                <small data-i18n="Select the animation for focus mode.">Select the animation for focus mode.</small>
+                                <select id="prome-sprite-zoom-animation">
+                                    <option value="ease" data-i18n="Ease">Ease</option>
+                                    <option value="ease-in" data-i18n="Ease-In">Ease-In</option>
+                                    <option value="ease-out" data-i18n="Ease-Out">Ease-Out</option>
+                                    <option value="ease-in-out" data-i18n="Ease-In-Out">Ease-In-Out</option>
+                                    <option value="linear" data-i18n="Linear">Linear</option>
+                                </select>
+                            </div>
+
+                            <div class="prome_vn_block flex-container flexFlowColumn">
+                                <label for="prome-sprite-zoom-speed" class="title_restorable">
+                                    <span data-i18n="Focus Mode Animation Speed">Focus Mode Animation Speed</span>
+                                    <div id="prome-sprite-zoom-speed-restore" title="Restore default value" class="right_menu_button">
+                                        <i class="fa-solid fa-clock-rotate-left fa-sm"></i>
+                                    </div>
+                                </label>
+                                <small data-i18n="Set the speed of the focus animation.">Set the speed of the focus animation.</small>
+                                <input class="neo-range-slider" id="prome-sprite-zoom-speed" type="range" min=".1" max="1.0" step=".01" />
+                                <input class="neo-range-input" id="prome-sprite-zoom-speed-counter" type="number" min=".01" max="1.0" step=".01" data-for="prome-sprite-zoom-speed"/>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <small class="flex-container justifyCenter">
-                    <span>Prome Visual Novel Extension Version <a id="prome-version-number" href="https://github.com/Bronya-Rand/Prome-VN-Extension">1.0.2</a></span>
+                <small class="flex-container justifyCenter alignitemscenter flexFlowRow">
+                    <span>Prome Visual Novel Extension Version <a id="prome-version-number" href="https://github.com/Bronya-Rand/Prome-VN-Extension">1.0.3</a></span>
+                    <span> | </span>
+                    <small id="prome-keybinds" class="menu_button menu_button_icon">
+                        <i class="fa-solid fa-keyboard"></i>
+                        <span data-i18n="Keybinds">Keybinds</span>
+                    </small>
                 </small>
             </div> 
         </div>

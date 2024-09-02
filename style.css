@@ -55,11 +55,17 @@ body.waifuMode.vLetterBox #visual-novel-letterbox-two {
 
 /* Prome Sprite Focus (Multiple Characters) */
 #visual-novel-wrapper [id*='expression-'] {
-    transition: transform var(--prom-sprite-zoom-speed) var(--prom-sprite-zoom-animation);
+    transition: transform var(--prom-sprite-zoom-speed) var(--prom-sprite-zoom-animation), filter 0.4s ease-in;
     transform: scale(1.0);
+    filter: brightness(1.0);
 }
 
 /* Sprite Focus to Last Message Character on 'expression-holder' */
 body.waifuMode.spriteZoom .prome-sprite-focus {
     transform: scale(1.05) !important;
+}
+
+/* Sprites not in chat are lower contrast to differentiate focused sprite */
+body.waifuMode.spriteDefocusTint .prome-sprite-defocus {
+    filter: brightness(0.5) !important;
 }
