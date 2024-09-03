@@ -14,7 +14,11 @@ import { extension_settings } from "../../../extensions.js";
 import { saveSettingsDebounced } from "../../../../script.js";
 
 import { applyLetterboxMode } from "./letterbox.js";
-import { applySpriteZoomAnimation, applySpriteDefocusTint, applySpriteZoom } from "./focus.js";
+import {
+  applySpriteZoomAnimation,
+  applySpriteDefocusTint,
+  applySpriteZoom,
+} from "./focus.js";
 
 export function prepareSlashCommands() {
   SlashCommandParser.addCommandObject(
@@ -198,8 +202,11 @@ function switchFocusMode(mode) {
 }
 
 function switchUnfocusMode() {
-  extension_settings[extensionName].spriteDefocusTint = !extension_settings[extensionName].spriteDefocusTint;
+  extension_settings[extensionName].spriteDefocusTint =
+    !extension_settings[extensionName].spriteDefocusTint;
   saveSettingsDebounced();
-  $("#prome-sprite-defocus-tint").prop("checked", extension_settings[extensionName].spriteDefocusTint).trigger("input");
+  $("#prome-sprite-defocus-tint")
+    .prop("checked", extension_settings[extensionName].spriteDefocusTint)
+    .trigger("input");
   applySpriteDefocusTint();
 }

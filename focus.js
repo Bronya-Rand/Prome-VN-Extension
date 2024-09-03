@@ -19,8 +19,12 @@ export function applySpriteZoom() {
 }
 
 export function applySpriteDefocusTint() {
-  if (extension_settings[extensionName].spriteDefocusTint === (null || undefined)) {
-    console.debug(`[${extensionName}] spriteDefocusTint returned null or undefined.`);
+  if (
+    extension_settings[extensionName].spriteDefocusTint === (null || undefined)
+  ) {
+    console.debug(
+      `[${extensionName}] spriteDefocusTint returned null or undefined.`
+    );
   }
 
   console.debug(
