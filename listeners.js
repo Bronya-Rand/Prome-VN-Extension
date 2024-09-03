@@ -1,12 +1,18 @@
-import { debounce_timeout } from '../../../constants.js';
-import { debounce } from '../../../utils.js';
+import { debounce_timeout } from "../../../constants.js";
+import { debounce } from "../../../utils.js";
 import { getContext } from "../../../extensions.js";
 
 import { getLastChatMessage } from "./utils.js";
 
-export const applyZoomDebounce = debounce(async () => { await applyZoom(); }, debounce_timeout.relaxed);
-export const applyDefocusDebounce = debounce(async () => { await applyDefocus(); }, debounce_timeout.relaxed);
+/* Debouncers */
+export const applyZoomDebounce = debounce(async () => {
+  await applyZoom();
+}, debounce_timeout.short);
+export const applyDefocusDebounce = debounce(async () => {
+  await applyDefocus();
+}, debounce_timeout.short);
 
+// Check if the current chat has more than one member
 function zoomListenerPreconditions() {
   const context = getContext();
   const group = context.groups.find((x) => x.id === context.groupId);
@@ -19,6 +25,7 @@ function zoomListenerPreconditions() {
   return true;
 }
 
+// Apply focus class to the sprite
 async function applyZoom() {
   if (!zoomListenerPreconditions()) return;
 
@@ -65,6 +72,7 @@ async function applyZoom() {
   }
 }
 
+// Apply defocus class to the sprites
 async function applyDefocus() {
   if (!zoomListenerPreconditions()) return;
 

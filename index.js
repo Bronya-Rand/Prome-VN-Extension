@@ -1,5 +1,8 @@
 /* ST Core Imports */
-import { extension_settings, renderExtensionTemplateAsync } from "../../../extensions.js";
+import {
+  extension_settings,
+  renderExtensionTemplateAsync,
+} from "../../../extensions.js";
 import { saveSettingsDebounced } from "../../../../script.js";
 import { power_user } from "../../../power-user.js";
 import { POPUP_TYPE, callGenericPopup } from "../../../popup.js";
@@ -105,10 +108,11 @@ async function loadSettings() {
   applySpriteZoomTimer();
   applySpriteZoomAnimation();
   applySpriteZoom();
+  // Apply Sprite Defocus Tint
   applySpriteDefocusTint();
 }
 
-// Toggles Prome VN Mode
+/* Prome Core Listeners */
 function onVNUI_Click(event) {
   const value = Boolean($(event.target).prop("checked"));
   extension_settings[extensionName].enableVN_UI = value;
@@ -121,11 +125,13 @@ function onVNUI_Click(event) {
 }
 
 async function onKeybindListClick() {
-  const template = await renderExtensionTemplateAsync(`third-party/${extensionName}`, "keybinds");
-  await callGenericPopup(template, POPUP_TYPE.TEXT, '', {});
+  const template = await renderExtensionTemplateAsync(
+    `third-party/${extensionName}`,
+    "keybinds"
+  );
+  await callGenericPopup(template, POPUP_TYPE.TEXT, "", {});
 }
 
-// This function is called when the extension is loaded
 jQuery(async () => {
   function addLetterbox() {
     const letterboxHtml = `
@@ -137,12 +143,14 @@ jQuery(async () => {
   }
 
   const settingsHtml = await $.get(`${extensionFolderPath}/settings.html`);
-
   $("#extensions_settings").append(settingsHtml);
 
+  /* Prome Core Actions */
   $("#prome-enable-vn").on("click", onVNUI_Click);
   $("#prome-keybinds").on("click", onKeybindListClick);
 
+  /* Prome Feature Actions */
+  // Letterbox
   $("#prome-letterbox-mode").on("change", onLetterbox_Select);
   $("#prome-letterbox-color-picker").on("change", onLetterboxColor_Change);
   $("#prome-letterbox-size").on("input", onLetterboxSize_Change);
@@ -150,19 +158,24 @@ jQuery(async () => {
   $("#prome-letterbox-size-restore").on("click", resetLetterBoxSize);
   $("#prome-letterbox-color-restore").on("click", resetLetterBoxColor);
 
+  // Sheld
   $("#prome-hide-sheld").on("click", onSheld_Click);
 
+  // Focus
   $("#prome-sprite-zoom").on("click", onSpriteZoom_Click);
   $("#prome-sprite-zoom-speed").on("input", onSpriteZoomTimer_Change);
   $("#prome-sprite-zoom-speed-counter").on("input", onSpriteZoomTimer_Change);
   $("#prome-sprite-zoom-speed-restore").on("click", resetSpriteZoomTimer);
   $("#prome-sprite-zoom-animation").on("change", onSpriteZoomAnimation_Select);
+  // Sprite Defocus Tint
   $("#prome-sprite-defocus-tint").on("click", onSpriteDefocusTint_Click);
 
+  /* Prome Feature Initialization */
   addLetterbox();
   loadSettings();
   prepareSlashCommands();
 
+  // Show info message if Sheld is hidden
   if (!isSheldVisible()) {
     toastr.info(
       "Head to Extensions > Prome (Visual Novel Extension) and uncheck 'Hide Sheld (Message Box)' to show it again.",
@@ -172,38 +185,51 @@ jQuery(async () => {
 });
 
 $(document).ready(function () {
-  function attachChatObserver() {
-    const promeObserver = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.type !== "childList") return;
+  /* Mutation Observer for Chat and VN Wrapper */
+  /* Listen for changes in the chat and image expressions */
+  const promeObserver = new MutationObserver((mutations) => {
+    let shouldApplyDebounce = false;
 
-        mutation.addedNodes.forEach((node) => {
-          if (node.classList.contains("mes")) {
-            applyDefocusDebounce();
-            applyZoomDebounce();
-          } else if (node.tagName === "IMG" && node.classList.contains("expression")) {
-            applyDefocusDebounce();
-            applyZoomDebounce();
-          }
-        });
+    mutations.forEach((mutation) => {
+      if (mutation.type !== "childList") return;
 
-        mutation.removedNodes.forEach((node) => {
-          if (node.classList.contains("mes")) {
-            applyDefocusDebounce();
-            applyZoomDebounce();
-          } else if (node.tagName === "IMG" && node.classList.contains("expression")) {
-            applyDefocusDebounce();
-            applyZoomDebounce();
-          }
-        });
+      mutation.addedNodes.forEach((node) => {
+        if (
+          node.classList.contains("mes") ||
+          (node.tagName === "IMG" && node.classList.contains("expression"))
+        ) {
+          shouldApplyDebounce = true;
+        }
+      });
+
+      mutation.removedNodes.forEach((node) => {
+        if (
+          node.classList.contains("mes") ||
+          (node.tagName === "IMG" && node.classList.contains("expression"))
+        ) {
+          shouldApplyDebounce = true;
+        }
       });
     });
-    promeObserver.observe(document.documentElement, { childList: true, subtree: true });
-  }
-  attachChatObserver();
+
+    if (shouldApplyDebounce) {
+      applyDefocusDebounce();
+      applyZoomDebounce();
+    }
+  });
+
+  const chatDiv = document.getElementById("chat");
+  promeObserver.observe(chatDiv, { childList: true });
+
+  // Since the VN Wrapper is loaded by ST, we need to wait for it to load
+  const vnWrapperInterval = setInterval(() => {
+    const vnWrapperDiv = document.getElementById("visual-novel-wrapper");
+    if (vnWrapperDiv) {
+      promeObserver.observe(vnWrapperDiv, { childList: true, subtree: true });
+      clearInterval(vnWrapperInterval);
+    }
+  }, 100);
 });
-
-
 
 /* Keybinds */
 // Hide Sheld via Ctrl+F1
