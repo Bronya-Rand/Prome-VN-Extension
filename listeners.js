@@ -29,8 +29,7 @@ function isDisabledMember(name) {
   const context = getContext();
   const group = context.groups.find((x) => x.id === context.groupId);
   if (!group) return false;
-
-  return group.disabled_members.map((member) => member.name).includes(name);
+  return group.disabled_members.includes(name);
 }
 
 // Apply focus class to the sprite
@@ -54,7 +53,7 @@ async function applyZoom() {
   }
   // check if the last message is from a disabled group member
   // if so, remove the focus class
-  if (isDisabledMember(lastMessage.name)) {
+  if (isDisabledMember(lastMessage.original_avatar)) {
     $("#visual-novel-wrapper > div").removeClass("prome-sprite-focus");
     return;
   }
@@ -108,7 +107,7 @@ async function applyDefocus() {
   }
   // check if last message is from a disabled group member
   // if so, defocus all sprites
-  if (isDisabledMember(lastMessage.name)) {
+  if (isDisabledMember(lastMessage.original_avatar)) {
     $("#visual-novel-wrapper > div").addClass("prome-sprite-defocus");
     return;
   }
