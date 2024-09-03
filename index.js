@@ -173,38 +173,37 @@ jQuery(async () => {
 
 $(document).ready(function () {
   function attachChatObserver() {
-    const chatDiv = document.getElementById("chat");
-    if (!chatDiv) return
-
-    // Listener for when a new message is sent
-    // Listen for new divs added/removed from the chat div
-    const chatObserver = new MutationObserver((mutations) => {
+    const promeObserver = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
-        if (mutation.type === "childList") {
-          setTimeout(() => {
-            mutation.addedNodes.forEach((node) => {
-              if (node.classList.contains("mes")) {
-                // New div with class "mes" added
-                applyDefocusDebounce();
-                applyZoomDebounce();
-              }
-            });
-            mutation.removedNodes.forEach((node) => {
-              if (node.classList.contains("mes")) {
-                // Div with class "mes" removed
-                applyDefocusDebounce();
-                applyZoomDebounce();
-              }
-            });
-          }, 1000);
-        }
+        if (mutation.type !== "childList") return;
+
+        mutation.addedNodes.forEach((node) => {
+          if (node.classList.contains("mes")) {
+            applyDefocusDebounce();
+            applyZoomDebounce();
+          } else if (node.tagName === "IMG" && node.classList.contains("expression")) {
+            applyDefocusDebounce();
+            applyZoomDebounce();
+          }
+        });
+
+        mutation.removedNodes.forEach((node) => {
+          if (node.classList.contains("mes")) {
+            applyDefocusDebounce();
+            applyZoomDebounce();
+          } else if (node.tagName === "IMG" && node.classList.contains("expression")) {
+            applyDefocusDebounce();
+            applyZoomDebounce();
+          }
+        });
       });
     });
-    chatObserver.observe(chatDiv, { childList: true });
+    promeObserver.observe(document.documentElement, { childList: true, subtree: true });
   }
-
   attachChatObserver();
 });
+
+
 
 /* Keybinds */
 // Hide Sheld via Ctrl+F1
