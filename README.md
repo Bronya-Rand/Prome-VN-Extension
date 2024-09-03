@@ -5,19 +5,18 @@ The Prome Visual Novel Extension is a extension for SillyTavern that remodernize
 ## Why Prome?
 > Prometheus: Boom...
 
-## Previews
-
-| Horizontal | Vertical |
-| :--------: | :------: |
-| ![horizontal.png](./.github/horizontal.png) | ![vertical.png](./.github/vertical.png) | 
-
 ## Features
 
-1. Same features as the original VN mode.
+1. Easy integration with ST's VN Mode.
 2. Letterbox Mode - Make your VN experience more 'cinematic.'
    > This feature can be toggled to be horizontal or vertical and can be adjusted in size and color as needed.
 
+   | Horizontal | Vertical |
+   | :--------: | :------: |
+   | ![horizontal.png](./.github/horizontal.png) | ![vertical.png](./.github/vertical.png) | 
+
 3. Sheld Visibility - Hide the Sheld (Message Box) to capture the moment of a given chat.
+   > This feature can be toggled in the Settings Menu or by pressing *Ctrl+F1*.
    <center>
     <img src="./.github/sheld_hide.png"/>
    </center>
@@ -25,6 +24,11 @@ The Prome Visual Novel Extension is a extension for SillyTavern that remodernize
    > This feature is only supported in a Group Chat VN.
    <center>
     <img src="./.github/focus-mode.png"/>
+   </center>
+5. Defocus Mode - Similar to Focus Mode, but focuses primarily on making the focused sprite more noticeable by darkening other characters.
+   > This feature is only supported in a Group Chat VN.
+   <center>
+    <img src="./.github/defocus.png"/>
    </center>
 
 All features and it's settings can be found under 'Extensions > Prome (Visual Novel Extension)'.
