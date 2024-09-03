@@ -25,11 +25,19 @@ function zoomListenerPreconditions() {
   return true;
 }
 
+function isDisabledMember(name) {
+  const context = getContext();
+  const group = context.groups.find((x) => x.id === context.groupId);
+  if (!group) return false;
+
+  return group.disabled_members.map((member) => member.name).includes(name);
+}
+
 // Apply focus class to the sprite
 async function applyZoom() {
   if (!zoomListenerPreconditions()) return;
 
-  // grab the current chat/group chat
+  // check if there are any messages
   const lastMessagesWithoutSystem = getLastChatMessage();
   // if there are no messages, remove the focus class
   if (lastMessagesWithoutSystem.length === 0) {
@@ -37,9 +45,16 @@ async function applyZoom() {
     return;
   }
 
+  // check if the last message is from a user
+  // if so, remove the focus class
   const lastMessage = lastMessagesWithoutSystem[0];
-  // if the last message is a user message, remove the focus class
   if (lastMessage.is_user) {
+    $("#visual-novel-wrapper > div").removeClass("prome-sprite-focus");
+    return;
+  }
+  // check if the last message is from a disabled group member
+  // if so, remove the focus class
+  if (isDisabledMember(lastMessage.name)) {
     $("#visual-novel-wrapper > div").removeClass("prome-sprite-focus");
     return;
   }
@@ -76,14 +91,24 @@ async function applyZoom() {
 async function applyDefocus() {
   if (!zoomListenerPreconditions()) return;
 
+  // check if there are any messages
   const lastMessagesWithoutSystem = getLastChatMessage();
+  // if there are no messages, defocus all sprites
   if (lastMessagesWithoutSystem.length === 0) {
     $("#visual-novel-wrapper > div").addClass("prome-sprite-defocus");
     return;
   }
 
+  // check if last message is from a user
+  // if so, defocus all sprites
   const lastMessage = lastMessagesWithoutSystem[0];
   if (lastMessage.is_user) {
+    $("#visual-novel-wrapper > div").addClass("prome-sprite-defocus");
+    return;
+  }
+  // check if last message is from a disabled group member
+  // if so, defocus all sprites
+  if (isDisabledMember(lastMessage.name)) {
     $("#visual-novel-wrapper > div").addClass("prome-sprite-defocus");
     return;
   }
