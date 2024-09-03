@@ -195,21 +195,25 @@ $(document).ready(function () {
 
       mutation.addedNodes.forEach((node) => {
         if (
-          node.classList.contains("mes") ||
-          (node.tagName === "IMG" && node.classList.contains("expression"))
+          node.classList &&
+          (node.classList.contains("mes") ||
+          (node.tagName === "IMG" && node.classList.contains("expression")))
         ) {
           shouldApplyDebounce = true;
         }
       });
 
-      mutation.removedNodes.forEach((node) => {
-        if (
-          node.classList.contains("mes") ||
-          (node.tagName === "IMG" && node.classList.contains("expression"))
-        ) {
-          shouldApplyDebounce = true;
-        }
-      });
+      if (!shouldApplyDebounce) {
+        mutation.removedNodes.forEach((node) => {
+          if (
+            node.classList &&
+            (node.classList.contains("mes") ||
+            (node.tagName === "IMG" && node.classList.contains("expression")))
+          ) {
+            shouldApplyDebounce = true;
+          }
+        });
+      }
     });
 
     if (shouldApplyDebounce) {
