@@ -4,7 +4,7 @@ The Prome Visual Novel Extension is a extension for SillyTavern that remodernize
 
 ## Why Prome?
 
-> Prometheus: Boom...
+> Prometheus: _Boom..._
 
 ## Features
 
@@ -18,7 +18,7 @@ The Prome Visual Novel Extension is a extension for SillyTavern that remodernize
    | ![horizontal.png](./.github/horizontal.png) | ![vertical.png](./.github/vertical.png) |
 
 3. Sheld Visibility - Hide the Sheld (Message Box) to capture the moment of a given chat.
-   > This feature can be toggled in the Settings Menu or by pressing _Ctrl+F1_.
+   > This feature can be toggled in the Settings Menu or by pressing `Ctrl` + `F1`.
    <center>
     <img src="./.github/sheld_hide.png"/>
    </center>
@@ -27,8 +27,8 @@ The Prome Visual Novel Extension is a extension for SillyTavern that remodernize
    <center>
     <img src="./.github/focus-mode.png"/>
    </center>
-5. Defocus Mode - Similar to Focus Mode, but focuses primarily on making the focused sprite more noticeable by darkening other characters (works alongside Focus Mode).
-   > This feature is only supported in a Group Chat VN.
+5. Darken Character Sprites - Similar to Focus Mode, but focuses primarily on making the focused sprite more noticeable by darkening other characters.
+   > This feature is only supported in a Group Chat VN. This feature also works alongside `Focus Mode` itself.
    <center>
     <img src="./.github/defocus.png"/>
    </center>
@@ -36,12 +36,17 @@ The Prome Visual Novel Extension is a extension for SillyTavern that remodernize
    <center>
     <img src="./.github/single-message.png"/>
     </center>
-
-All features and it's settings can be found under 'Extensions > Prome (Visual Novel Extension)'.
-
+7. [BETA] Chat History (for Traditional VN Mode) - Since Traditional VN hides all messages but the last sent message, a wand button has been added to view said chat history.
+   > This feature is obsolete if you don't use VN Mode, but can be accessed regardless via the Wand Icon -> Open Chat History.
    <center>
-    <img src="./.github/settings.png"/>
+    <img src="./.github/single-chat-history-log.png"/>
    </center>
+
+Most features and it's settings can be found under *Extensions* > `Prome (Visual Novel Extension)`. Other features like Chat History will be located under the wand tool in the ST chatbox.
+
+   |              Extension Settings              |              Wand Options              |
+   | :-----------------------------------------: | :-------------------------------------: |
+   | ![settings.png](./.github/settings.png) | ![settings2.png](./.github/settings2.png) |
 
 ## Prerequisites
 

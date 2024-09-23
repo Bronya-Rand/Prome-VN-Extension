@@ -45,6 +45,7 @@ import {
   applySpriteDefocusTint,
   onSpriteDefocusTint_Click,
 } from "./modules/focus.js";
+import { getChatHistory } from "./modules/chat-history.js";
 
 async function loadSettings() {
   extension_settings[extensionName] = extension_settings[extensionName] || {};
@@ -145,10 +146,14 @@ function onVNUI_Click(event) {
 
 async function onKeybindListClick() {
   const template = await renderExtensionTemplateAsync(
-    `third-party/${extensionName}`,
+    `third-party/${extensionName}/html`,
     "keybinds"
   );
   await callGenericPopup(template, POPUP_TYPE.TEXT, "", {});
+}
+
+async function onChatHistoryClick() {
+  getChatHistory();
 }
 
 jQuery(async () => {
@@ -161,12 +166,19 @@ jQuery(async () => {
     $("body").append(letterboxHtml);
   }
 
-  const settingsHtml = await $.get(`${extensionFolderPath}/settings.html`);
+  const settingsHtml = await $.get(`${extensionFolderPath}/html/settings.html`);
   $("#extensions_settings").append(settingsHtml);
 
   /* Prome Core Actions */
   $("#prome-enable-vn").on("click", onVNUI_Click);
   $("#prome-keybinds").on("click", onKeybindListClick);
+
+  const wandButtonHtml = await renderExtensionTemplateAsync(
+    `third-party/${extensionName}/html`,
+    "wand_buttons"
+  );
+  $("#extensionsMenu").append(wandButtonHtml);
+  $("#prome-wand-chat-history").on("click", onChatHistoryClick);
 
   /* Prome Feature Actions */
   // Letterbox
