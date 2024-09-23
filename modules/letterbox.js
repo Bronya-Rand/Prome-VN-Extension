@@ -1,7 +1,7 @@
-import { extensionName, defaultSettings, VN_MODES } from "./constants.js";
-import { extension_settings } from "../../../extensions.js";
-import { saveSettingsDebounced } from "../../../../script.js";
-import { isLetterboxModeEnabled } from "./utils.js";
+import { extensionName, defaultSettings, VN_MODES } from "../constants.js";
+import { extension_settings } from "../../../../extensions.js";
+import { saveSettingsDebounced } from "../../../../../script.js";
+import { isLetterboxModeEnabled } from "../utils.js";
 
 /* Letterbox Functions */
 export function resetLetterBoxSize() {

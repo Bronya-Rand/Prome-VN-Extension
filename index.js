@@ -16,7 +16,7 @@ import {
 import { applyZoomDebounce, applyDefocusDebounce } from "./listeners.js";
 
 /* Prome Feature Imports */
-import { prepareSlashCommands } from "./slash-commands.js";
+import { prepareSlashCommands } from "./modules/slash-commands.js";
 import {
   applyLetterboxMode,
   applyLetterboxColor,
@@ -26,8 +26,13 @@ import {
   onLetterboxSize_Change,
   resetLetterBoxSize,
   resetLetterBoxColor,
-} from "./letterbox.js";
-import { applySheldVisibility, onSheld_Click } from "./sheld.js";
+} from "./modules/letterbox.js";
+import {
+  applySheldMode,
+  applySheldVisibility,
+  onSheld_Click,
+  onSheldMode_Click,
+} from "./modules/sheld.js";
 import { isSheldVisible } from "./utils.js";
 import {
   applySpriteZoomTimer,
@@ -39,7 +44,7 @@ import {
   onSpriteZoomAnimation_Select,
   applySpriteDefocusTint,
   onSpriteDefocusTint_Click,
-} from "./focus.js";
+} from "./modules/focus.js";
 
 async function loadSettings() {
   extension_settings[extensionName] = extension_settings[extensionName] || {};
@@ -47,6 +52,14 @@ async function loadSettings() {
     Object.assign(extension_settings[extensionName], defaultSettings);
     if (power_user.waifuMode) {
       extension_settings[extensionName].enableVN_UI = power_user.waifuMode;
+    }
+  }
+
+  // Check if new settings are added to extension_settings
+  for (const key in defaultSettings) {
+    if (extension_settings[extensionName][key] === undefined) {
+      console.debug(`[${extensionName}] New setting added: ${key}`);
+      extension_settings[extensionName][key] = defaultSettings[key];
     }
   }
 
@@ -91,6 +104,11 @@ async function loadSettings() {
     .prop("checked", extension_settings[extensionName].spriteDefocusTint)
     .trigger("input");
 
+  $("#prome-sheld-last_mes").prop(
+    "checked",
+    extension_settings[extensionName].showOnlyLastMessage
+  );
+
   // ST Main Updates
   $("#waifuMode")
     .prop("checked", extension_settings[extensionName].enableVN_UI)
@@ -101,8 +119,9 @@ async function loadSettings() {
   applyLetterboxColor();
   applyLetterboxSize();
 
-  // Apply Sheld Visibility
+  // Apply Sheld Settings
   applySheldVisibility();
+  applySheldMode();
 
   // Apply Sprite Zoom
   applySpriteZoomTimer();
@@ -160,6 +179,7 @@ jQuery(async () => {
 
   // Sheld
   $("#prome-hide-sheld").on("click", onSheld_Click);
+  $("#prome-sheld-last_mes").on("click", onSheldMode_Click);
 
   // Focus
   $("#prome-sprite-zoom").on("click", onSpriteZoom_Click);
@@ -220,6 +240,9 @@ $(document).ready(function () {
       applyDefocusDebounce();
       applyZoomDebounce();
     }
+
+    // Apply Sheld Mode on new messages
+    applySheldMode();
   });
 
   const chatDiv = document.getElementById("chat");

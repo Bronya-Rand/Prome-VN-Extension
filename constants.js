@@ -10,6 +10,7 @@ export const defaultSettings = {
   zoomSpeed: 0.6,
   zoomAnimation: "ease",
   spriteDefocusTint: false,
+  showOnlyLastMessage: false,
 };
 
 export const VN_MODES = {

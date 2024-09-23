@@ -1,17 +1,17 @@
-import { SlashCommand } from "../../../slash-commands/SlashCommand.js";
+import { SlashCommand } from "../../../../slash-commands/SlashCommand.js";
 import {
   ARGUMENT_TYPE,
   SlashCommandNamedArgument,
-} from "../../../slash-commands/SlashCommandArgument.js";
-import { SlashCommandParser } from "../../../slash-commands/SlashCommandParser.js";
+} from "../../../../slash-commands/SlashCommandArgument.js";
+import { SlashCommandParser } from "../../../../slash-commands/SlashCommandParser.js";
 import {
   SlashCommandEnumValue,
   enumTypes,
-} from "../../../slash-commands/SlashCommandEnumValue.js";
+} from "../../../../slash-commands/SlashCommandEnumValue.js";
 
-import { VN_MODES, extensionName } from "./constants.js";
-import { extension_settings } from "../../../extensions.js";
-import { saveSettingsDebounced } from "../../../../script.js";
+import { VN_MODES, extensionName } from "../constants.js";
+import { extension_settings } from "../../../../extensions.js";
+import { saveSettingsDebounced } from "../../../../../script.js";
 
 import { applyLetterboxMode } from "./letterbox.js";
 import {

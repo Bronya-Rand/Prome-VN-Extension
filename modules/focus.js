@@ -1,6 +1,6 @@
-import { extensionName, defaultSettings } from "./constants.js";
-import { extension_settings } from "../../../extensions.js";
-import { saveSettingsDebounced } from "../../../../script.js";
+import { extensionName, defaultSettings } from "../constants.js";
+import { extension_settings } from "../../../../extensions.js";
+import { saveSettingsDebounced } from "../../../../../script.js";
 
 /* Sprite Zoom Functions */
 export function applySpriteZoom() {
