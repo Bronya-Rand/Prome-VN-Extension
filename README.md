@@ -27,7 +27,7 @@ The Prome Visual Novel Extension is a extension for SillyTavern that remodernize
    <center>
     <img src="./.github/focus-mode.png"/>
    </center>
-5. Defocus Mode - Similar to Focus Mode, but focuses primarily on making the focused sprite more noticeable by darkening other characters.
+5. Defocus Mode - Similar to Focus Mode, but focuses primarily on making the focused sprite more noticeable by darkening other characters (works alongside Focus Mode).
    > This feature is only supported in a Group Chat VN.
    <center>
     <img src="./.github/defocus.png"/>
