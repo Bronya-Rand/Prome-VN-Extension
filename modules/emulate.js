@@ -14,7 +14,7 @@ export function applySpriteEmulation() {
 
 export function onSpriteEmulation_Click(event) {
   const value = Boolean($(event.target).prop("checked"));
-  extension_settings[extensionName].spriteEmulation = value;
+  extension_settings[extensionName].emulateSprites = value;
   saveSettingsDebounced();
   applySpriteEmulation();
 }
