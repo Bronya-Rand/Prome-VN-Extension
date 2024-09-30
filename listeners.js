@@ -1,8 +1,8 @@
 import { debounce_timeout } from "../../../constants.js";
 import { debounce } from "../../../utils.js";
 import { getContext } from "../../../extensions.js";
-
-import { getLastChatMessage } from "./utils.js";
+import { extensionName } from "./constants.js";
+import { getLastChatMessage, getSpriteList } from "./utils.js";
 
 /* Debouncers */
 export const applyZoomDebounce = debounce(async () => {
@@ -10,6 +10,9 @@ export const applyZoomDebounce = debounce(async () => {
 }, debounce_timeout.short);
 export const applyDefocusDebounce = debounce(async () => {
   await applyDefocus();
+}, debounce_timeout.short);
+export const emulateSpritesDebounce = debounce(async () => {
+  await emulateSprites();
 }, debounce_timeout.short);
 
 // Check if the current chat has more than one member
@@ -135,5 +138,57 @@ async function applyDefocus() {
     }, 100);
   } else {
     applyDefocusClass();
+  }
+}
+
+async function emulateSprites() {
+  if (!zoomListenerPreconditions()) return;
+
+  const context = getContext();
+  const group = context.groups.find((x) => x.id === context.groupId);
+  const filteredMembers = group.members.filter(
+    (x) => !group.disabled_members.includes(x)
+  );
+
+  for (const member of filteredMembers) {
+    const character = context.characters.find(x => x.avatar == member);
+    if (!character) {
+      continue;
+    }
+
+    const sprites = await getSpriteList(character.name);
+    if (sprites.length === 0) {
+      if (!isDisabledMember(character.avatar)) {
+        console.debug(
+          `[${extensionName}] No sprites found for character: ${character.name}. Emulating via character card image.`
+        );
+
+        // grab the sprite div
+        const spriteDiv = `#visual-novel-wrapper [id='expression-${character.avatar}']`;
+        let sprite = $(spriteDiv);
+
+        // apply the sprite card image to <img id="expression-image"> in the spriteDiv
+        const applySpriteCardImage = (div, member) => {
+          // grab the sprite img element in the sprite div
+          const expressionImage = $(`${div} > img`)[0];
+
+          // apply the sprite card image to the img src
+          expressionImage.src = `/characters/${member}`;
+        }
+
+        if (sprite.length === 0) {
+          // give time for the sprite to load on the page
+          const checkInterval = setInterval(() => {
+            sprite = $(spriteDiv);
+            if (sprite.length > 0) {
+              applySpriteCardImage(spriteDiv, character.avatar);
+              clearInterval(checkInterval);
+            }
+          }, 100);
+        } else {
+          applySpriteCardImage(spriteDiv, character.avatar);
+        }
+      }
+    }
   }
 }

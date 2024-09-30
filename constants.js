@@ -11,6 +11,7 @@ export const defaultSettings = {
   zoomAnimation: "ease",
   spriteDefocusTint: false,
   showOnlyLastMessage: false,
+  emulateSprites: false,
 };
 
 export const VN_MODES = {

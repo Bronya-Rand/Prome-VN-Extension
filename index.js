@@ -13,7 +13,7 @@ import {
   extensionFolderPath,
   defaultSettings,
 } from "./constants.js";
-import { applyZoomDebounce, applyDefocusDebounce } from "./listeners.js";
+import { applyZoomDebounce, applyDefocusDebounce, emulateSpritesDebounce } from "./listeners.js";
 
 /* Prome Feature Imports */
 import { prepareSlashCommands } from "./modules/slash-commands.js";
@@ -46,6 +46,7 @@ import {
   onSpriteDefocusTint_Click,
 } from "./modules/focus.js";
 import { getChatHistory } from "./modules/chat-history.js";
+import { applySpriteEmulation, onSpriteEmulation_Click } from "./modules/emulate.js";
 
 async function loadSettings() {
   extension_settings[extensionName] = extension_settings[extensionName] || {};
@@ -105,6 +106,12 @@ async function loadSettings() {
     .prop("checked", extension_settings[extensionName].spriteDefocusTint)
     .trigger("input");
 
+  $("#prome-emulate-sprites")
+    .prop(
+      "checked",
+      extension_settings[extensionName].emulateSprites
+    )
+
   $("#prome-sheld-last_mes").prop(
     "checked",
     extension_settings[extensionName].showOnlyLastMessage
@@ -123,6 +130,9 @@ async function loadSettings() {
   // Apply Sheld Settings
   applySheldVisibility();
   applySheldMode();
+
+  // Apply Sprite Emulation 
+  applySpriteEmulation();
 
   // Apply Sprite Zoom
   applySpriteZoomTimer();
@@ -193,6 +203,9 @@ jQuery(async () => {
   $("#prome-hide-sheld").on("click", onSheld_Click);
   $("#prome-sheld-last_mes").on("click", onSheldMode_Click);
 
+  // Sprite Emulation
+  $("#prome-emulate-sprites").on("click", onSpriteEmulation_Click);
+
   // Focus
   $("#prome-sprite-zoom").on("click", onSpriteZoom_Click);
   $("#prome-sprite-zoom-speed").on("input", onSpriteZoomTimer_Change);
@@ -219,7 +232,7 @@ jQuery(async () => {
 $(document).ready(function () {
   /* Mutation Observer for Chat and VN Wrapper */
   /* Listen for changes in the chat and image expressions */
-  const promeObserver = new MutationObserver((mutations) => {
+  const promeChatObserver = new MutationObserver((mutations) => {
     let shouldApplyDebounce = false;
 
     mutations.forEach((mutation) => {
@@ -229,7 +242,7 @@ $(document).ready(function () {
         if (
           node.classList &&
           (node.classList.contains("mes") ||
-            (node.tagName === "IMG" && node.classList.contains("expression")))
+            (node.tagName === "DIV" && node.classList.contains("expression-holder")))
         ) {
           shouldApplyDebounce = true;
         }
@@ -240,13 +253,15 @@ $(document).ready(function () {
           if (
             node.classList &&
             (node.classList.contains("mes") ||
-              (node.tagName === "IMG" && node.classList.contains("expression")))
+              (node.tagName === "DIV" && node.classList.contains("expression-holder")))
           ) {
             shouldApplyDebounce = true;
           }
         });
       }
     });
+
+    emulateSpritesDebounce();
 
     if (shouldApplyDebounce) {
       applyDefocusDebounce();
@@ -258,13 +273,27 @@ $(document).ready(function () {
   });
 
   const chatDiv = document.getElementById("chat");
-  promeObserver.observe(chatDiv, { childList: true });
+  promeChatObserver.observe(chatDiv, { childList: true });
+
+  /* Mutation Observer for VN Sprites */
+  /* Removes the VN Sprite's 'hidden' toggle for 'prome-render-sprite' */
+  const promeSpriteObserver = new MutationObserver((mutations) => {
+    for (const mutation of mutations) {
+      if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+        const spriteDiv = mutation.target;
+        if (spriteDiv.classList.contains('hidden')) {
+          spriteDiv.classList.remove('hidden');
+        }
+      }
+    }
+  });
 
   // Since the VN Wrapper is loaded by ST, we need to wait for it to load
   const vnWrapperInterval = setInterval(() => {
     const vnWrapperDiv = document.getElementById("visual-novel-wrapper");
     if (vnWrapperDiv) {
-      promeObserver.observe(vnWrapperDiv, { childList: true, subtree: true });
+      promeChatObserver.observe(vnWrapperDiv, { childList: true, subtree: true });
+      promeSpriteObserver.observe(vnWrapperDiv, { attributes: true, subtree: true });
       clearInterval(vnWrapperInterval);
     }
   }, 100);
