@@ -80,6 +80,6 @@ body.waifuMode.spriteEmulation .prome-render-sprite {
 
 /* Sprites are hidden if feature is off */
 body.waifuMode .prome-render-sprite {
-    display: none;
+    display: none !important;
     visibility: hidden;
 }
