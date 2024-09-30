@@ -54,7 +54,7 @@ body.waifuMode.vLetterBox #visual-novel-letterbox-two {
 }
 
 /* Prome Sprite Focus (Multiple Characters) */
-#visual-novel-wrapper [id*='expression-'][id$='.png'] {
+#visual-novel-wrapper [id*='expression-'] {
     transition: transform var(--prom-sprite-zoom-speed) var(--prom-sprite-zoom-animation), filter 0.4s ease-in;
     transform: scale(1.0);
     filter: brightness(1.0);
@@ -73,7 +73,13 @@ body.waifuMode.spriteDefocusTint .prome-sprite-defocus {
 /* Prome Sprite Emulation */
 
 /* Sprites are shown if feature is on */
-body.waifuMode.spriteEmulation #visual-novel-wrapper [id*='expression-'][id$='.png'] {
+body.waifuMode.spriteEmulation .prome-render-sprite {
     display: flex !important;
     visibility: visible !important;
+}
+
+/* Sprites are hidden if feature is off */
+body.waifuMode .prome-render-sprite {
+    display: none;
+    visibility: hidden;
 }

@@ -275,11 +275,25 @@ $(document).ready(function () {
   const chatDiv = document.getElementById("chat");
   promeChatObserver.observe(chatDiv, { childList: true });
 
+  /* Mutation Observer for VN Sprites */
+  /* Removes the VN Sprite's 'hidden' toggle for 'prome-render-sprite' */
+  const promeSpriteObserver = new MutationObserver((mutations) => {
+    for (const mutation of mutations) {
+      if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+        const spriteDiv = mutation.target;
+        if (spriteDiv.classList.contains('hidden')) {
+          spriteDiv.classList.remove('hidden');
+        }
+      }
+    }
+  });
+
   // Since the VN Wrapper is loaded by ST, we need to wait for it to load
   const vnWrapperInterval = setInterval(() => {
     const vnWrapperDiv = document.getElementById("visual-novel-wrapper");
     if (vnWrapperDiv) {
       promeChatObserver.observe(vnWrapperDiv, { childList: true, subtree: true });
+      promeSpriteObserver.observe(vnWrapperDiv, { attributes: true, subtree: true });
       clearInterval(vnWrapperInterval);
     }
   }, 100);
