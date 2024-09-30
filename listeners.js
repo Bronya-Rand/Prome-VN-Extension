@@ -1,7 +1,7 @@
 import { debounce_timeout } from "../../../constants.js";
 import { debounce } from "../../../utils.js";
 import { getContext } from "../../../extensions.js";
-import { extensionName, extension_settings } from "../constants.js";
+import { extensionName, extension_settings } from "./constants.js";
 import { getLastChatMessage, getSpriteList } from "./utils.js";
 
 /* Debouncers */
