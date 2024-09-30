@@ -3,17 +3,12 @@ import { extension_settings } from "../../../../extensions.js";
 import { saveSettingsDebounced } from "../../../../../script.js";
 
 export function applySpriteEmulation() {
-  if (extension_settings[extensionName].spriteEmulation === (null || undefined)) {
-    console.debug(`[${extensionName}] spriteEmulation returned null or undefined.`);
+  if (extension_settings[extensionName].emulateSprites === (null || undefined)) {
+    console.debug(`[${extensionName}] emulateSprites returned null or undefined.`);
   }
 
   console.debug(
-    `[${extensionName}] Sprite Emulation?: ${extension_settings[extensionName].spriteEmulation}`
-  );
-
-  $("body").toggleClass(
-    "spriteEmulation",
-    extension_settings[extensionName].spriteEmulation
+    `[${extensionName}] Sprite Emulation?: ${extension_settings[extensionName].emulateSprites}`
   );
 }
 
