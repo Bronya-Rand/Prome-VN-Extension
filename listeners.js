@@ -188,6 +188,8 @@ async function emulateSprites() {
         } else {
           applySpriteCardImage(spriteDiv, character.avatar);
         }
+        // apply the prome-render-sprite class to the sprite div
+        sprite.addClass("prome-render-sprite");
       }
     }
   }
