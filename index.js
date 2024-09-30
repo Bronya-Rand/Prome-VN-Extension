@@ -13,7 +13,7 @@ import {
   extensionFolderPath,
   defaultSettings,
 } from "./constants.js";
-import { applyZoomDebounce, applyDefocusDebounce } from "./listeners.js";
+import { applyZoomDebounce, applyDefocusDebounce, emulateSpritesDebounce } from "./listeners.js";
 
 /* Prome Feature Imports */
 import { prepareSlashCommands } from "./modules/slash-commands.js";
@@ -46,6 +46,7 @@ import {
   onSpriteDefocusTint_Click,
 } from "./modules/focus.js";
 import { getChatHistory } from "./modules/chat-history.js";
+import { applySpriteEmulation, onSpriteEmulation_Click } from "./modules/emulate.js";
 
 async function loadSettings() {
   extension_settings[extensionName] = extension_settings[extensionName] || {};
@@ -105,6 +106,12 @@ async function loadSettings() {
     .prop("checked", extension_settings[extensionName].spriteDefocusTint)
     .trigger("input");
 
+  $("#prome-emulate-sprites")
+    .prop(
+      "checked",
+      extension_settings[extensionName].emulateSprites
+    )
+
   $("#prome-sheld-last_mes").prop(
     "checked",
     extension_settings[extensionName].showOnlyLastMessage
@@ -123,6 +130,9 @@ async function loadSettings() {
   // Apply Sheld Settings
   applySheldVisibility();
   applySheldMode();
+
+  // Apply Sprite Emulation 
+  applySpriteEmulation();
 
   // Apply Sprite Zoom
   applySpriteZoomTimer();
@@ -193,6 +203,9 @@ jQuery(async () => {
   $("#prome-hide-sheld").on("click", onSheld_Click);
   $("#prome-sheld-last_mes").on("click", onSheldMode_Click);
 
+  // Sprite Emulation
+  $("#prome-emulate-sprites").on("click", onSpriteEmulation_Click);
+
   // Focus
   $("#prome-sprite-zoom").on("click", onSpriteZoom_Click);
   $("#prome-sprite-zoom-speed").on("input", onSpriteZoomTimer_Change);
@@ -247,6 +260,10 @@ $(document).ready(function () {
         });
       }
     });
+
+    if (extension_settings[extensionName].emulateSprites) {
+      emulateSpritesDebounce();
+    }
 
     if (shouldApplyDebounce) {
       applyDefocusDebounce();

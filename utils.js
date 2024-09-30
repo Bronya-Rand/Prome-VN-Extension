@@ -22,3 +22,15 @@ export function isLetterboxModeEnabled() {
 export function isSheldVisible() {
   return Boolean(!extension_settings[extensionName].hideSheld);
 }
+
+export async function getSpriteList(name) {
+  try {
+    const result = await fetch(`/api/sprites/get?name=${encodeURIComponent(name)}`);
+    let sprites = result.ok ? (await result.json()) : [];
+    return sprites;
+  }
+  catch (err) {
+      console.log(err);
+      return [];
+  }
+}
