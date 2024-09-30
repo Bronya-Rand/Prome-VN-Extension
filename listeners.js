@@ -1,7 +1,8 @@
 import { debounce_timeout } from "../../../constants.js";
 import { debounce } from "../../../utils.js";
 import { getContext } from "../../../extensions.js";
-import { extensionName, extension_settings } from "./constants.js";
+import { extensionName } from "./constants.js";
+import { getContext } from "../../../extensions.js";
 import { getLastChatMessage, getSpriteList } from "./utils.js";
 
 /* Debouncers */
@@ -153,7 +154,7 @@ async function emulateSprites() {
   for (const member of filteredMembers) {
     const sprites = await getSpriteList(member.name);
     if (sprites.length === 0) {
-      if (extension_settings[extensionName].emulateSprites && !isDisabledMember(member.name)) {
+      if (!isDisabledMember(member.name)) {
         console.debug(
             `[${extensionName}] No sprites found for character: ${member.name}. Emulating via character card image.`
         );
