@@ -61,8 +61,19 @@ A SillyTavern that supports extensions.
 
 ### Installation
 
+#### Via Download Extensions & Assets (Easiest)
+1. Click _Extensions_ then **Download Extensions & Assets**
+2. Click the red power plug button and then OK.
+3. Scroll down to find `Prome Visual Novel Extension` and click the Download button.
+4. Refresh the SillyTavern page.
+5. Click on _Extensions_ again and click down on the `Prome (Visual Novel Extension)` dropdown and toggle _Enable Prome VN Mode_.
+   > If you already have Visual Novel Mode on, you can skip this step.
+6. Profit.
+
+#### Via Install Extension
 1. Click _Extensions_ then **Install Extension**
 2. Paste in the following **link** into the text field and click Save: `https://github.com/Bronya-Rand/Bronie-Parser-Extension`.
-3. Click down on the `Prome (Visual Novel Extension)` dropdown and toggle _Enable Prome VN Mode_.
+3. Refresh the SillyTavern page.
+4. Click on _Extensions_ again and click down on the `Prome (Visual Novel Extension)` dropdown and toggle _Enable Prome VN Mode_.
    > If you already have Visual Novel Mode on, you can skip this step.
-4. Profit.
+5. Profit.
