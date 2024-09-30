@@ -14,6 +14,7 @@ import {
 } from "../../../../../script.js";
 import { extensionName } from "../constants.js";
 import { POPUP_TYPE, callGenericPopup } from "../../../../popup.js";
+import { isGroupChat } from "../utils.js";
 
 function getChatAvatar(mes) {
   const context = getContext();
@@ -47,8 +48,11 @@ export async function getChatHistory() {
     // get the chat history render
     const promeChatHistoryItemList = template.find(".promeChatHistoryList");
     promeChatHistoryItemList.empty();
-    // skip first message in chat
-    const chatHistory = context.chat.slice(1);
+    let chatHistory = context.chat
+    // skip first message in chat if it's a group chat
+    if (isGroupChat()) {
+      chatHistory = chatHistory.splice(1);
+    }
 
     for (const mes of chatHistory) {
       let messageText = mes["mes"];
