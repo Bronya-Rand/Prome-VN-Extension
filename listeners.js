@@ -2,7 +2,6 @@ import { debounce_timeout } from "../../../constants.js";
 import { debounce } from "../../../utils.js";
 import { getContext } from "../../../extensions.js";
 import { extensionName } from "./constants.js";
-import { getContext } from "../../../extensions.js";
 import { getLastChatMessage, getSpriteList } from "./utils.js";
 
 /* Debouncers */
@@ -156,7 +155,7 @@ async function emulateSprites() {
     if (sprites.length === 0) {
       if (!isDisabledMember(member.name)) {
         console.debug(
-            `[${extensionName}] No sprites found for character: ${member.name}. Emulating via character card image.`
+          `[${extensionName}] No sprites found for character: ${member.name}. Emulating via character card image.`
         );
 
         // grab the sprite div
@@ -165,23 +164,23 @@ async function emulateSprites() {
 
         // apply the sprite card image to <img id="expression-image">
         const applySpriteCardImage = (card) => {
-            const spriteCard = $("#expression-image");
-            spriteCard.attr("src", card);
+          const spriteCard = $("#expression-image");
+          spriteCard.attr("src", card);
         };
 
         if (sprite.length === 0) {
-            // give time for the sprite to load on the page
-            const checkInterval = setInterval(() => {
-                sprite = $(spriteDiv);
-                if (sprite.length > 0) {
-                    applySpriteCardImage(member.img);
-                    clearInterval(checkInterval);
-                }
-            }, 100);
+          // give time for the sprite to load on the page
+          const checkInterval = setInterval(() => {
+            sprite = $(spriteDiv);
+            if (sprite.length > 0) {
+              applySpriteCardImage(member.img);
+              clearInterval(checkInterval);
+            }
+          }, 100);
         } else {
-            applySpriteCardImage(character.img);
+          applySpriteCardImage(character.img);
         }
       }
     }
-  }  
+  }
 }
