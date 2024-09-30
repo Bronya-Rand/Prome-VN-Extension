@@ -41,6 +41,11 @@ The Prome Visual Novel Extension is a extension for SillyTavern that remodernize
    <center>
     <img src="./.github/single-chat-history-log.png"/>
    </center>
+8. [BETA] Sprite Emulation - Emulates Sprites by using a character's character card.
+   > TBH, I have no idea what use case this has, but someone asked for it.
+   <center>
+    <img src="./.github/card-emulation.png"/>
+   </center>
 
 Most features and it's settings can be found under *Extensions* > `Prome (Visual Novel Extension)`. Other features like Chat History will be located under the wand tool in the ST chatbox.
 
