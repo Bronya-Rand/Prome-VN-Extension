@@ -242,7 +242,7 @@ $(document).ready(function () {
         if (
           node.classList &&
           (node.classList.contains("mes") ||
-            (node.tagName === "IMG" && node.classList.contains("expression")))
+            (node.tagName === "DIV" && node.classList.contains("expression-holder")))
         ) {
           shouldApplyDebounce = true;
         }
@@ -253,7 +253,7 @@ $(document).ready(function () {
           if (
             node.classList &&
             (node.classList.contains("mes") ||
-              (node.tagName === "IMG" && node.classList.contains("expression")))
+              (node.tagName === "DIV" && node.classList.contains("expression-holder")))
           ) {
             shouldApplyDebounce = true;
           }
