@@ -10,6 +10,8 @@ export function applySpriteEmulation() {
   console.debug(
     `[${extensionName}] Sprite Emulation?: ${extension_settings[extensionName].emulateSprites}`
   );
+
+  $("body").toggleClass("spriteEmulation", extension_settings[extensionName].emulateSprites);
 }
 
 export function onSpriteEmulation_Click(event) {

@@ -69,3 +69,11 @@ body.waifuMode.spriteZoom .prome-sprite-focus {
 body.waifuMode.spriteDefocusTint .prome-sprite-defocus {
     filter: brightness(0.5) !important;
 }
+
+/* Prome Sprite Emulation */
+
+/* Sprites are shown if feature is on */
+body.waifuMode.spriteEmulation #visual-novel-wrapper [id*='expression-'] {
+    display: flex !important;
+    visibility: visible !important;
+}

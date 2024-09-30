@@ -151,34 +151,42 @@ async function emulateSprites() {
   );
 
   for (const member of filteredMembers) {
-    const sprites = await getSpriteList(member.name);
+    const character = context.characters.find(x => x.avatar == member);
+    if (!character) {
+      continue;
+    }
+
+    const sprites = await getSpriteList(character.name);
     if (sprites.length === 0) {
-      if (!isDisabledMember(member.name)) {
+      if (!isDisabledMember(character.avatar)) {
         console.debug(
-          `[${extensionName}] No sprites found for character: ${member.name}. Emulating via character card image.`
+          `[${extensionName}] No sprites found for character: ${character.name}. Emulating via character card image.`
         );
 
         // grab the sprite div
-        const spriteDiv = `#visual-novel-wrapper [id='expression-${member.name}.png']`;
+        const spriteDiv = `#visual-novel-wrapper [id='expression-${character.avatar}']`;
         let sprite = $(spriteDiv);
 
-        // apply the sprite card image to <img id="expression-image">
-        const applySpriteCardImage = (card) => {
-          const spriteCard = $("#expression-image");
-          spriteCard.attr("src", card);
-        };
+        // apply the sprite card image to <img id="expression-image"> in the spriteDiv
+        const applySpriteCardImage = (div, member) => {
+          // grab the sprite img element in the sprite div
+          const expressionImage = $(`${div} > img`)[0];
+
+          // apply the sprite card image to the img src
+          expressionImage.src = `/characters/${member}`;
+        }
 
         if (sprite.length === 0) {
           // give time for the sprite to load on the page
           const checkInterval = setInterval(() => {
             sprite = $(spriteDiv);
             if (sprite.length > 0) {
-              applySpriteCardImage(member.img);
+              applySpriteCardImage(spriteDiv, character.avatar);
               clearInterval(checkInterval);
             }
           }, 100);
         } else {
-          applySpriteCardImage(character.img);
+          applySpriteCardImage(spriteDiv, character.avatar);
         }
       }
     }

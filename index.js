@@ -232,7 +232,7 @@ jQuery(async () => {
 $(document).ready(function () {
   /* Mutation Observer for Chat and VN Wrapper */
   /* Listen for changes in the chat and image expressions */
-  const promeObserver = new MutationObserver((mutations) => {
+  const promeChatObserver = new MutationObserver((mutations) => {
     let shouldApplyDebounce = false;
 
     mutations.forEach((mutation) => {
@@ -261,9 +261,7 @@ $(document).ready(function () {
       }
     });
 
-    if (extension_settings[extensionName].emulateSprites) {
-      emulateSpritesDebounce();
-    }
+    emulateSpritesDebounce();
 
     if (shouldApplyDebounce) {
       applyDefocusDebounce();
@@ -275,13 +273,13 @@ $(document).ready(function () {
   });
 
   const chatDiv = document.getElementById("chat");
-  promeObserver.observe(chatDiv, { childList: true });
+  promeChatObserver.observe(chatDiv, { childList: true });
 
   // Since the VN Wrapper is loaded by ST, we need to wait for it to load
   const vnWrapperInterval = setInterval(() => {
     const vnWrapperDiv = document.getElementById("visual-novel-wrapper");
     if (vnWrapperDiv) {
-      promeObserver.observe(vnWrapperDiv, { childList: true, subtree: true });
+      promeChatObserver.observe(vnWrapperDiv, { childList: true, subtree: true });
       clearInterval(vnWrapperInterval);
     }
   }, 100);
