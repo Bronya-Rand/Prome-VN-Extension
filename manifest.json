@@ -1,11 +1,11 @@
 {
-    "display_name": "Prome Visual Novel Extension",
-    "loading_order": 5,
-    "requires": [],
-    "optional": [],
-    "js": "index.js",
-    "css": "style.css",
-    "author": "Bronya-Rand",
-    "version": "1.0.6",
-    "homePage": "https://github.com/Bronya-Rand/Prome-VN-Extension"
+  "display_name": "Prome Visual Novel Extension",
+  "loading_order": 5,
+  "requires": [],
+  "optional": [],
+  "js": "index.js",
+  "css": "style.css",
+  "author": "Bronya-Rand",
+  "version": "1.0.7",
+  "homePage": "https://github.com/Bronya-Rand/Prome-VN-Extension"
 }

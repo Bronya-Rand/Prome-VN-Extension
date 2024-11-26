@@ -1,85 +1,150 @@
 /* Prome UI Settings */
 .prome-drawer-content {
-    gap: 8px;
-    display: flex;
-    flex-direction: column;
+	gap: 8px;
+	display: flex;
+	flex-direction: column;
 }
 
 .prome_vn_block {
-    width: 100%;
+	width: 100%;
 }
 
 /* Prome Letterbox Settings */
 body.waifuMode.hLetterBox #visual-novel-letterbox-one {
-    width: 100vw;
-    height: var(--prom-letterbox-size);
-    top: 0;
-    position: absolute;
-    background-color: var(--prom-letterbox-color);
-    z-index: 29;
-    justify-content: center;
-    align-items: center;
+	width: 100vw;
+	height: var(--prom-letterbox-size);
+	top: 0;
+	position: absolute;
+	background-color: var(--prom-letterbox-color);
+	z-index: 29;
+	justify-content: center;
+	align-items: center;
 }
 body.waifuMode.hLetterBox #visual-novel-letterbox-two {
-    width: 100vw;
-    height: var(--prom-letterbox-size);
-    bottom: 0;
-    position: absolute;
-    background-color: var(--prom-letterbox-color);
-    z-index: 29;
-    justify-content: center;
-    align-items: center;
+	width: 100vw;
+	height: var(--prom-letterbox-size);
+	bottom: 0;
+	position: absolute;
+	background-color: var(--prom-letterbox-color);
+	z-index: 29;
+	justify-content: center;
+	align-items: center;
 }
 body.waifuMode.vLetterBox #visual-novel-letterbox-one {
-    width: var(--prom-letterbox-size);
-    height: 100vh;
-    top: 0;
-    left: 0;
-    position: fixed;
-    background-color: var(--prom-letterbox-color);
-    z-index: 29;
-    justify-content: center;
-    align-items: center;
+	width: var(--prom-letterbox-size);
+	height: 100vh;
+	top: 0;
+	left: 0;
+	position: fixed;
+	background-color: var(--prom-letterbox-color);
+	z-index: 29;
+	justify-content: center;
+	align-items: center;
 }
 body.waifuMode.vLetterBox #visual-novel-letterbox-two {
-    width: var(--prom-letterbox-size);
-    height: 100vh;
-    top: 0;
-    right: 0;
-    position: fixed;
-    background-color: var(--prom-letterbox-color);
-    z-index: 29;
-    justify-content: center;
-    align-items: center;
+	width: var(--prom-letterbox-size);
+	height: 100vh;
+	top: 0;
+	right: 0;
+	position: fixed;
+	background-color: var(--prom-letterbox-color);
+	z-index: 29;
+	justify-content: center;
+	align-items: center;
 }
 
-/* Prome Sprite Focus (Multiple Characters) */
-#visual-novel-wrapper [id*='expression-'] {
-    transition: transform var(--prom-sprite-zoom-speed) var(--prom-sprite-zoom-animation), filter 0.4s ease-in;
-    transform: scale(1.0);
-    filter: brightness(1.0);
+/* 
+ * Prome Sprite Focus (Multiple Characters) 
+ * For shake + focus, see Prome Sprite Shake
+ */
+#visual-novel-wrapper [id*="expression-"] {
+	transition: transform var(--prom-sprite-zoom-speed)
+		var(--prom-sprite-zoom-animation), filter 0.4s ease-in;
+	filter: brightness(1);
 }
 
 /* Sprite Focus to Last Message Character on 'expression-holder' */
 body.waifuMode.spriteZoom .prome-sprite-focus {
-    transform: scale(1.05) !important;
+	transform: scale(1.05);
 }
+
+/*
+ * Prome Sprite Defocus
+ */
 
 /* Sprites not in chat are lower contrast to differentiate focused sprite */
 body.waifuMode.spriteDefocusTint .prome-sprite-defocus {
-    filter: brightness(0.5) !important;
+	filter: brightness(0.5) !important;
 }
 
 /* Prome Sprite Emulation */
 
 /* Sprites are shown if feature is on */
 body.waifuMode.spriteEmulation .prome-render-sprite {
-    display: flex !important;
-    visibility: visible !important;
+	display: flex !important;
+	visibility: visible !important;
 }
 
 /* Sprites are hidden if feature is off */
 body.waifuMode .prome-render-sprite {
-    display: none !important;
-    visibility: hidden;
+	display: none !important;
+	visibility: hidden;
+}
+
+/* 
+ * Prome Sprite Shake 
+ */
+
+body.waifuMode.spriteShake .prome-sprite-shake {
+	animation: shake 0.35s infinite;
+}
+
+body.waifuMode.spriteShake.spriteZoom .prome-sprite-shake {
+	animation: shakeAndFocus 0.35s infinite;
+}
+
+@keyframes shake {
+	0% {
+		transform: translate(0px, 0px) rotate(0deg);
+	}
+	25% {
+		transform: translate(1px, 0px) rotate(0.1deg);
+	}
+	50% {
+		transform: translate(0px, 0px) rotate(0.2deg);
+	}
+	75% {
+		transform: translate(-1px, 0px) rotate(0.1deg);
+	}
+	100% {
+		transform: translate(0px, 0px) rotate(0deg);
+	}
+}
+
+@keyframes shakeAndFocus {
+	0% {
+		transform: translate(0px, 0px) rotate(0deg) scale(1.05);
+	}
+	25% {
+		transform: translate(1px, 0px) rotate(0.1deg) scale(1.05);
+	}
+	50% {
+		transform: translate(0px, 0px) rotate(0.2deg) scale(1.05);
+	}
+	75% {
+		transform: translate(-1px, 0px) rotate(0.1deg) scale(1.05);
+	}
+	100% {
+		transform: translate(0px, 0px) rotate(0deg) scale(1.05);
+	}
+}
+
+/* 
+ * Prome Sprite Shadows
+ */
+
+body.waifuMode.spriteShadow:not(.spriteEmulation)
+	#visual-novel-wrapper
+	[id*="expression-"] {
+	filter: drop-shadow(15px 5px 9px #111);
 }
