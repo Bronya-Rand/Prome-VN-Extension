@@ -160,3 +160,10 @@ body.waifuMode.spriteShadow.spriteDefocusTint:not(.spriteEmulation)
 		)
 		brightness(0.5) !important;
 }
+
+body.waifuMode.spriteShadow #expression-wrapper .expression-holder {
+	filter: drop-shadow(
+		var(--prom-sprite-shadow-offsetx) var(--prom-sprite-shadow-offsety)
+			var(--prom-sprite-shadow-blur) #111
+	);
+}
