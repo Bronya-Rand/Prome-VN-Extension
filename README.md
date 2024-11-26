@@ -81,7 +81,7 @@ A SillyTavern that supports extensions.
 #### Via Install Extension
 
 1. Click _Extensions_ then **Install Extension**
-2. Paste in the following **link** into the text field and click Save: `https://github.com/Bronya-Rand/Bronie-Parser-Extension`.
+2. Paste in the following **link** into the text field and click Save: `https://github.com/Bronya-Rand/Prome-VN-Extension`.
 3. Refresh the SillyTavern page.
 4. Click on _Extensions_ again and click down on the `Prome (Visual Novel Extension)` dropdown and toggle _Enable Prome VN Mode_.
    > If you already have Visual Novel Mode on, you can skip this step.
