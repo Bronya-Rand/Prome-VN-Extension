@@ -44,7 +44,6 @@ function isDisabledMember(name) {
 // Apply focus class to the sprite
 async function applyZoom() {
 	if (!zoomListenerPreconditions()) return;
-	if (extension_settings[extensionName].spriteShake) return;
 
 	// check if there are any messages
 	const lastMessagesWithoutSystem = getLastChatMessage();

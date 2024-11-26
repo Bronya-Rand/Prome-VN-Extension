@@ -146,5 +146,17 @@ body.waifuMode.spriteShake.spriteZoom .prome-sprite-shake {
 body.waifuMode.spriteShadow:not(.spriteEmulation)
 	#visual-novel-wrapper
 	[id*="expression-"] {
-	filter: drop-shadow(15px 5px 9px #111);
+	filter: drop-shadow(
+		var(--prom-sprite-shadow-offsetx) var(--prom-sprite-shadow-offsety)
+			var(--prom-sprite-shadow-blur) #111
+	);
+}
+
+body.waifuMode.spriteShadow.spriteDefocusTint:not(.spriteEmulation)
+	.prome-sprite-defocus {
+	filter: drop-shadow(
+			var(--prom-sprite-shadow-offsetx) var(--prom-sprite-shadow-offsety)
+				var(--prom-sprite-shadow-blur) #111
+		)
+		brightness(0.5) !important;
 }

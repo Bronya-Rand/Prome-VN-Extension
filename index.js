@@ -62,7 +62,19 @@ import {
 	applySpriteEmulation,
 	onSpriteEmulation_Click,
 } from "./modules/emulate.js";
-import { applySpriteShadow, onSpriteShadow_Click } from "./modules/shadows.js";
+import {
+	applySpriteShadow,
+	onSpriteShadow_Click,
+	onSpriteShadowOffsetX_Change,
+	onSpriteShadowOffsetY_Change,
+	onSpriteShadowBlur_Change,
+	resetSpriteShadowOffsetX,
+	resetSpriteShadowOffsetY,
+	resetSpriteShadowBlur,
+	applySpriteShadowBlur,
+	applySpriteShadowOffsetX,
+	applySpriteShadowOffsetY,
+} from "./modules/shadows.js";
 
 async function loadSettings() {
 	extension_settings[extensionName] = extension_settings[extensionName] || {};
@@ -141,6 +153,24 @@ async function loadSettings() {
 		"checked",
 		extension_settings[extensionName].spriteShadow,
 	);
+	$("#prome-sprite-shadow-offsetx").val(
+		extension_settings[extensionName].shadowOffsetX,
+	);
+	$("#prome-sprite-shadow-offsetx-counter").val(
+		extension_settings[extensionName].shadowOffsetX,
+	);
+	$("#prome-sprite-shadow-offsety").val(
+		extension_settings[extensionName].shadowOffsetY,
+	);
+	$("#prome-sprite-shadow-offsety-counter").val(
+		extension_settings[extensionName].shadowOffsetY,
+	);
+	$("#prome-sprite-shadow-blur").val(
+		extension_settings[extensionName].shadowBlur,
+	);
+	$("#prome-sprite-shadow-blur-counter").val(
+		extension_settings[extensionName].shadowBlur,
+	);
 
 	// Traditional VN Mode Updates
 	$("#prome-sheld-last_mes").prop(
@@ -175,6 +205,9 @@ async function loadSettings() {
 	applySpriteShake();
 	// Sprite Shadow
 	applySpriteShadow();
+	applySpriteShadowOffsetX();
+	applySpriteShadowOffsetY();
+	applySpriteShadowBlur();
 }
 
 /* Prome Core Listeners */
@@ -252,6 +285,27 @@ jQuery(async () => {
 	$("#prome-sprite-shake").on("click", onSpriteShake_Click);
 	// Sprite Shadow
 	$("#prome-sprite-shadow").on("click", onSpriteShadow_Click);
+	$("#prome-sprite-shadow-offsetx").on("input", onSpriteShadowOffsetX_Change);
+	$("#prome-sprite-shadow-offsetx-counter").on(
+		"input",
+		onSpriteShadowOffsetX_Change,
+	);
+	$("#prome-sprite-shadow-offsety").on("input", onSpriteShadowOffsetY_Change);
+	$("#prome-sprite-shadow-offsety-counter").on(
+		"input",
+		onSpriteShadowOffsetY_Change,
+	);
+	$("#prome-sprite-shadow-blur").on("input", onSpriteShadowBlur_Change);
+	$("#prome-sprite-shadow-blur-counter").on("input", onSpriteShadowBlur_Change);
+	$("#prome-sprite-shadow-offsetx-restore").on(
+		"click",
+		resetSpriteShadowOffsetX,
+	);
+	$("#prome-sprite-shadow-offsety-restore").on(
+		"click",
+		resetSpriteShadowOffsetY,
+	);
+	$("#prome-sprite-shadow-blur-restore").on("click", resetSpriteShadowBlur);
 
 	/* Prome Feature Initialization */
 	addLetterbox();

@@ -155,6 +155,9 @@
             >
           </label>
 
+          <h5 data-i18n="Sprite Shadow Configuration">
+            Sprite Shadow Configuration
+          </h5>
           <label class="checkbox_label" for="prome-sprite-shadow">
             <input
               id="prome-sprite-shadow"
@@ -163,6 +166,107 @@
             />
             <span data-i18n="Enable Sprite Shadow">Enable Sprite Shadow</span>
           </label>
+
+          <div class="prome_vn_block flex-container flexFlowRow">
+            <div class="prome_vn_block flex-container flexFlowColumn">
+              <label for="prome-sprite-shadow-offsetx" class="title_restorable">
+                <span data-i18n="Shadow X Offset">Shadow X Offset</span>
+                <div
+                  id="prome-sprite-shadow-offsetx-restore"
+                  title="Restore default value"
+                  class="right_menu_button"
+                >
+                  <i class="fa-solid fa-clock-rotate-left fa-sm"></i>
+                </div>
+              </label>
+              <small data-i18n="Set the X offset of the character shadow."
+                >Set the X offset of the character shadow.</small
+              >
+              <input
+                class="neo-range-slider"
+                id="prome-sprite-shadow-offsetx"
+                type="range"
+                min="1"
+                max="20"
+                step="1"
+              />
+              <input
+                class="neo-range-input"
+                id="prome-sprite-shadow-offsetx-counter"
+                type="number"
+                min="1"
+                max="20"
+                step="1"
+                data-for="prome-sprite-shadow-offsetx"
+              />
+            </div>
+
+            <div class="prome_vn_block flex-container flexFlowColumn">
+              <label for="prome-sprite-shadow-offsety" class="title_restorable">
+                <span data-i18n="Shadow Y Offset">Shadow Y Offset</span>
+                <div
+                  id="prome-sprite-shadow-offsety-restore"
+                  title="Restore default value"
+                  class="right_menu_button"
+                >
+                  <i class="fa-solid fa-clock-rotate-left fa-sm"></i>
+                </div>
+              </label>
+              <small data-i18n="Set the Y offset of the character shadow."
+                >Set the Y offset of the character shadow.</small
+              >
+              <input
+                class="neo-range-slider"
+                id="prome-sprite-shadow-offsety"
+                type="range"
+                min="1"
+                max="20"
+                step="1"
+              />
+              <input
+                class="neo-range-input"
+                id="prome-sprite-shadow-offsety-counter"
+                type="number"
+                min="1"
+                max="20"
+                step="1"
+                data-for="prome-sprite-shadow-offsety"
+              />
+            </div>
+
+            <div class="prome_vn_block flex-container flexFlowColumn">
+              <label for="prome-sprite-shadow-blur" class="title_restorable">
+                <span data-i18n="Shadow Blur">Shadow Blur</span>
+                <div
+                  id="prome-sprite-shadow-blur-restore"
+                  title="Restore default value"
+                  class="right_menu_button"
+                >
+                  <i class="fa-solid fa-clock-rotate-left fa-sm"></i>
+                </div>
+              </label>
+              <small data-i18n="Set the blur of the character shadow."
+                >Set the blur of the character shadow.</small
+              >
+              <input
+                class="neo-range-slider"
+                id="prome-sprite-shadow-blur"
+                type="range"
+                min="1"
+                max="20"
+                step="1"
+              />
+              <input
+                class="neo-range-input"
+                id="prome-sprite-shadow-blur-counter"
+                type="number"
+                min="1"
+                max="20"
+                step="1"
+                data-for="prome-sprite-shadow-blur"
+              />
+            </div>
+          </div>
 
           <h5 data-i18n="Group Chat Configuration">Group Chat Configuration</h5>
           <label class="checkbox_label" for="prome-sprite-defocus-tint">

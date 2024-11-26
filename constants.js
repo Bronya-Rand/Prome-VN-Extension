@@ -14,6 +14,9 @@ export const defaultSettings = {
 	emulateSprites: false,
 	spriteShake: false,
 	spriteShadow: false,
+	shadowOffsetX: 15,
+	shadowOffsetY: 5,
+	shadowBlur: 9,
 };
 
 export const VN_MODES = {
