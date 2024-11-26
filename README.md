@@ -46,11 +46,13 @@ The Prome Visual Novel Extension is a extension for SillyTavern that remodernize
    <center>
     <img src="./.github/card-emulation.png"/>
    </center>
-9. Sprite Shadows - Adds a small shadow to the character sprites, making them blend in with the environment or to add a small glint of realism to the chat.
-   > This feature can be adjusted in size (X and Y) and blur strength. This feature does not work for non-sprite characters using Sprite Emulation.
-   <center>
-      <img src="./.github/sprite-shadow.png">
-   </center>
+9. Sprite Shake - Shakes the speaking character sprite when they are speaking.
+   > This feature only works if `Streaming` is enabled in your preset settings.
+10. Sprite Shadows - Adds a small shadow to the character sprites, making them blend in with the environment or to add a small glint of realism to the chat.
+    > This feature can be adjusted in size (X and Y) and blur strength. This feature does not work for non-sprite characters using Sprite Emulation.
+    <center>
+       <img src="./.github/sprite-shadow.png">
+    </center>
 
 Most features and it's settings can be found under _Extensions_ > `Prome (Visual Novel Extension)`. Other features like Chat History will be located under the wand tool in the ST chatbox.
 
