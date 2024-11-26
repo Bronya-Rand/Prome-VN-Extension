@@ -47,7 +47,7 @@ The Prome Visual Novel Extension is a extension for SillyTavern that remodernize
     <img src="./.github/card-emulation.png"/>
    </center>
 9. Sprite Shadows - Adds a small shadow to the character sprites, making them blend in with the environment or to add a small glint of realism to the chat.
-   > This feature does not work for non-sprite characters using Sprite Emulation.
+   > This feature can be adjusted in size (X and Y) and blur strength. This feature does not work for non-sprite characters using Sprite Emulation.
    <center>
       <img src="./.github/sprite-shadow.png">
    </center>

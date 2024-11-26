@@ -19,6 +19,8 @@ import {
 	applySpriteDefocusTint,
 	applySpriteZoom,
 } from "./focus.js";
+import { applySpriteShake } from "./shake.js";
+import { applySpriteShadow } from "./shadows.js";
 
 export function prepareSlashCommands() {
 	SlashCommandParser.addCommandObject(
@@ -161,7 +163,7 @@ export function prepareSlashCommands() {
 
 	SlashCommandParser.addCommandObject(
 		SlashCommand.fromProps({
-			name: "defocus",
+			name: "sprite-defocus",
 			callback: async () => {
 				switchUnfocusMode();
 				toastr.success(
@@ -174,7 +176,45 @@ export function prepareSlashCommands() {
 				);
 				return extension_settings[extensionName].spriteDefocusTint;
 			},
-			helpString: "Toggles defocus tint for the Prome VN UI.",
+			helpString: "Toggles the defocus tint for character sprites.",
+		}),
+	);
+
+	SlashCommandParser.addCommandObject(
+		SlashCommand.fromProps({
+			name: "sprite-shake",
+			callback: async () => {
+				switchSpriteShake();
+				toastr.success(
+					`Sprite shake is now ${
+						extension_settings[extensionName].spriteShake
+							? "enabled"
+							: "disabled"
+					}.`,
+					"Sprite Shake Status",
+				);
+				return extension_settings[extensionName].spriteShake;
+			},
+			helpString: "Toggles sprite shaking when a character is speaking.",
+		}),
+	);
+
+	SlashCommandParser.addCommandObject(
+		SlashCommand.fromProps({
+			name: "sprite-shadow",
+			callback: async () => {
+				switchSpriteShadow();
+				toastr.success(
+					`Sprite shadow is now ${
+						extension_settings[extensionName].spriteShadow
+							? "enabled"
+							: "disabled"
+					}.`,
+					"Sprite Shadow Status",
+				);
+				return extension_settings[extensionName].spriteShadow;
+			},
+			helpString: "Toggles sprite shadows for character sprites.",
 		}),
 	);
 }
@@ -208,4 +248,24 @@ function switchUnfocusMode() {
 		.prop("checked", extension_settings[extensionName].spriteDefocusTint)
 		.trigger("input");
 	applySpriteDefocusTint();
+}
+
+function switchSpriteShake() {
+	extension_settings[extensionName].spriteShake =
+		!extension_settings[extensionName].spriteShake;
+	saveSettingsDebounced();
+	$("#prome-sprite-shake")
+		.prop("checked", extension_settings[extensionName].spriteShake)
+		.trigger("input");
+	applySpriteShake();
+}
+
+function switchSpriteShadow() {
+	extension_settings[extensionName].spriteShadow =
+		!extension_settings[extensionName].spriteShadow;
+	saveSettingsDebounced();
+	$("#prome-sprite-shadow")
+		.prop("checked", extension_settings[extensionName].spriteShadow)
+		.trigger("input");
+	applySpriteShadow();
 }
