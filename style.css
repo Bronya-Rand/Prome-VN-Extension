@@ -9,6 +9,10 @@
 	width: 100%;
 }
 
+.prome_details_padding {
+	padding: 5px 5px;
+}
+
 /* Prome Letterbox Settings */
 body.waifuMode.hLetterBox #visual-novel-letterbox-one {
 	width: 100vw;
