@@ -75,6 +75,7 @@ import {
 	applySpriteShadowOffsetX,
 	applySpriteShadowOffsetY,
 } from "./modules/shadows.js";
+import { setupTintHTML, setupTintJQuery } from "./modules/tint.js";
 
 async function loadSettings() {
 	extension_settings[extensionName] = extension_settings[extensionName] || {};
@@ -182,6 +183,9 @@ async function loadSettings() {
 	$("#waifuMode")
 		.prop("checked", extension_settings[extensionName].enableVN_UI)
 		.trigger("input");
+
+	// Apply Tint Settings
+	setupTintHTML();
 
 	// Apply Letterbox Settings
 	applyLetterboxMode();
@@ -309,6 +313,7 @@ jQuery(async () => {
 
 	/* Prome Feature Initialization */
 	addLetterbox();
+	setupTintJQuery();
 	loadSettings();
 	prepareSlashCommands();
 

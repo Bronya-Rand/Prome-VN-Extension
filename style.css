@@ -171,3 +171,107 @@ body.waifuMode.spriteShadow #expression-wrapper .expression-holder {
 			var(--prom-sprite-shadow-blur) #111
 	);
 }
+
+/* 
+ * Prome Background Tint
+ */
+
+body.worldTint.tintWorld #bg1 {
+	filter: var(--prom-background-tint-filter);
+}
+
+body.worldTint.tintCharacter #expression-wrapper .expression-holder {
+	filter: var(--prom-character-tint-filter);
+}
+
+body.worldTint.sharedTint #expression-wrapper .expression-holder {
+	filter: var(--prom-background-tint-filter);
+}
+
+body.worldTint.tintCharacter #visual-novel-wrapper [id*="expression-"] {
+	filter: var(--prom-character-tint-filter);
+}
+
+body.worldTint.sharedTint #visual-novel-wrapper [id*="expression-"] {
+	filter: var(--prom-background-tint-filter);
+}
+
+body.worldTint.tintCharacter.spriteShadow:not(.spriteEmulation)
+	#visual-novel-wrapper
+	[id*="expression-"] {
+	filter: var(--prom-character-tint-filter)
+		drop-shadow(
+			var(--prom-sprite-shadow-offsetx) var(--prom-sprite-shadow-offsety)
+				var(--prom-sprite-shadow-blur) #111
+		);
+}
+
+body.worldTint.sharedTint.spriteShadow:not(.spriteEmulation)
+	#visual-novel-wrapper
+	[id*="expression-"] {
+	filter: var(--prom-background-tint-filter)
+		drop-shadow(
+			var(--prom-sprite-shadow-offsetx) var(--prom-sprite-shadow-offsety)
+				var(--prom-sprite-shadow-blur) #111
+		);
+}
+
+body.worldTint.tintCharacter.spriteShadow.spriteDefocusTint:not(
+		.spriteEmulation
+	)
+	.prome-sprite-defocus {
+	filter: var(--prom-character-tint-filter)
+		drop-shadow(
+			var(--prom-sprite-shadow-offsetx) var(--prom-sprite-shadow-offsety)
+				var(--prom-sprite-shadow-blur) #111
+		)
+		brightness(0.5) !important;
+}
+
+body.worldTint.sharedTint.spriteShadow.spriteDefocusTint:not(.spriteEmulation)
+	.prome-sprite-defocus {
+	filter: var(--prom-background-tint-filter)
+		drop-shadow(
+			var(--prom-sprite-shadow-offsetx) var(--prom-sprite-shadow-offsety)
+				var(--prom-sprite-shadow-blur) #111
+		)
+		brightness(0.5) !important;
+}
+
+body.worldTint.tintCharacter.spriteShadow
+	#expression-wrapper
+	.expression-holder {
+	filter: var(--prom-character-tint-filter)
+		drop-shadow(
+			var(--prom-sprite-shadow-offsetx) var(--prom-sprite-shadow-offsety)
+				var(--prom-sprite-shadow-blur) #111
+		);
+}
+
+body.worldTint.sharedTint.spriteShadow #expression-wrapper .expression-holder {
+	filter: var(--prom-background-tint-filter)
+		drop-shadow(
+			var(--prom-sprite-shadow-offsetx) var(--prom-sprite-shadow-offsety)
+				var(--prom-sprite-shadow-blur) #111
+		);
+}
+
+body.worldTint.tintCharacter.spriteShadow
+	#visual-novel-wrapper
+	[id*="expression-"] {
+	filter: var(--prom-character-tint-filter)
+		drop-shadow(
+			var(--prom-sprite-shadow-offsetx) var(--prom-sprite-shadow-offsety)
+				var(--prom-sprite-shadow-blur) #111
+		);
+}
+
+body.worldTint.sharedTint.spriteShadow
+	#visual-novel-wrapper
+	[id*="expression-"] {
+	filter: var(--prom-background-tint-filter)
+		drop-shadow(
+			var(--prom-sprite-shadow-offsetx) var(--prom-sprite-shadow-offsety)
+				var(--prom-sprite-shadow-blur) #111
+		);
+}

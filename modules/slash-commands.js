@@ -21,6 +21,7 @@ import {
 } from "./focus.js";
 import { applySpriteShake } from "./shake.js";
 import { applySpriteShadow } from "./shadows.js";
+import { applyTint } from "./tint.js";
 
 export function prepareSlashCommands() {
 	SlashCommandParser.addCommandObject(
@@ -217,6 +218,84 @@ export function prepareSlashCommands() {
 			helpString: "Toggles sprite shadows for character sprites.",
 		}),
 	);
+
+	SlashCommandParser.addCommandObject(
+		SlashCommand.fromProps({
+			name: "tint-mode",
+			callback: async () => {
+				switchTintMode();
+				toastr.success(
+					`World tint is now ${
+						extension_settings[extensionName].worldTint ? "enabled" : "disabled"
+					}.`,
+					"World Tint Status",
+				);
+				return extension_settings[extensionName].worldTint;
+			},
+			helpString: "Toggles the tint mode for the Prome VN UI.",
+		}),
+	);
+
+	SlashCommandParser.addCommandObject(
+		SlashCommand.fromProps({
+			name: "tint-world",
+			callback: async () => {
+				switchTintWorldMode();
+				toastr.success(
+					`World tint is now ${
+						extension_settings[extensionName].currentTintValues.world.enabled
+							? "enabled"
+							: "disabled"
+					}.`,
+					"World Tint Status",
+				);
+				return extension_settings[extensionName].currentTintValues.world
+					.enabled;
+			},
+			helpString: "Toggles the world tint for the Prome VN UI.",
+		}),
+	);
+
+	SlashCommandParser.addCommandObject(
+		SlashCommand.fromProps({
+			name: "tint-character",
+			callback: async () => {
+				switchTintCharacterMode();
+				toastr.success(
+					`Character tint is now ${
+						extension_settings[extensionName].currentTintValues.character
+							.enabled
+							? "enabled"
+							: "disabled"
+					}.`,
+					"Character Tint Status",
+				);
+				return extension_settings[extensionName].currentTintValues.character
+					.enabled;
+			},
+			helpString: "Toggles the character tint for the Prome VN UI.",
+		}),
+	);
+
+	SlashCommandParser.addCommandObject(
+		SlashCommand.fromProps({
+			name: "tint-shared",
+			callback: async () => {
+				switchTintSharedMode();
+				toastr.success(
+					`Shared tint is now ${
+						extension_settings[extensionName].currentTintValues.shared
+							? "enabled"
+							: "disabled"
+					}.`,
+					"Shared Tint Status",
+				);
+				return extension_settings[extensionName].currentTintValues.shared;
+			},
+			helpString:
+				"Toggles the world tint to character sprites (This will override Character Tint).",
+		}),
+	);
 }
 
 function switchLetterboxMode(mode) {
@@ -268,4 +347,50 @@ function switchSpriteShadow() {
 		.prop("checked", extension_settings[extensionName].spriteShadow)
 		.trigger("input");
 	applySpriteShadow();
+}
+
+function switchTintMode() {
+	extension_settings[extensionName].worldTint =
+		!extension_settings[extensionName].worldTint;
+	saveSettingsDebounced();
+	$("#prome-tint-enable")
+		.prop("checked", extension_settings[extensionName].worldTint)
+		.trigger("input");
+	applyTint();
+}
+
+function switchTintWorldMode() {
+	extension_settings[extensionName].currentTintValues.world.enabled =
+		!extension_settings[extensionName].currentTintValues.world.enabled;
+	saveSettingsDebounced();
+	$("#prome-world-tint")
+		.prop(
+			"checked",
+			extension_settings[extensionName].currentTintValues.world.enabled,
+		)
+		.trigger("input");
+	applyTint();
+}
+
+function switchTintCharacterMode() {
+	extension_settings[extensionName].currentTintValues.character.enabled =
+		!extension_settings[extensionName].currentTintValues.character.enabled;
+	saveSettingsDebounced();
+	$("#prome-character-tint")
+		.prop(
+			"checked",
+			extension_settings[extensionName].currentTintValues.character.enabled,
+		)
+		.trigger("input");
+	applyTint();
+}
+
+function switchTintSharedMode() {
+	extension_settings[extensionName].currentTintValues.shared =
+		!extension_settings[extensionName].currentTintValues.shared;
+	saveSettingsDebounced();
+	$("#prome-tint-share")
+		.prop("checked", extension_settings[extensionName].currentTintValues.shared)
+		.trigger("input");
+	applyTint();
 }

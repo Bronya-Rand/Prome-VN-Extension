@@ -30,7 +30,7 @@
 
         <div class="prome_vn_block flex-container flexFlowColumn">
           <h4 data-i18n="Sheld Configuration">Sheld Configuration</h4>
-          <div class="prome_vn_block flex-container flexFlowColumn">
+          <div class="prome_vn_block flex-container flexFlowRow">
             <label
               class="checkbox_label"
               for="prome-hide-sheld"
@@ -146,27 +146,29 @@
           <div
             class="prome_vn_block flex-container flexFlowColumn prome_details_padding"
           >
-            <label class="checkbox_label" for="prome-emulate-sprites">
-              <input
-                id="prome-emulate-sprites"
-                type="checkbox"
+            <div class="prome_vn_block flex-container flexFlowRow">
+              <label
+                class="checkbox_label"
+                for="prome-emulate-sprites"
                 title="Emulates the character card of a character to be a sprite."
-              />
-              <span data-i18n="Emulate Character Card as Sprite"
-                >[BETA] Emulate Character Card as Sprite</span
               >
-            </label>
+                <input id="prome-emulate-sprites" type="checkbox" />
+                <span data-i18n="Emulate Character Card as Sprite"
+                  >[BETA] Emulate Character Card as Sprite</span
+                >
+              </label>
 
-            <label class="checkbox_label" for="prome-sprite-shake">
-              <input
-                id="prome-sprite-shake"
-                type="checkbox"
-                title="Shakes the character sprite when the character is speaking (Only applicable if Streaming is enabled in Preset Settings)."
-              />
-              <span data-i18n="Enable Sprite Shake"
-                >[BETA] Enable Sprite Shake</span
+              <label
+                class="checkbox_label"
+                for="prome-sprite-shake"
+                title="Shakes the character sprite when the character is speaking (Only works if Streaming is enabled in Preset Settings)."
               >
-            </label>
+                <input id="prome-sprite-shake" type="checkbox" />
+                <span data-i18n="Enable Sprite Shake"
+                  >[BETA] Enable Sprite Shake</span
+                >
+              </label>
+            </div>
 
             <details>
               <summary data-i18n="Sprite Shadow Configuration">
@@ -308,31 +310,27 @@
           <div
             class="prome_vn_block flex-container flexFlowColumn prome_details_padding"
           >
-            <label class="checkbox_label" for="prome-sprite-defocus-tint">
-              <input
-                id="prome-sprite-defocus-tint"
-                type="checkbox"
+            <div class="prome_vn_block flex-container flexFlowRow">
+              <label
+                class="checkbox_label"
+                for="prome-sprite-defocus-tint"
                 title="Darkens non-speaking (unfocused) characters."
-              />
-              <span data-i18n="Darken Unfocused Character Sprites"
-                >Darken Character Sprites</span
               >
-            </label>
-            <small data-i18n="Darkens non-speaking (unfocused) characters."
-              >Darkens non-speaking (unfocused) characters.</small
-            >
+                <input id="prome-sprite-defocus-tint" type="checkbox" />
+                <span data-i18n="Darken Unfocused Character Sprites"
+                  >Darken Character Sprites</span
+                >
+              </label>
 
-            <label class="checkbox_label" for="prome-sprite-zoom">
-              <input
-                id="prome-sprite-zoom"
-                type="checkbox"
+              <label
+                class="checkbox_label"
+                for="prome-sprite-zoom"
                 title="Focuses the current speaking character in chat."
-              />
-              <span data-i18n="Enable Focus Mode">Enable Focus Mode</span>
-            </label>
-            <small data-i18n="Focuses the current speaking character in chat."
-              >Focuses the current speaking character in chat.</small
-            >
+              >
+                <input id="prome-sprite-zoom" type="checkbox" />
+                <span data-i18n="Enable Focus Mode">Enable Focus Mode</span>
+              </label>
+            </div>
 
             <details>
               <summary data-i18n="Focus Mode Settings">
@@ -402,6 +400,356 @@
           </div>
         </details>
 
+        <!-- Tint Configuration -->
+        <details>
+          <summary data-i18n="Tint Configuration">Tint Configuration</summary>
+          <div
+            class="prome_vn_block flex-container flexFlowColumn prome_details_padding"
+          >
+            <div class="prome_vn_block flex-container flexFlowRow">
+              <label
+                class="checkbox_label"
+                for="prome-tint-chat"
+                title="Tints the chat background and/or character sprites."
+              >
+                <input id="prome-tint-enable" type="checkbox" />
+                <span data-i18n="Enable Chat Tint">Enable Chat Tint</span>
+              </label>
+
+              <label
+                for="prome-world-tint-share"
+                class="title_restorable"
+                title="Applies the world tint to character sprites (Will override Character Tint Settings)."
+              >
+                <input id="prome-tint-share" type="checkbox" />
+                <span data-i18n="Share World Tint With Characters"
+                  >Share World Tint With Characters</span
+                >
+              </label>
+            </div>
+
+            <div class="prome_vn_block flex-container flexFlowColumn">
+              <label for="prome-tint-preset" data-i18n="Tint Presets"
+                >Tint Presets</label
+              >
+              <small
+                data-i18n="Select the tint preset to use for the Prome VN UI."
+                >Select the tint preset to use for the Prome VN UI.</small
+              >
+              <div class="flex-container flexFlowRow">
+                <select id="prome-tint-preset"></select>
+                <div
+                  id="prome-tint-save"
+                  data-i18n="Save tint"
+                  title="Save tint"
+                  class="menu_button"
+                >
+                  <i class="fa-solid fa-save"></i>
+                </div>
+                <div
+                  id="prome-tint-delete"
+                  data-i18n="Delete tint"
+                  title="Delete tint"
+                  class="menu_button"
+                >
+                  <i class="fa-solid fa-trash-can"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="prome_vn_block flex-container flexFlowRow">
+              <!-- World Tint Settings -->
+              <div class="prome_vn_block flex-container flexFlowColumn">
+                <span data-i18n="World Tint Settings">World Tint Settings</span>
+                <label
+                  class="checkbox_label"
+                  for="prome-world-tint"
+                  title="Tints the world background."
+                >
+                  <input id="prome-world-tint" type="checkbox" />
+                  <span data-i18n="Enable World Tint">Enable World Tint</span>
+                </label>
+
+                <label for="prome-world-blur" class="title_restorable">
+                  <span data-i18n="Blur Strength">Blur Strength</span>
+                </label>
+                <small data-i18n="Set the strength of the world blur."
+                  >Set the strength of the world blur.</small
+                >
+                <input
+                  class="neo-range-input"
+                  id="prome-world-blur"
+                  type="number"
+                  min="0"
+                  max="999"
+                  step="1"
+                  data-for="prome-world-blur"
+                />
+
+                <label for="prome-world-brightness" class="title_restorable">
+                  <span data-i18n="Brightness">Brightness</span>
+                </label>
+                <small data-i18n="Set the brightness of the world."
+                  >Set the brightness of the world.</small
+                >
+                <input
+                  class="neo-range-input"
+                  id="prome-world-brightness"
+                  type="number"
+                  min="0"
+                  max="999"
+                  step="1"
+                  data-for="prome-world-brightness"
+                />
+
+                <label for="prome-world-contrast" class="title_restorable">
+                  <span data-i18n="Contrast">Contrast</span>
+                </label>
+                <small data-i18n="Set the contrast of the world."
+                  >Set the contrast of the world.</small
+                >
+                <input
+                  class="neo-range-input"
+                  id="prome-world-contrast"
+                  type="number"
+                  min="0"
+                  max="999"
+                  step="1"
+                  data-for="prome-world-contrast"
+                />
+
+                <label for="prome-world-grayscale" class="title_restorable">
+                  <span data-i18n="Grayscale">Grayscale</span>
+                </label>
+                <small data-i18n="Makes the world black and white."
+                  >Makes the world black and white.</small
+                >
+                <input
+                  class="neo-range-input"
+                  id="prome-world-grayscale"
+                  type="number"
+                  min="0"
+                  max="999"
+                  step="1"
+                  data-for="prome-world-grayscale"
+                />
+
+                <label for="prome-world-hue" class="title_restorable">
+                  <span data-i18n="Hue">Hue</span>
+                </label>
+                <small data-i18n="Set the hue of the world."
+                  >Set the hue of the world.</small
+                >
+                <input
+                  class="neo-range-input"
+                  id="prome-world-hue"
+                  type="number"
+                  min="0"
+                  max="999"
+                  step="1"
+                  data-for="prome-world-hue"
+                />
+
+                <label for="prome-world-invert" class="title_restorable">
+                  <span data-i18n="Invert">Invert</span>
+                </label>
+                <small data-i18n="Inverts the world colors."
+                  >Inverts the world colors.</small
+                >
+                <input
+                  class="neo-range-input"
+                  id="prome-world-invert"
+                  type="number"
+                  min="0"
+                  max="999"
+                  step="1"
+                  data-for="prome-world-invert"
+                />
+
+                <label for="prome-world-saturate" class="title_restorable">
+                  <span data-i18n="Saturate">Saturate</span>
+                </label>
+                <small data-i18n="Saturates the world colors."
+                  >Saturates the world colors.</small
+                >
+                <input
+                  class="neo-range-input"
+                  id="prome-world-saturate"
+                  type="number"
+                  min="0"
+                  max="999"
+                  step="1"
+                  data-for="prome-world-saturate"
+                />
+
+                <label for="sepia" class="title_restorable">
+                  <span data-i18n="Sepia">Sepia</span>
+                </label>
+                <small data-i18n="Makes the world warmer in color."
+                  >Makes the world warmer in color.</small
+                >
+                <input
+                  class="neo-range-input"
+                  id="prome-world-sepia"
+                  type="number"
+                  min="0"
+                  max="999"
+                  step="1"
+                  data-for="prome-world-sepia"
+                />
+              </div>
+
+              <!-- Character Tint Settings -->
+              <div class="prome_vn_block flex-container flexFlowColumn">
+                <span data-i18n="Character Tint Settings"
+                  >Character Tint Settings</span
+                >
+                <label
+                  class="checkbox_label"
+                  for="prome-character-tint"
+                  title="Tints the character sprites."
+                >
+                  <input id="prome-character-tint" type="checkbox" />
+                  <span data-i18n="Enable Character Tint"
+                    >Enable Character Tint</span
+                  >
+                </label>
+
+                <label for="prome-character-blur" class="title_restorable">
+                  <span data-i18n="Blur Strength">Blur Strength</span>
+                </label>
+                <small data-i18n="Set the strength of the character blur."
+                  >Set the strength of the character blur.</small
+                >
+                <input
+                  class="neo-range-input"
+                  id="prome-character-blur"
+                  type="number"
+                  min="0"
+                  max="999"
+                  step="1"
+                  data-for="prome-character-blur"
+                />
+
+                <label
+                  for="prome-character-brightness"
+                  class="title_restorable"
+                >
+                  <span data-i18n="Brightness">Brightness</span>
+                </label>
+                <small data-i18n="Set the brightness of the character."
+                  >Set the brightness of the character.</small
+                >
+                <input
+                  class="neo-range-input"
+                  id="prome-character-brightness"
+                  type="number"
+                  min="0"
+                  max="999"
+                  step="1"
+                  data-for="prome-character-brightness"
+                />
+
+                <label for="prome-character-contrast" class="title_restorable">
+                  <span data-i18n="Contrast">Contrast</span>
+                </label>
+                <small data-i18n="Set the contrast of the character."
+                  >Set the contrast of the character.</small
+                >
+                <input
+                  class="neo-range-input"
+                  id="prome-character-contrast"
+                  type="number"
+                  min="0"
+                  max="999"
+                  step="1"
+                  data-for="prome-character-contrast"
+                />
+
+                <label for="prome-character-grayscale" class="title_restorable">
+                  <span data-i18n="Grayscale">Grayscale</span>
+                </label>
+                <small data-i18n="Makes the character black and white."
+                  >Makes the character black and white.</small
+                >
+                <input
+                  class="neo-range-input"
+                  id="prome-character-grayscale"
+                  type="number"
+                  min="0"
+                  max="999"
+                  step="1"
+                  data-for="prome-character-grayscale"
+                />
+
+                <label for="prome-character-hue" class="title_restorable">
+                  <span data-i18n="Hue">Hue</span>
+                </label>
+                <small data-i18n="Set the hue of the character."
+                  >Set the hue of the character.</small
+                >
+                <input
+                  class="neo-range-input"
+                  id="prome-character-hue"
+                  type="number"
+                  min="0"
+                  max="999"
+                  step="1"
+                  data-for="prome-character-hue"
+                />
+
+                <label for="prome-character-invert" class="title_restorable">
+                  <span data-i18n="Invert">Invert</span>
+                </label>
+                <small data-i18n="Inverts the character colors."
+                  >Inverts the character colors.</small
+                >
+                <input
+                  class="neo-range-input"
+                  id="prome-character-invert"
+                  type="number"
+                  min="0"
+                  max="999"
+                  step="1"
+                  data-for="prome-character-invert"
+                />
+
+                <label for="prome-character-saturate" class="title_restorable">
+                  <span data-i18n="Saturate">Saturate</span>
+                </label>
+                <small data-i18n="Saturates the character colors."
+                  >Saturates the character colors.</small
+                >
+                <input
+                  class="neo-range-input"
+                  id="prome-character-saturate"
+                  type="number"
+                  min="0"
+                  max="999"
+                  step="1"
+                  data-for="prome-character-saturate"
+                />
+
+                <label for="sepia" class="title_restorable">
+                  <span data-i18n="Sepia">Sepia</span>
+                </label>
+                <small data-i18n="Makes the character warmer in color."
+                  >Makes the character warmer in color.</small
+                >
+                <input
+                  class="neo-range-input"
+                  id="prome-character-sepia"
+                  type="number"
+                  min="0"
+                  max="999"
+                  step="1"
+                  data-for="prome-character-sepia"
+                />
+              </div>
+            </div>
+          </div>
+        </details>
+
         <small
           class="flex-container justifyCenter alignitemscenter flexFlowRow"
         >
@@ -410,7 +758,7 @@
             <a
               id="prome-version-number"
               href="https://github.com/Bronya-Rand/Prome-VN-Extension"
-              >1.0.7</a
+              >1.1.0</a
             ></span
           >
           <span> | </span>
