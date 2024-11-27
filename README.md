@@ -32,26 +32,38 @@ The Prome Visual Novel Extension is a extension for SillyTavern that remodernize
    <center>
     <img src="./.github/defocus.png"/>
    </center>
-6. [BETA] Traditional VN Mode - Hides all messages that isn't the last message to make the chat more akin to a normal VN response prompt.
+6. Traditional VN Mode - Hides all messages that isn't the last message to make the chat more akin to a normal VN response prompt.
    <center>
     <img src="./.github/single-message.png"/>
     </center>
-7. [BETA] Chat History (for Traditional VN Mode) - Since Traditional VN hides all messages but the last sent message, a wand button has been added to view said chat history.
+7. Chat History (for Traditional VN Mode) - Since Traditional VN hides all messages but the last sent message, a wand button has been added to view said chat history.
    > This feature is obsolete if you don't use VN Mode, but can be accessed regardless via the Wand Icon -> Open Chat History.
    <center>
     <img src="./.github/single-chat-history-log.png"/>
    </center>
-8. [BETA] Sprite Emulation - Emulates Sprites by using a character's character card.
+8. Sprite Emulation - Emulates Sprites by using a character's character card.
    > TBH, I have no idea what use case this has, but someone asked for it.
    <center>
     <img src="./.github/card-emulation.png"/>
    </center>
+9. Sprite Shake - Shakes the speaking character sprite when they are speaking.
+   > This feature only works if `Streaming` is enabled in your preset settings.
+10. Sprite Shadows - Adds a small shadow to the character sprites, making them blend in with the environment or to add a small glint of realism to the chat.
+    > This feature can be adjusted in size (X and Y) and blur strength. This feature does not work for non-sprite characters using Sprite Emulation.
+    <center>
+       <img src="./.github/sprite-shadow.png">
+    </center>
+11. [BETA] World + Character Tinting - Prome's biggest feature to date. Tints the background and/or characters to a given preset of your choice.
+    > This is in beta. Tinting choices are: Blur, Brightness, Contrast, Grayscale, Hue, Invert, Saturate and Sepia. World Tint may be shared with Character Tint and both tints can be enabled or disabled.
+    <center>
+       <img src="./.github/world-tint.png">
+    </center>
 
-Most features and it's settings can be found under *Extensions* > `Prome (Visual Novel Extension)`. Other features like Chat History will be located under the wand tool in the ST chatbox.
+Most features and it's settings can be found under _Extensions_ > `Prome (Visual Novel Extension)`. Other features like Chat History will be located under the wand tool in the ST chatbox.
 
-   |              Extension Settings              |              Wand Options              |
-   | :-----------------------------------------: | :-------------------------------------: |
-   | ![settings.png](./.github/settings.png) | ![settings2.png](./.github/settings2.png) |
+|           Extension Settings            |               Wand Options                |
+| :-------------------------------------: | :---------------------------------------: |
+| ![settings.png](./.github/settings.png) | ![settings2.png](./.github/settings2.png) |
 
 ## Prerequisites
 
@@ -62,6 +74,7 @@ A SillyTavern that supports extensions.
 ### Installation
 
 #### Via Download Extensions & Assets (Easiest)
+
 1. Click _Extensions_ then **Download Extensions & Assets**
 2. Click the red power plug button and then OK.
 3. Scroll down to find `Prome Visual Novel Extension` and click the Download button.
@@ -71,8 +84,9 @@ A SillyTavern that supports extensions.
 6. Profit.
 
 #### Via Install Extension
+
 1. Click _Extensions_ then **Install Extension**
-2. Paste in the following **link** into the text field and click Save: `https://github.com/Bronya-Rand/Bronie-Parser-Extension`.
+2. Paste in the following **link** into the text field and click Save: `https://github.com/Bronya-Rand/Prome-VN-Extension`.
 3. Refresh the SillyTavern page.
 4. Click on _Extensions_ again and click down on the `Prome (Visual Novel Extension)` dropdown and toggle _Enable Prome VN Mode_.
    > If you already have Visual Novel Mode on, you can skip this step.
