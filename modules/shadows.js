@@ -4,14 +4,14 @@ import { saveSettingsDebounced } from "../../../../../script.js";
 
 /* Sprite Shadow Functions */
 /* Action Functions */
-export function onSpriteShadow_Click(event) {
+function onSpriteShadow_Click(event) {
 	const value = Boolean($(event.target).prop("checked"));
 	extension_settings[extensionName].spriteShadow = value;
 	saveSettingsDebounced();
 	applySpriteShadow();
 }
 
-export function onSpriteShadowOffsetX_Change() {
+function onSpriteShadowOffsetX_Change() {
 	const value = this.value;
 	if (value < 1 || value > 20) {
 		console.error(`[${extensionName}] Invalid shadow offset x value: ${value}`);
@@ -24,7 +24,7 @@ export function onSpriteShadowOffsetX_Change() {
 	applySpriteShadowOffsetX();
 }
 
-export function onSpriteShadowOffsetY_Change() {
+function onSpriteShadowOffsetY_Change() {
 	const value = this.value;
 	if (value < 1 || value > 20) {
 		console.error(`[${extensionName}] Invalid shadow offset y value: ${value}`);
@@ -37,7 +37,7 @@ export function onSpriteShadowOffsetY_Change() {
 	applySpriteShadowOffsetY();
 }
 
-export function onSpriteShadowBlur_Change() {
+function onSpriteShadowBlur_Change() {
 	const value = this.value;
 	if (value < 1 || value > 20) {
 		console.error(`[${extensionName}] Invalid shadow blur value: ${value}`);
@@ -90,7 +90,7 @@ export function applySpriteShadowBlur() {
 }
 
 /* Reset Functions */
-export function resetSpriteShadowOffsetX() {
+function resetSpriteShadowOffsetX() {
 	extension_settings[extensionName].shadowOffsetX =
 		defaultSettings.shadowOffsetX;
 	$("#prome-sprite-shadow-offsetx")
@@ -100,7 +100,7 @@ export function resetSpriteShadowOffsetX() {
 	saveSettingsDebounced();
 }
 
-export function resetSpriteShadowOffsetY() {
+function resetSpriteShadowOffsetY() {
 	extension_settings[extensionName].shadowOffsetY =
 		defaultSettings.shadowOffsetY;
 	$("#prome-sprite-shadow-offsety")
@@ -110,11 +110,61 @@ export function resetSpriteShadowOffsetY() {
 	saveSettingsDebounced();
 }
 
-export function resetSpriteShadowBlur() {
+function resetSpriteShadowBlur() {
 	extension_settings[extensionName].shadowBlur = defaultSettings.shadowBlur;
 	$("#prome-sprite-shadow-blur")
 		.val(defaultSettings.shadowBlur)
 		.trigger("input");
 	$("#prome-sprite-shadow-blur-counter").val(defaultSettings.shadowBlur);
 	saveSettingsDebounced();
+}
+
+export function setupSpriteShadowHTML() {
+	$("#prome-sprite-shadow").prop(
+		"checked",
+		extension_settings[extensionName].spriteShadow,
+	);
+	$("#prome-sprite-shadow-offsetx").val(
+		extension_settings[extensionName].shadowOffsetX,
+	);
+	$("#prome-sprite-shadow-offsetx-counter").val(
+		extension_settings[extensionName].shadowOffsetX,
+	);
+	$("#prome-sprite-shadow-offsety").val(
+		extension_settings[extensionName].shadowOffsetY,
+	);
+	$("#prome-sprite-shadow-offsety-counter").val(
+		extension_settings[extensionName].shadowOffsetY,
+	);
+	$("#prome-sprite-shadow-blur").val(
+		extension_settings[extensionName].shadowBlur,
+	);
+	$("#prome-sprite-shadow-blur-counter").val(
+		extension_settings[extensionName].shadowBlur,
+	);
+}
+
+export function setupSpriteShadowJQuery() {
+	$("#prome-sprite-shadow").on("click", onSpriteShadow_Click);
+	$("#prome-sprite-shadow-offsetx").on("input", onSpriteShadowOffsetX_Change);
+	$("#prome-sprite-shadow-offsetx-counter").on(
+		"input",
+		onSpriteShadowOffsetX_Change,
+	);
+	$("#prome-sprite-shadow-offsety").on("input", onSpriteShadowOffsetY_Change);
+	$("#prome-sprite-shadow-offsety-counter").on(
+		"input",
+		onSpriteShadowOffsetY_Change,
+	);
+	$("#prome-sprite-shadow-blur").on("input", onSpriteShadowBlur_Change);
+	$("#prome-sprite-shadow-blur-counter").on("input", onSpriteShadowBlur_Change);
+	$("#prome-sprite-shadow-offsetx-restore").on(
+		"click",
+		resetSpriteShadowOffsetX,
+	);
+	$("#prome-sprite-shadow-offsety-restore").on(
+		"click",
+		resetSpriteShadowOffsetY,
+	);
+	$("#prome-sprite-shadow-blur-restore").on("click", resetSpriteShadowBlur);
 }

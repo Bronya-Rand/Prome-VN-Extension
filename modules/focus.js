@@ -76,14 +76,14 @@ export function onSpriteZoomTimer_Change() {
 	applySpriteZoomTimer();
 }
 
-export function resetSpriteZoomTimer() {
+function resetSpriteZoomTimer() {
 	extension_settings[extensionName].zoomSpeed = defaultSettings.zoomSpeed;
 	$("#prome-sprite-zoom-speed").val(defaultSettings.zoomSpeed).trigger("input");
 	$("#prome-sprite-zoom-speed-counter").val(defaultSettings.zoomSpeed);
 	saveSettingsDebounced();
 }
 
-export function onSpriteZoom_Click(event) {
+function onSpriteZoom_Click(event) {
 	const value = Boolean($(event.target).prop("checked"));
 	extension_settings[extensionName].spriteZoom = value;
 	saveSettingsDebounced();
@@ -97,7 +97,7 @@ export function onSpriteDefocusTint_Click(event) {
 	applySpriteDefocusTint();
 }
 
-export function onSpriteZoomAnimation_Select() {
+function onSpriteZoomAnimation_Select() {
 	const value = String(this.value);
 	if (
 		value !== "ease" &&
@@ -113,4 +113,27 @@ export function onSpriteZoomAnimation_Select() {
 	extension_settings[extensionName].zoomAnimation = value;
 	saveSettingsDebounced();
 	applySpriteZoomAnimation();
+}
+
+export function setupFocusModeHTML() {
+	$("#prome-sprite-zoom")
+		.prop("checked", extension_settings[extensionName].spriteZoom)
+		.trigger("input");
+	$("#prome-sprite-zoom-speed")
+		.val(extension_settings[extensionName].zoomSpeed)
+		.trigger("input");
+	$("#prome-sprite-zoom-speed-counter").val(
+		extension_settings[extensionName].zoomSpeed,
+	);
+	$("#prome-sprite-zoom-animation")
+		.val(extension_settings[extensionName].zoomAnimation)
+		.trigger("change");
+}
+
+export function setupFocusModeJQuery() {
+	$("#prome-sprite-zoom").on("click", onSpriteZoom_Click);
+	$("#prome-sprite-zoom-speed").on("input", onSpriteZoomTimer_Change);
+	$("#prome-sprite-zoom-speed-counter").on("input", onSpriteZoomTimer_Change);
+	$("#prome-sprite-zoom-speed-restore").on("click", resetSpriteZoomTimer);
+	$("#prome-sprite-zoom-animation").on("change", onSpriteZoomAnimation_Select);
 }
