@@ -114,3 +114,26 @@ export function onSpriteZoomAnimation_Select() {
 	saveSettingsDebounced();
 	applySpriteZoomAnimation();
 }
+
+export function setupFocusModeHTML() {
+	$("#prome-sprite-zoom")
+		.prop("checked", extension_settings[extensionName].spriteZoom)
+		.trigger("input");
+	$("#prome-sprite-zoom-speed")
+		.val(extension_settings[extensionName].zoomSpeed)
+		.trigger("input");
+	$("#prome-sprite-zoom-speed-counter").val(
+		extension_settings[extensionName].zoomSpeed,
+	);
+	$("#prome-sprite-zoom-animation")
+		.val(extension_settings[extensionName].zoomAnimation)
+		.trigger("change");
+}
+
+export function setupFocusModeJQuery() {
+	$("#prome-sprite-zoom").on("click", onSpriteZoom_Click);
+	$("#prome-sprite-zoom-speed").on("input", onSpriteZoomTimer_Change);
+	$("#prome-sprite-zoom-speed-counter").on("input", onSpriteZoomTimer_Change);
+	$("#prome-sprite-zoom-speed-restore").on("click", resetSpriteZoomTimer);
+	$("#prome-sprite-zoom-animation").on("change", onSpriteZoomAnimation_Select);
+}

@@ -110,3 +110,28 @@ export function onLetterbox_Select() {
 	saveSettingsDebounced();
 	applyLetterboxMode();
 }
+
+export function setupLetterboxModeHTML() {
+	$("#prome-letterbox-mode")
+		.val(extension_settings[extensionName].letterboxMode)
+		.trigger("change");
+	$("#prome-letterbox-color-picker").attr(
+		"color",
+		extension_settings[extensionName].letterboxColor,
+	);
+	$("#prome-letterbox-size")
+		.val(extension_settings[extensionName].letterboxSize)
+		.trigger("input");
+	$("#prome-letterbox-size-counter").val(
+		extension_settings[extensionName].letterboxSize,
+	);
+}
+
+export function setupLetterboxModeJQuery() {
+	$("#prome-letterbox-mode").on("change", onLetterbox_Select);
+	$("#prome-letterbox-color-picker").on("change", onLetterboxColor_Change);
+	$("#prome-letterbox-size").on("input", onLetterboxSize_Change);
+	$("#prome-letterbox-size-counter").on("input", onLetterboxSize_Change);
+	$("#prome-letterbox-size-restore").on("click", resetLetterBoxSize);
+	$("#prome-letterbox-color-restore").on("click", resetLetterBoxColor);
+}

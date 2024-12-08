@@ -32,11 +32,8 @@ import {
 	applyLetterboxMode,
 	applyLetterboxColor,
 	applyLetterboxSize,
-	onLetterbox_Select,
-	onLetterboxColor_Change,
-	onLetterboxSize_Change,
-	resetLetterBoxSize,
-	resetLetterBoxColor,
+	setupLetterboxModeJQuery,
+	setupLetterboxModeHTML,
 } from "./modules/letterbox.js";
 import {
 	applySheldMode,
@@ -49,12 +46,10 @@ import {
 	applySpriteZoomTimer,
 	applySpriteZoomAnimation,
 	applySpriteZoom,
-	onSpriteZoom_Click,
-	onSpriteZoomTimer_Change,
-	resetSpriteZoomTimer,
-	onSpriteZoomAnimation_Select,
 	applySpriteDefocusTint,
 	onSpriteDefocusTint_Click,
+	setupFocusModeJQuery,
+	setupFocusModeHTML,
 } from "./modules/focus.js";
 import { applySpriteShake, onSpriteShake_Click } from "./modules/shake.js";
 import { getChatHistory } from "./modules/chat-history.js";
@@ -64,16 +59,11 @@ import {
 } from "./modules/emulate.js";
 import {
 	applySpriteShadow,
-	onSpriteShadow_Click,
-	onSpriteShadowOffsetX_Change,
-	onSpriteShadowOffsetY_Change,
-	onSpriteShadowBlur_Change,
-	resetSpriteShadowOffsetX,
-	resetSpriteShadowOffsetY,
-	resetSpriteShadowBlur,
 	applySpriteShadowBlur,
 	applySpriteShadowOffsetX,
 	applySpriteShadowOffsetY,
+	setupSpriteShadowHTML,
+	setupSpriteShadowJQuery,
 } from "./modules/shadows.js";
 import { setupTintHTML, setupTintJQuery } from "./modules/tint.js";
 
@@ -103,20 +93,7 @@ async function loadSettings() {
 		.trigger("input");
 
 	// Letterbox Updates
-	$("#prome-letterbox-mode")
-		.val(extension_settings[extensionName].letterboxMode)
-		.trigger("change");
-	$("#prome-letterbox-color-picker").attr(
-		"color",
-		extension_settings[extensionName].letterboxColor,
-	);
-	$("#prome-letterbox-size")
-		.val(extension_settings[extensionName].letterboxSize)
-		.trigger("input");
-	$("#prome-letterbox-size-counter").val(
-		extension_settings[extensionName].letterboxSize,
-	);
-
+	setupLetterboxModeHTML();
 	// Sheld Updates
 	$("#prome-hide-sheld")
 		.prop("checked", extension_settings[extensionName].hideSheld)
@@ -124,18 +101,7 @@ async function loadSettings() {
 
 	// Sprite Updates
 	/// Focus Mode
-	$("#prome-sprite-zoom")
-		.prop("checked", extension_settings[extensionName].spriteZoom)
-		.trigger("input");
-	$("#prome-sprite-zoom-speed")
-		.val(extension_settings[extensionName].zoomSpeed)
-		.trigger("input");
-	$("#prome-sprite-zoom-speed-counter").val(
-		extension_settings[extensionName].zoomSpeed,
-	);
-	$("#prome-sprite-zoom-animation")
-		.val(extension_settings[extensionName].zoomAnimation)
-		.trigger("change");
+	setupFocusModeHTML();
 	/// Defocus Tint
 	$("#prome-sprite-defocus-tint")
 		.prop("checked", extension_settings[extensionName].spriteDefocusTint)
@@ -150,28 +116,7 @@ async function loadSettings() {
 		extension_settings[extensionName].emulateSprites,
 	);
 	/// Sprite Shadow
-	$("#prome-sprite-shadow").prop(
-		"checked",
-		extension_settings[extensionName].spriteShadow,
-	);
-	$("#prome-sprite-shadow-offsetx").val(
-		extension_settings[extensionName].shadowOffsetX,
-	);
-	$("#prome-sprite-shadow-offsetx-counter").val(
-		extension_settings[extensionName].shadowOffsetX,
-	);
-	$("#prome-sprite-shadow-offsety").val(
-		extension_settings[extensionName].shadowOffsetY,
-	);
-	$("#prome-sprite-shadow-offsety-counter").val(
-		extension_settings[extensionName].shadowOffsetY,
-	);
-	$("#prome-sprite-shadow-blur").val(
-		extension_settings[extensionName].shadowBlur,
-	);
-	$("#prome-sprite-shadow-blur-counter").val(
-		extension_settings[extensionName].shadowBlur,
-	);
+	setupSpriteShadowHTML();
 
 	// Traditional VN Mode Updates
 	$("#prome-sheld-last_mes").prop(
@@ -264,13 +209,7 @@ jQuery(async () => {
 
 	/* Prome Feature Actions */
 	// Letterbox
-	$("#prome-letterbox-mode").on("change", onLetterbox_Select);
-	$("#prome-letterbox-color-picker").on("change", onLetterboxColor_Change);
-	$("#prome-letterbox-size").on("input", onLetterboxSize_Change);
-	$("#prome-letterbox-size-counter").on("input", onLetterboxSize_Change);
-	$("#prome-letterbox-size-restore").on("click", resetLetterBoxSize);
-	$("#prome-letterbox-color-restore").on("click", resetLetterBoxColor);
-
+	setupLetterboxModeJQuery();
 	// Sheld
 	$("#prome-hide-sheld").on("click", onSheld_Click);
 	$("#prome-sheld-last_mes").on("click", onSheldMode_Click);
@@ -278,38 +217,13 @@ jQuery(async () => {
 	// Sprite Emulation
 	$("#prome-emulate-sprites").on("click", onSpriteEmulation_Click);
 	// Focus
-	$("#prome-sprite-zoom").on("click", onSpriteZoom_Click);
-	$("#prome-sprite-zoom-speed").on("input", onSpriteZoomTimer_Change);
-	$("#prome-sprite-zoom-speed-counter").on("input", onSpriteZoomTimer_Change);
-	$("#prome-sprite-zoom-speed-restore").on("click", resetSpriteZoomTimer);
-	$("#prome-sprite-zoom-animation").on("change", onSpriteZoomAnimation_Select);
+	setupFocusModeJQuery();
 	// Sprite Defocus Tint
 	$("#prome-sprite-defocus-tint").on("click", onSpriteDefocusTint_Click);
 	// Sprite Shake
 	$("#prome-sprite-shake").on("click", onSpriteShake_Click);
 	// Sprite Shadow
-	$("#prome-sprite-shadow").on("click", onSpriteShadow_Click);
-	$("#prome-sprite-shadow-offsetx").on("input", onSpriteShadowOffsetX_Change);
-	$("#prome-sprite-shadow-offsetx-counter").on(
-		"input",
-		onSpriteShadowOffsetX_Change,
-	);
-	$("#prome-sprite-shadow-offsety").on("input", onSpriteShadowOffsetY_Change);
-	$("#prome-sprite-shadow-offsety-counter").on(
-		"input",
-		onSpriteShadowOffsetY_Change,
-	);
-	$("#prome-sprite-shadow-blur").on("input", onSpriteShadowBlur_Change);
-	$("#prome-sprite-shadow-blur-counter").on("input", onSpriteShadowBlur_Change);
-	$("#prome-sprite-shadow-offsetx-restore").on(
-		"click",
-		resetSpriteShadowOffsetX,
-	);
-	$("#prome-sprite-shadow-offsety-restore").on(
-		"click",
-		resetSpriteShadowOffsetY,
-	);
-	$("#prome-sprite-shadow-blur-restore").on("click", resetSpriteShadowBlur);
+	setupSpriteShadowJQuery();
 
 	/* Prome Feature Initialization */
 	addLetterbox();

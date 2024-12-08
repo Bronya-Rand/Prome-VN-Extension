@@ -13,11 +13,6 @@ export function getChatId() {
 	return context.getCurrentChatId();
 }
 
-export function isGroupChat() {
-	const context = getContext();
-	return context.groupId !== null;
-}
-
 export function isLetterboxModeEnabled() {
 	return Boolean(
 		extension_settings[extensionName].letterboxMode !== VN_MODES.NONE,
