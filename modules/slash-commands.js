@@ -296,6 +296,29 @@ export function prepareSlashCommands() {
 				"Toggles the world tint to character sprites (This will override Character Tint).",
 		}),
 	);
+
+	SlashCommandParser.addCommandObject(
+		SlashCommand.fromProps({
+			name: "express",
+			/** @type {(args: { expression: string | undefined }) => void} */
+			callback: async (args, _) => {
+				if (args.expression) {
+					setUserExpression(args.expression);
+					return args.expression;
+				}
+				toastr.error("Please provide an expression.", "No Expression Provided");
+			},
+			namedArgumentList: [
+				SlashCommandNamedArgument.fromProps({
+					name: "expression",
+					description: "The expression to set for the user sprite.",
+					isRequired: true,
+					typeList: [ARGUMENT_TYPE.STRING],
+				}),
+			],
+			helpString: "Sets the expression for the user sprite.",
+		}),
+	);
 }
 
 function switchLetterboxMode(mode) {
@@ -393,4 +416,13 @@ function switchTintSharedMode() {
 		.prop("checked", extension_settings[extensionName].currentTintValues.shared)
 		.trigger("input");
 	applyTint();
+}
+
+function setUserExpression(expression) {
+	$("#expression-prome-user")
+		.children("img")
+		.attr(
+			"src",
+			`/characters/${extension_settings[extensionName].userSprite}/${expression}.png`,
+		);
 }

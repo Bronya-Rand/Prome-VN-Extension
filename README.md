@@ -58,6 +58,12 @@ The Prome Visual Novel Extension is a extension for SillyTavern that remodernize
     <center>
        <img src="./.github/world-tint.png">
     </center>
+12. [BETA] User Sprites - Prome's second biggest feature. Want to be part of the conversation? Borrow someone else's sprites or use your own for your own persona with the benefit of Prome's features itself!
+    > This is somewhat inspired by LenAnderson's GroupExpressions extension, however, this is made solely for User Persona integration. Sprite Set can be changed by typing the name of the folder in question in the Prome Settings. (No LLM expression support)
+    <center>
+       <img src="./.github/user-sprite.png">
+    </center>
+    Be mindful that a warning may appear which states 'prome-user' is not in the list of group members. Ignore this as Prome basically "tells" ST such a character exists in it's code as a way to add yourself into the screen.
 
 Most features and it's settings can be found under _Extensions_ > `Prome (Visual Novel Extension)`. Other features like Chat History will be located under the wand tool in the ST chatbox.
 

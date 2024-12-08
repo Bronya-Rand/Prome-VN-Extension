@@ -397,6 +397,56 @@
                 </div>
               </div>
             </details>
+
+            <details>
+              <summary data-i18n="User Sprite Configuration">
+                [BETA] User Sprite Configuration
+              </summary>
+              <div
+                class="prome_vn_block flex-container flexFlowColumn prome_details_padding"
+              >
+                <label
+                  class="checkbox_label"
+                  for="prome-user-sprite"
+                  title="Enables the ability to use a user sprite for your persona."
+                >
+                  <input id="prome-user-sprite" type="checkbox" />
+                  <span data-i18n="Enable User Sprite">Enable User Sprite</span>
+                </label>
+
+                <div class="prome_vn_block flex-container flexFlowColumn">
+                  <label for="prome-user-sprites" data-i18n="Sprite List"
+                    >Sprite Set</label
+                  >
+                  <small
+                    data-i18n="Type the name of the sprite set to use for your persona. (Place your sprites in the 'characters' folder in SillyTavern)."
+                    >Type the name of the sprite set to use for your persona.
+                    (Place your sprites in the 'characters' folder in
+                    SillyTavern).</small
+                  >
+
+                  <textarea
+                    id="prome-user-sprite-input"
+                    type="text"
+                    class="text_pole textarea_compact"
+                    placeholder="Enter the name of your sprite"
+                  ></textarea>
+
+                  <p>
+                    <small data-i18n="Note: Create a sprite folder in the "
+                      >Note: Create a sprite folder in the
+                    </small>
+                    <b>characters</b>
+                    <small
+                      data-i18n=" folder of your user directory (typically 'data/default-user'). Place your expressions there."
+                    >
+                      folder of your user directory (typically
+                      'data/default-user'). Place your expressions there.</small
+                    >
+                  </p>
+                </div>
+              </div>
+            </details>
           </div>
         </details>
 
@@ -758,7 +808,7 @@
             <a
               id="prome-version-number"
               href="https://github.com/Bronya-Rand/Prome-VN-Extension"
-              >1.1.1</a
+              >1.1.2</a
             ></span
           >
           <span> | </span>

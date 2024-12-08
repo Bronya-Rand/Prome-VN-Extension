@@ -65,6 +65,12 @@ import {
 	setupSpriteShadowJQuery,
 } from "./modules/shadows.js";
 import { setupTintHTML, setupTintJQuery } from "./modules/tint.js";
+import {
+	applyUserSprite,
+	handleUserSprite,
+	onUserSprite_Click,
+	onUserSprite_Input,
+} from "./modules/user.js";
 
 async function loadSettings() {
 	extension_settings[extensionName] = extension_settings[extensionName] || {};
@@ -84,31 +90,32 @@ async function loadSettings() {
 	}
 
 	// Prome Updates
-	$("#prome-enable-vn")
-		.prop(
-			"checked",
-			extension_settings[extensionName].enableVN_UI || power_user.waifuMode,
-		)
-		.trigger("input");
+	$("#prome-enable-vn").prop(
+		"checked",
+		extension_settings[extensionName].enableVN_UI || power_user.waifuMode,
+	);
 
 	// Letterbox Updates
 	setupLetterboxModeHTML();
 	// Sheld Updates
-	$("#prome-hide-sheld")
-		.prop("checked", extension_settings[extensionName].hideSheld)
-		.trigger("input");
+	$("#prome-hide-sheld").prop(
+		"checked",
+		extension_settings[extensionName].hideSheld,
+	);
 
 	// Sprite Updates
 	/// Focus Mode
 	setupFocusModeHTML();
 	/// Defocus Tint
-	$("#prome-sprite-defocus-tint")
-		.prop("checked", extension_settings[extensionName].spriteDefocusTint)
-		.trigger("input");
+	$("#prome-sprite-defocus-tint").prop(
+		"checked",
+		extension_settings[extensionName].spriteDefocusTint,
+	);
 	/// Shake
-	$("#prome-sprite-shake")
-		.prop("checked", extension_settings[extensionName].spriteShake)
-		.trigger("input");
+	$("#prome-sprite-shake").prop(
+		"checked",
+		extension_settings[extensionName].spriteShake,
+	);
 	/// Sprite Emulation
 	$("#prome-emulate-sprites").prop(
 		"checked",
@@ -116,6 +123,15 @@ async function loadSettings() {
 	);
 	/// Sprite Shadow
 	setupSpriteShadowHTML();
+
+	// User Sprite Updates
+	$("#prome-user-sprite").prop(
+		"checked",
+		extension_settings[extensionName].enableUserSprite,
+	);
+	$("#prome-user-sprite-input").val(
+		extension_settings[extensionName].userSprite,
+	);
 
 	// Traditional VN Mode Updates
 	$("#prome-sheld-last_mes").prop(
@@ -156,6 +172,8 @@ async function loadSettings() {
 	applySpriteShadowOffsetX();
 	applySpriteShadowOffsetY();
 	applySpriteShadowBlur();
+	// User Sprite
+	applyUserSprite();
 }
 
 /* Prome Core Listeners */
@@ -224,6 +242,10 @@ jQuery(async () => {
 	// Sprite Shadow
 	setupSpriteShadowJQuery();
 
+	// User Sprite
+	$("#prome-user-sprite").on("click", onUserSprite_Click);
+	$("#prome-user-sprite-input").on("input", onUserSprite_Input);
+
 	/* Prome Feature Initialization */
 	addLetterbox();
 	setupTintJQuery();
@@ -240,6 +262,8 @@ jQuery(async () => {
 		applyZoomDebounce();
 		applyDefocusDebounce();
 	});
+
+	eventSource.on(event_types.CHAT_CHANGED, handleUserSprite);
 
 	// Show info message if Sheld is hidden
 	if (!isSheldVisible()) {
