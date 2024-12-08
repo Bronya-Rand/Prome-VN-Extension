@@ -103,8 +103,14 @@ body.waifuMode.spriteShake .prome-sprite-shake {
 	animation: shake 0.35s infinite;
 }
 
-body.waifuMode.spriteShake.spriteZoom .prome-sprite-shake {
+body.waifuMode.spriteShake.spriteZoom
+	#visual-novel-wrapper
+	.prome-sprite-shake {
 	animation: shakeAndFocus 0.35s infinite;
+}
+
+body.waifuMode.spriteShake.spriteZoom .prome-sprite-shake {
+	animation: shake 0.35s infinite;
 }
 
 @keyframes shake {
