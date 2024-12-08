@@ -23,7 +23,6 @@ import {
 	emulateSpritesDebounce,
 	applyShakeDebounce,
 	stopShake,
-	resetShakeStatus,
 } from "./listeners.js";
 
 /* Prome Feature Imports */
@@ -253,11 +252,16 @@ jQuery(async () => {
 	loadSettings();
 	prepareSlashCommands();
 
-	// Apply Sprite Shake when `message_received` event is emitted
-	// Stop when `generation_ended` event is emitted
-	eventSource.on(event_types.GENERATION_STARTED, resetShakeStatus);
-	eventSource.on(event_types.MESSAGE_RECEIVED, applyShakeDebounce);
-	eventSource.on(event_types.GENERATION_ENDED, stopShake);
+	eventSource.on(event_types.MESSAGE_SWIPED, applyShakeDebounce);
+	eventSource.on(event_types.CHARACTER_MESSAGE_RENDERED, stopShake);
+	eventSource.on(event_types.CHAT_CHANGED, () => {
+		applyZoomDebounce();
+		applyDefocusDebounce();
+	});
+	eventSource.on(event_types.MESSAGE_DELETED, () => {
+		applyZoomDebounce();
+		applyDefocusDebounce();
+	});
 
 	eventSource.on(event_types.CHAT_CHANGED, handleUserSprite);
 
@@ -274,41 +278,35 @@ $(document).ready(() => {
 	/* Mutation Observer for Chat and VN Wrapper */
 	/* Listen for changes in the chat and image expressions */
 	const promeChatObserver = new MutationObserver((mutations) => {
-		let shouldApplyDebounce = false;
-
-		for (const mutation of mutations) {
-			if (mutation.type !== "childList") return;
-
-			for (const node of mutation.addedNodes) {
-				if (
-					node.classList &&
-					(node.classList.contains("mes") ||
-						(node.tagName === "DIV" &&
-							node.classList.contains("expression-holder")))
-				) {
-					shouldApplyDebounce = true;
-				}
-			}
-
-			if (!shouldApplyDebounce) {
-				for (const node of mutation.removedNodes) {
-					if (
-						node.classList &&
-						(node.classList.contains("mes") ||
-							(node.tagName === "DIV" &&
-								node.classList.contains("expression-holder")))
-					) {
-						shouldApplyDebounce = true;
-					}
-				}
-			}
-		}
-
 		emulateSpritesDebounce();
 
-		if (shouldApplyDebounce) {
-			applyDefocusDebounce(); // Apply Sprite Defocus Tint
-			applyZoomDebounce(); // Apply Sprite Zoom
+		const handleNode = (node) => {
+			if (node.classList) {
+				if (node.classList.contains("mes")) {
+					applyZoomDebounce();
+					applyDefocusDebounce();
+					applyShakeDebounce();
+				}
+				if (
+					node.tagName === "DIV" &&
+					node.classList.contains("expression-holder")
+				) {
+					applyZoomDebounce();
+					applyDefocusDebounce();
+				}
+			}
+		};
+
+		for (const mutation of mutations) {
+			if (mutation.type !== "childList") continue;
+
+			for (const node of mutation.addedNodes) {
+				handleNode(node);
+			}
+
+			for (const node of mutation.removedNodes) {
+				handleNode(node);
+			}
 		}
 
 		// Apply Sheld Mode on new messages
