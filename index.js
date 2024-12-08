@@ -23,7 +23,6 @@ import {
 	emulateSpritesDebounce,
 	applyShakeDebounce,
 	stopShake,
-	startShake,
 } from "./listeners.js";
 
 /* Prome Feature Imports */
@@ -317,20 +316,8 @@ jQuery(async () => {
 	loadSettings();
 	prepareSlashCommands();
 
-	// Apply Sprite Shake when `message_received` event is emitted
-	// Stop when `generation_ended` event is emitted
-	eventSource.on(event_types.GENERATE_AFTER_DATA, () => {
-		console.debug("GENERATE_AFTER_COMBINE_PROMPTS");
-		applyShakeDebounce();
-	});
-	eventSource.on(event_types.MESSAGE_SWIPED, () => {
-		console.debug("MESSAGE_SWIPE");
-		applyShakeDebounce();
-	});
-	eventSource.on(event_types.MESSAGE_RECEIVED, () => {
-		console.debug("MESSAGE_RECEIVED");
-		stopShake();
-	});
+	eventSource.on(event_types.MESSAGE_SWIPED, applyShakeDebounce);
+	eventSource.on(event_types.CHARACTER_MESSAGE_RENDERED, stopShake);
 	eventSource.on(event_types.CHAT_CHANGED, () => {
 		applyZoomDebounce();
 		applyDefocusDebounce();
@@ -355,11 +342,12 @@ $(document).ready(() => {
 	const promeChatObserver = new MutationObserver((mutations) => {
 		emulateSpritesDebounce();
 
-		const handleNode = (node, added = false) => {
+		const handleNode = (node) => {
 			if (node.classList) {
 				if (node.classList.contains("mes")) {
 					applyZoomDebounce();
 					applyDefocusDebounce();
+					applyShakeDebounce();
 				}
 				if (
 					node.tagName === "DIV" &&
@@ -375,7 +363,7 @@ $(document).ready(() => {
 			if (mutation.type !== "childList") continue;
 
 			for (const node of mutation.addedNodes) {
-				handleNode(node, true);
+				handleNode(node);
 			}
 
 			for (const node of mutation.removedNodes) {

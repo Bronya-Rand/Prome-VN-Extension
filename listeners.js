@@ -3,7 +3,6 @@ import { debounce } from "../../../utils.js";
 import { getContext } from "../../../extensions.js";
 import { extensionName } from "./constants.js";
 import { getLastChatMessage, getSpriteList } from "./utils.js";
-import { extension_settings } from "../../../extensions.js";
 import { textgenerationwebui_settings as textgen_settings } from "../../../textgen-settings.js";
 
 /* Debouncers */
@@ -19,8 +18,6 @@ export const emulateSpritesDebounce = debounce(async () => {
 export const applyShakeDebounce = debounce(async () => {
 	await applyShake();
 }, debounce_timeout.short);
-
-let GENERATION_EVENT_EMITTED = false;
 
 // Check if the current chat has more than one member
 function zoomListenerPreconditions() {
@@ -257,22 +254,38 @@ async function applyShake() {
 	}
 }
 
-export function startShake() {
-	if (!textgen_settings.streaming) return;
-	GENERATION_EVENT_EMITTED = true;
-}
-
 export function stopShake() {
 	const context = getContext();
 	const group = context.groups.find((x) => x.id === context.groupId);
+	const streamingProcessor = context.streamingProcessor;
+	let isStreamingDone =
+		streamingProcessor &&
+		!streamingProcessor.isStopped &&
+		streamingProcessor.isFinished;
 
-	// If Group Chat, Apply Shake to Speaking Sprite
-	if (group) {
-		$("#visual-novel-wrapper > div").removeClass("prome-sprite-shake");
+	const stopShakeClass = (group) => {
+		// If Group Chat, Apply Shake to Speaking Sprite
+		if (group) {
+			$("#visual-novel-wrapper > div").removeClass("prome-sprite-shake");
+		} else {
+			$("#expression-wrapper .expression-holder").removeClass(
+				"prome-sprite-shake",
+			);
+		}
+	};
+
+	if (!isStreamingDone) {
+		const checkInterval = setInterval(() => {
+			isStreamingDone =
+				streamingProcessor &&
+				!streamingProcessor.isStopped &&
+				streamingProcessor.isFinished;
+			if (isStreamingDone) {
+				stopShakeClass(group);
+				clearInterval(checkInterval);
+			}
+		}, 100);
 	} else {
-		$("#expression-wrapper .expression-holder").removeClass(
-			"prome-sprite-shake",
-		);
+		stopShakeClass(group);
 	}
-	GENERATION_EVENT_EMITTED = false;
 }
