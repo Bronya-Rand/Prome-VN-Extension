@@ -173,6 +173,7 @@ async function emulateSprites() {
 		if (!character) {
 			continue;
 		}
+		if (character.avatar === "prome-user") return;
 
 		const sprites = await getSpriteList(character.name);
 		if (sprites.length === 0) {

@@ -57,13 +57,15 @@ export async function handleUserSprite() {
 
 async function applyUserSpriteAttributes() {
 	if (extension_settings[extensionName].enableUserSprite) {
+		if (extension_settings[extensionName].userSprite.length === 0) return;
 		const spritePackExists = await getSpriteList(
 			`${extension_settings[extensionName].userSprite}`,
 		);
 		if (spritePackExists.length === 0) return;
 
 		const originalSrc = $("#expression-prome-user").children("img").attr("src");
-		const originalExpression = originalSrc.split("/").pop();
+		let originalExpression = originalSrc.split("/").pop();
+		if (originalExpression.length === 0) originalExpression = "neutral.png";
 
 		$("#expression-prome-user")
 			.children("img")
@@ -71,6 +73,7 @@ async function applyUserSpriteAttributes() {
 				"src",
 				`/characters/${extension_settings[extensionName].userSprite}/${originalExpression}`,
 			);
+		await eventSource.emit(event_types.GROUP_UPDATED);
 	}
 }
 
