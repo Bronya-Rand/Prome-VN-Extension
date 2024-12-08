@@ -116,9 +116,10 @@ function onSpriteZoomAnimation_Select() {
 }
 
 export function setupFocusModeHTML() {
-	$("#prome-sprite-zoom")
-		.prop("checked", extension_settings[extensionName].spriteZoom)
-		.trigger("input");
+	$("#prome-sprite-zoom").prop(
+		"checked",
+		extension_settings[extensionName].spriteZoom,
+	);
 	$("#prome-sprite-zoom-speed")
 		.val(extension_settings[extensionName].zoomSpeed)
 		.trigger("input");

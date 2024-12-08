@@ -2,8 +2,11 @@ import { debounce_timeout } from "../../../constants.js";
 import { debounce } from "../../../utils.js";
 import { getContext } from "../../../extensions.js";
 import { extensionName } from "./constants.js";
-import { getLastChatMessage, getSpriteList } from "./utils.js";
-import { extension_settings } from "../../../extensions.js";
+import {
+	getLastChatMessage,
+	getSpriteList,
+	isUserSpriteEnabled,
+} from "./utils.js";
 
 /* Debouncers */
 export const applyZoomDebounce = debounce(async () => {
@@ -58,6 +61,8 @@ async function applyZoom() {
 	const lastMessage = lastMessagesWithoutSystem[0];
 	if (lastMessage.is_user) {
 		$("#visual-novel-wrapper > div").removeClass("prome-sprite-focus");
+		if (isUserSpriteEnabled())
+			$("#expression-prome-user").addClass("prome-sprite-focus");
 		return;
 	}
 	// check if the last message is from a disabled group member
@@ -111,7 +116,15 @@ async function applyDefocus() {
 	// if so, defocus all sprites
 	const lastMessage = lastMessagesWithoutSystem[0];
 	if (lastMessage.is_user) {
-		$("#visual-novel-wrapper > div").addClass("prome-sprite-defocus");
+		// if user sprite is enabled, defocus all sprites except the user sprite
+		if (isUserSpriteEnabled()) {
+			$("#visual-novel-wrapper > div")
+				.not("#expression-prome-user")
+				.addClass("prome-sprite-defocus");
+			$("#expression-prome-user").removeClass("prome-sprite-defocus");
+		} else {
+			$("#visual-novel-wrapper > div").addClass("prome-sprite-defocus");
+		}
 		return;
 	}
 	// check if last message is from a disabled group member

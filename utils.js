@@ -23,6 +23,10 @@ export function isSheldVisible() {
 	return Boolean(!extension_settings[extensionName].hideSheld);
 }
 
+export function isUserSpriteEnabled() {
+	return Boolean(extension_settings[extensionName].enableUserSprite);
+}
+
 export async function getSpriteList(name) {
 	try {
 		const result = await fetch(
