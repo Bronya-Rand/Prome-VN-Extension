@@ -23,7 +23,7 @@ import {
 	emulateSpritesDebounce,
 	applyShakeDebounce,
 	stopShake,
-	resetShakeStatus,
+	startShake,
 } from "./listeners.js";
 
 /* Prome Feature Imports */
@@ -319,9 +319,26 @@ jQuery(async () => {
 
 	// Apply Sprite Shake when `message_received` event is emitted
 	// Stop when `generation_ended` event is emitted
-	eventSource.on(event_types.GENERATION_STARTED, resetShakeStatus);
-	eventSource.on(event_types.MESSAGE_RECEIVED, applyShakeDebounce);
-	eventSource.on(event_types.GENERATION_ENDED, stopShake);
+	eventSource.on(event_types.GENERATE_AFTER_DATA, () => {
+		console.debug("GENERATE_AFTER_COMBINE_PROMPTS");
+		applyShakeDebounce();
+	});
+	eventSource.on(event_types.MESSAGE_SWIPED, () => {
+		console.debug("MESSAGE_SWIPE");
+		applyShakeDebounce();
+	});
+	eventSource.on(event_types.MESSAGE_RECEIVED, () => {
+		console.debug("MESSAGE_RECEIVED");
+		stopShake();
+	});
+	eventSource.on(event_types.CHAT_CHANGED, () => {
+		applyZoomDebounce();
+		applyDefocusDebounce();
+	});
+	eventSource.on(event_types.MESSAGE_DELETED, () => {
+		applyZoomDebounce();
+		applyDefocusDebounce();
+	});
 
 	// Show info message if Sheld is hidden
 	if (!isSheldVisible()) {
@@ -336,41 +353,34 @@ $(document).ready(() => {
 	/* Mutation Observer for Chat and VN Wrapper */
 	/* Listen for changes in the chat and image expressions */
 	const promeChatObserver = new MutationObserver((mutations) => {
-		let shouldApplyDebounce = false;
-
-		for (const mutation of mutations) {
-			if (mutation.type !== "childList") return;
-
-			for (const node of mutation.addedNodes) {
-				if (
-					node.classList &&
-					(node.classList.contains("mes") ||
-						(node.tagName === "DIV" &&
-							node.classList.contains("expression-holder")))
-				) {
-					shouldApplyDebounce = true;
-				}
-			}
-
-			if (!shouldApplyDebounce) {
-				for (const node of mutation.removedNodes) {
-					if (
-						node.classList &&
-						(node.classList.contains("mes") ||
-							(node.tagName === "DIV" &&
-								node.classList.contains("expression-holder")))
-					) {
-						shouldApplyDebounce = true;
-					}
-				}
-			}
-		}
-
 		emulateSpritesDebounce();
 
-		if (shouldApplyDebounce) {
-			applyDefocusDebounce(); // Apply Sprite Defocus Tint
-			applyZoomDebounce(); // Apply Sprite Zoom
+		const handleNode = (node, added = false) => {
+			if (node.classList) {
+				if (node.classList.contains("mes")) {
+					applyZoomDebounce();
+					applyDefocusDebounce();
+				}
+				if (
+					node.tagName === "DIV" &&
+					node.classList.contains("expression-holder")
+				) {
+					applyZoomDebounce();
+					applyDefocusDebounce();
+				}
+			}
+		};
+
+		for (const mutation of mutations) {
+			if (mutation.type !== "childList") continue;
+
+			for (const node of mutation.addedNodes) {
+				handleNode(node, true);
+			}
+
+			for (const node of mutation.removedNodes) {
+				handleNode(node);
+			}
 		}
 
 		// Apply Sheld Mode on new messages

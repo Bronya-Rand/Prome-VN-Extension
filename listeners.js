@@ -4,6 +4,7 @@ import { getContext } from "../../../extensions.js";
 import { extensionName } from "./constants.js";
 import { getLastChatMessage, getSpriteList } from "./utils.js";
 import { extension_settings } from "../../../extensions.js";
+import { textgenerationwebui_settings as textgen_settings } from "../../../textgen-settings.js";
 
 /* Debouncers */
 export const applyZoomDebounce = debounce(async () => {
@@ -19,7 +20,7 @@ export const applyShakeDebounce = debounce(async () => {
 	await applyShake();
 }, debounce_timeout.short);
 
-let SHAKE_ALREADY_APPLIED = false;
+let GENERATION_EVENT_EMITTED = false;
 
 // Check if the current chat has more than one member
 function zoomListenerPreconditions() {
@@ -30,7 +31,7 @@ function zoomListenerPreconditions() {
 	const filteredMembers = group.members.filter(
 		(x) => !group.disabled_members.includes(x),
 	);
-	if (filteredMembers.length <= 1) return false;
+	if (filteredMembers.length < 1) return false;
 	return true;
 }
 
@@ -203,26 +204,29 @@ async function emulateSprites() {
 
 // Apply shake class to the speaking sprite
 async function applyShake() {
+	if (!textgen_settings.streaming) return;
+
 	const context = getContext();
 	const group = context.groups.find((x) => x.id === context.groupId);
-	if (SHAKE_ALREADY_APPLIED) return;
-	SHAKE_ALREADY_APPLIED = true;
 
 	// If Group Chat, Apply Shake to Speaking Sprite
 	if (group) {
 		const filteredMembers = group.members.filter(
 			(x) => !group.disabled_members.includes(x),
 		);
-		if (filteredMembers.length <= 1) return;
+		if (filteredMembers.length < 1) return;
 
-		const lastMessagesWithoutSystem = getLastChatMessage();
-		if (lastMessagesWithoutSystem.length === 0) return;
+		if (!context.characterId) return; // ST bug or something else
+		const speakingCharacter = context.characters[context.characterId];
+		if (!speakingCharacter) {
+			console.debug(
+				"Character not found in group members. Either error or something else happened.",
+			);
+			return;
+		}
+		if (isDisabledMember(speakingCharacter.avatar)) return;
 
-		const lastMessage = lastMessagesWithoutSystem[0];
-		if (lastMessage.is_user) return;
-		if (isDisabledMember(lastMessage.original_avatar)) return;
-
-		const spriteDiv = `#visual-novel-wrapper [id='expression-${lastMessage.original_avatar}']`;
+		const spriteDiv = `#visual-novel-wrapper [id='expression-${speakingCharacter.avatar}']`;
 		let sprite = $(spriteDiv);
 
 		const applyShakeClass = () => {
@@ -253,7 +257,12 @@ async function applyShake() {
 	}
 }
 
-export async function stopShake() {
+export function startShake() {
+	if (!textgen_settings.streaming) return;
+	GENERATION_EVENT_EMITTED = true;
+}
+
+export function stopShake() {
 	const context = getContext();
 	const group = context.groups.find((x) => x.id === context.groupId);
 
@@ -265,8 +274,5 @@ export async function stopShake() {
 			"prome-sprite-shake",
 		);
 	}
-}
-
-export function resetShakeStatus() {
-	SHAKE_ALREADY_APPLIED = false;
+	GENERATION_EVENT_EMITTED = false;
 }
