@@ -4,7 +4,7 @@ import { saveSettingsDebounced } from "../../../../../script.js";
 import { isLetterboxModeEnabled } from "../utils.js";
 
 /* Letterbox Functions */
-export function resetLetterBoxSize() {
+function resetLetterBoxSize() {
 	extension_settings[extensionName].letterboxSize =
 		defaultSettings.letterboxSize;
 	$("#prome-letterbox-size")
@@ -14,7 +14,7 @@ export function resetLetterBoxSize() {
 	saveSettingsDebounced();
 }
 
-export function resetLetterBoxColor() {
+function resetLetterBoxColor() {
 	extension_settings[extensionName].letterboxColor =
 		defaultSettings.letterboxColor;
 	$("#prome-letterbox-color-picker").attr(
@@ -26,7 +26,7 @@ export function resetLetterBoxColor() {
 }
 
 // Changes the size of the letterbox
-export function onLetterboxSize_Change() {
+function onLetterboxSize_Change() {
 	const value = this.value;
 	if (value < 1 || value > 50) {
 		console.error(`[${extensionName}] Invalid letterbox size value: ${value}`);
@@ -40,7 +40,7 @@ export function onLetterboxSize_Change() {
 }
 
 // Changes the color of the letterbox
-export function onLetterboxColor_Change(evt) {
+function onLetterboxColor_Change(evt) {
 	const value = evt.detail.rgba;
 	extension_settings[extensionName].letterboxColor = value;
 	saveSettingsDebounced();
@@ -100,7 +100,7 @@ export function applyLetterboxMode() {
 }
 
 /* Event Handlers */
-export function onLetterbox_Select() {
+function onLetterbox_Select() {
 	const value = Number(this.value);
 	if (value < 0 || value > 2) {
 		console.error(`[${extensionName}] Invalid letterbox mode value: ${value}`);

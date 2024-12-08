@@ -76,14 +76,14 @@ export function onSpriteZoomTimer_Change() {
 	applySpriteZoomTimer();
 }
 
-export function resetSpriteZoomTimer() {
+function resetSpriteZoomTimer() {
 	extension_settings[extensionName].zoomSpeed = defaultSettings.zoomSpeed;
 	$("#prome-sprite-zoom-speed").val(defaultSettings.zoomSpeed).trigger("input");
 	$("#prome-sprite-zoom-speed-counter").val(defaultSettings.zoomSpeed);
 	saveSettingsDebounced();
 }
 
-export function onSpriteZoom_Click(event) {
+function onSpriteZoom_Click(event) {
 	const value = Boolean($(event.target).prop("checked"));
 	extension_settings[extensionName].spriteZoom = value;
 	saveSettingsDebounced();
@@ -97,7 +97,7 @@ export function onSpriteDefocusTint_Click(event) {
 	applySpriteDefocusTint();
 }
 
-export function onSpriteZoomAnimation_Select() {
+function onSpriteZoomAnimation_Select() {
 	const value = String(this.value);
 	if (
 		value !== "ease" &&
