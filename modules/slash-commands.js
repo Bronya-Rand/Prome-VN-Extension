@@ -337,7 +337,7 @@ export function prepareSlashCommands() {
 			callback: async (args, _) => {
 				if (args.name) {
 					const spriteSetExists = await getSpriteList(args.name);
-					if (!spriteSetExists.ok) {
+					if (!spriteSetExists.length === 0) {
 						toastr.error(
 							`The sprite set "${args.name}" does not exist.`,
 							"Invalid Sprite Set",
