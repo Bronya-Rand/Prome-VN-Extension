@@ -23,6 +23,7 @@ import { applySpriteShake } from "./shake.js";
 import { applySpriteShadow } from "./shadows.js";
 import { applyTint } from "./tint.js";
 import { getSpriteList } from "../utils.js";
+import { applyUserSprite, handleUserSprite } from "./user.js";
 
 export function prepareSlashCommands() {
 	SlashCommandParser.addCommandObject(
@@ -358,7 +359,27 @@ export function prepareSlashCommands() {
 				}),
 			],
 			helpString:
-				"(Prome Visual Novel Extension) ets the user sprite set to use for the user sprite.",
+				"(Prome Visual Novel Extension) Sets the user sprite set to use for the user sprite.",
+		}),
+	);
+
+	SlashCommandParser.addCommandObject(
+		SlashCommand.fromProps({
+			name: "user-sprite",
+			callback: async () => {
+				switchUserSpriteMode();
+				toastr.success(
+					`User sprite is now ${
+						extension_settings[extensionName].enableUserSprite
+							? "enabled"
+							: "disabled"
+					}.`,
+					"User Sprite Status",
+				);
+				return extension_settings[extensionName].enableUserSprite;
+			},
+			helpString:
+				"(Prome Visual Novel Extension) Toggles the user sprite on the VN UI.",
 		}),
 	);
 }
@@ -473,4 +494,15 @@ function setSpriteSetName(name) {
 	extension_settings[extensionName].userSprite = name;
 	saveSettingsDebounced();
 	$("#prome-user-sprite-input").val(name).trigger("input");
+}
+
+function switchUserSpriteMode() {
+	extension_settings[extensionName].enableUserSprite =
+		!extension_settings[extensionName].enableUserSprite;
+	saveSettingsDebounced();
+	$("#prome-user-sprite")
+		.prop("checked", extension_settings[extensionName].enableUserSprite)
+		.trigger("input");
+	applyUserSprite();
+	handleUserSprite();
 }
