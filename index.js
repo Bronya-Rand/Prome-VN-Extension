@@ -197,6 +197,14 @@ async function onKeybindListClick() {
 	await callGenericPopup(template, POPUP_TYPE.TEXT, "", {});
 }
 
+async function onCommandsListClick() {
+	const template = await renderExtensionTemplateAsync(
+		`third-party/${extensionName}/html`,
+		"commands",
+	);
+	await callGenericPopup(template, POPUP_TYPE.TEXT, "", {});
+}
+
 async function onChatHistoryClick() {
 	getChatHistory();
 }
@@ -217,6 +225,7 @@ jQuery(async () => {
 	/* Prome Core Actions */
 	$("#prome-enable-vn").on("click", onVNUI_Click);
 	$("#prome-keybinds").on("click", onKeybindListClick);
+	$("#prome-commands").on("click", onCommandsListClick);
 
 	const wandButtonHtml = await renderExtensionTemplateAsync(
 		`third-party/${extensionName}/html`,

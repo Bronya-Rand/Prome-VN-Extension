@@ -82,7 +82,7 @@ export function prepareSlashCommands() {
 
 	SlashCommandParser.addCommandObject(
 		SlashCommand.fromProps({
-			name: "focus-mode",
+			name: "sprite-focus",
 			callback: async () => {
 				switchFocusMode(!extension_settings[extensionName].spriteZoom);
 				toastr.success(
@@ -95,13 +95,14 @@ export function prepareSlashCommands() {
 				);
 				return extension_settings[extensionName].spriteZoom;
 			},
-			helpString: "(Prome Visual Novel Extension) Toggles focus mode.",
+			helpString:
+				"(Prome Visual Novel Extension) Toggles focus mode on character sprites.",
 		}),
 	);
 
 	SlashCommandParser.addCommandObject(
 		SlashCommand.fromProps({
-			name: "focus-mode-animation",
+			name: "set-focus-animation",
 			/** @type {(args: { animation: string | undefined }) => void} */
 			callback: async (args, _) => {
 				if (
@@ -180,7 +181,7 @@ export function prepareSlashCommands() {
 				return extension_settings[extensionName].spriteDefocusTint;
 			},
 			helpString:
-				"(Prome Visual Novel Extension) Toggles the defocus tint for character sprites.",
+				"(Prome Visual Novel Extension) Toggles the defocus tint on non-speaking character sprites.",
 		}),
 	);
 
@@ -200,7 +201,7 @@ export function prepareSlashCommands() {
 				return extension_settings[extensionName].spriteShake;
 			},
 			helpString:
-				"(Prome Visual Novel Extension) Toggles sprite shaking when a character is speaking.",
+				"(Prome Visual Novel Extension) Toggles the shake animation when a character speaks on character sprites.",
 		}),
 	);
 
@@ -220,13 +221,13 @@ export function prepareSlashCommands() {
 				return extension_settings[extensionName].spriteShadow;
 			},
 			helpString:
-				"(Prome Visual Novel Extension) Toggles sprite shadows for character sprites.",
+				"(Prome Visual Novel Extension) Toggles sprite shadows on character sprites.",
 		}),
 	);
 
 	SlashCommandParser.addCommandObject(
 		SlashCommand.fromProps({
-			name: "tint-mode",
+			name: "tint",
 			callback: async () => {
 				switchTintMode();
 				toastr.success(
@@ -238,7 +239,7 @@ export function prepareSlashCommands() {
 				return extension_settings[extensionName].worldTint;
 			},
 			helpString:
-				"(Prome Visual Novel Extension) Toggles the tint mode for the Prome VN UI.",
+				"(Prome Visual Novel Extension) Toggles world/character tint on the VN UI.",
 		}),
 	);
 
@@ -259,13 +260,13 @@ export function prepareSlashCommands() {
 					.enabled;
 			},
 			helpString:
-				"(Prome Visual Novel Extension) Toggles the world tint for the Prome VN UI.",
+				"(Prome Visual Novel Extension) Toggles the world tint on the VN UI.",
 		}),
 	);
 
 	SlashCommandParser.addCommandObject(
 		SlashCommand.fromProps({
-			name: "tint-character",
+			name: "tint-characters",
 			callback: async () => {
 				switchTintCharacterMode();
 				toastr.success(
@@ -281,13 +282,13 @@ export function prepareSlashCommands() {
 					.enabled;
 			},
 			helpString:
-				"(Prome Visual Novel Extension) Toggles the character tint for the Prome VN UI.",
+				"(Prome Visual Novel Extension) Toggles the character tint on the VN UI.",
 		}),
 	);
 
 	SlashCommandParser.addCommandObject(
 		SlashCommand.fromProps({
-			name: "tint-shared",
+			name: "tint-share",
 			callback: async () => {
 				switchTintSharedMode();
 				toastr.success(
@@ -301,7 +302,7 @@ export function prepareSlashCommands() {
 				return extension_settings[extensionName].currentTintValues.shared;
 			},
 			helpString:
-				"(Prome Visual Novel Extension) Toggles the world tint to character sprites (This will override Character Tint).",
+				"(Prome Visual Novel Extension) Toggles sharing world tint with character sprites (This will override Character Tint).",
 		}),
 	);
 
@@ -325,7 +326,7 @@ export function prepareSlashCommands() {
 				}),
 			],
 			helpString:
-				"(Prome Visual Novel Extension) Sets the expression for the user sprite.",
+				"(Prome Visual Novel Extension) Sets the expression of the user sprite.",
 		}),
 	);
 
@@ -357,7 +358,7 @@ export function prepareSlashCommands() {
 				}),
 			],
 			helpString:
-				"(Prome Visual Novel Extension) Sets the sprite set name for the user sprite.",
+				"(Prome Visual Novel Extension) ets the user sprite set to use for the user sprite.",
 		}),
 	);
 }
