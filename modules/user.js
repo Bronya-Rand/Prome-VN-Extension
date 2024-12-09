@@ -45,7 +45,7 @@ export async function handleUserSprite() {
 				avatar: "prome-user",
 				data: {
 					creator_notes:
-						"This is your 'character' used for Group Chat sprites. Do not interact with this entry.",
+						"This is a dummy bot made for Prome's user sprites. Do not interact with this entry.",
 				},
 			});
 		}
