@@ -19,14 +19,23 @@
           <span> and Prometheus.</span>
         </small>
 
-        <label
-          class="checkbox_label"
-          for="prome-enable-vn"
-          title="Toggle the Prome VN UI."
-        >
-          <input id="prome-enable-vn" type="checkbox" />
-          <span data-i18n="Enable Prome VN Mode">Enable Prome VN Mode</span>
-        </label>
+        <div class="prome_vn_block flex-container flexFlowColumn">
+          <label
+            class="checkbox_label"
+            for="prome-enable-vn"
+            title="Toggles Prome."
+          >
+            <input id="prome-enable-vn" type="checkbox" />
+            <span data-i18n="Enable Prome">Enable Prome</span>
+          </label>
+
+          <small
+            data-i18n="Note: Not all features require Prome to be enabled i.e. World/Character Tint and Hide Sheld."
+          >
+            Note: Not all features require Prome to be enabled i.e.
+            World/Character Tint and Hide Sheld.
+          </small>
+        </div>
 
         <div class="prome_vn_block flex-container flexFlowColumn">
           <h4 data-i18n="Sheld Configuration">Sheld Configuration</h4>
