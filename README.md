@@ -11,8 +11,8 @@ The Prome Visual Novel Extension is a extension for SillyTavern that remodernize
 1. Easy integration with SillyTavern and it's Visual Novel Mode
 2. **[BETA]** World + Character Tinting - Prome's biggest feature to date. Wanted to make a chat take place in the evening for that special 'date' or experience a post-alter version of a game world, but were unable to get such weather/events to happen (such as a locked day cycle in Honkai: Star Rail)? Now you can by setting the world and/or character colors to be how **YOU** want it to be.
 
-   > [!NOTE]
-   > Tinting choices available are: Blur, Brightness, Contrast, Grayscale, Hue, Invert, Saturate and Sepia. The World Tint can be shared with characters and both tints can be enabled or disabled in the Prome menu.
+> [!NOTE]
+> Tinting choices available are: Blur, Brightness, Contrast, Grayscale, Hue, Invert, Saturate and Sepia. The World Tint can be shared with characters and both tints can be enabled or disabled in the Prome menu.
 
       <center>
          <img src="./.github/world-tint.png">
