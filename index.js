@@ -273,6 +273,7 @@ jQuery(async () => {
 		applyZoomDebounce();
 		applyDefocusDebounce();
 	});
+	eventSource.on(event_types.GROUP_UPDATED, handleUserSprite);
 
 	// Show info message if Sheld is hidden
 	if (!isSheldVisible()) {
