@@ -186,6 +186,7 @@ function onVNUI_Click(event) {
 	// Hijack ST Main's Waifu Mode
 	$("body").toggleClass("waifuMode", power_user.waifuMode);
 	$("#waifuMode").prop("checked", power_user.waifuMode);
+	applySheldMode();
 }
 
 async function onKeybindListClick() {

@@ -36,19 +36,25 @@ export function applySheldMode() {
 	const currentChatId = getChatId();
 	if (!currentChatId) return;
 
-	// hide "Show more messages" as it's obsolete for single message mode
-	// show it if the mode is disabled
-	$("#chat [id='show_more_messages']").toggleClass(
-		"displayNone",
-		extension_settings[extensionName].showOnlyLastMessage,
-	);
+	if (!extension_settings[extensionName].enableVN_UI) {
+		// revert all changes if VN mode is disabled
+		$("#chat [id='show_more_messages']").removeClass("displayNone");
+		$("#chat .mes").removeClass("displayNone");
+	} else {
+		// hide "Show more messages" as it's obsolete for single message mode
+		// show it if the mode is disabled
+		$("#chat [id='show_more_messages']").toggleClass(
+			"displayNone",
+			extension_settings[extensionName].showOnlyLastMessage,
+		);
 
-	// remove previous messages that were hidden in the chat div
-	$("#chat .mes").removeClass("displayNone");
+		// remove previous messages that were hidden in the chat div
+		$("#chat .mes").removeClass("displayNone");
 
-	// now hide all messages except the last one ("mes last_mes")
-	if (extension_settings[extensionName].showOnlyLastMessage) {
-		$("#chat .mes:not(.last_mes)").addClass("displayNone"); // hide all messages except the last one
+		// now hide all messages except the last one ("mes last_mes")
+		if (extension_settings[extensionName].showOnlyLastMessage) {
+			$("#chat .mes:not(.last_mes)").addClass("displayNone"); // hide all messages except the last one
+		}
 	}
 }
 
