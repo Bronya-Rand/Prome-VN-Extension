@@ -22,6 +22,7 @@ import {
 import { applySpriteShake } from "./shake.js";
 import { applySpriteShadow } from "./shadows.js";
 import { applyTint } from "./tint.js";
+import { getSpriteList } from "../utils.js";
 
 export function prepareSlashCommands() {
 	SlashCommandParser.addCommandObject(
@@ -74,7 +75,8 @@ export function prepareSlashCommands() {
 					],
 				}),
 			],
-			helpString: "Switches the letterbox mode in the Prome VN UI.",
+			helpString:
+				"(Prome Visual Novel Extension) Switches the letterbox mode in the VN UI.",
 		}),
 	);
 
@@ -93,7 +95,7 @@ export function prepareSlashCommands() {
 				);
 				return extension_settings[extensionName].spriteZoom;
 			},
-			helpString: "Toggles focus mode for the Prome VN UI.",
+			helpString: "(Prome Visual Novel Extension) Toggles focus mode.",
 		}),
 	);
 
@@ -158,7 +160,7 @@ export function prepareSlashCommands() {
 				}),
 			],
 			helpString:
-				'Switches the focus mode animation when "Focus Mode" is enabled.',
+				'(Prome Visual Novel Extension) Switches the focus mode animation when "Focus Mode" is enabled.',
 		}),
 	);
 
@@ -177,7 +179,8 @@ export function prepareSlashCommands() {
 				);
 				return extension_settings[extensionName].spriteDefocusTint;
 			},
-			helpString: "Toggles the defocus tint for character sprites.",
+			helpString:
+				"(Prome Visual Novel Extension) Toggles the defocus tint for character sprites.",
 		}),
 	);
 
@@ -196,7 +199,8 @@ export function prepareSlashCommands() {
 				);
 				return extension_settings[extensionName].spriteShake;
 			},
-			helpString: "Toggles sprite shaking when a character is speaking.",
+			helpString:
+				"(Prome Visual Novel Extension) Toggles sprite shaking when a character is speaking.",
 		}),
 	);
 
@@ -215,7 +219,8 @@ export function prepareSlashCommands() {
 				);
 				return extension_settings[extensionName].spriteShadow;
 			},
-			helpString: "Toggles sprite shadows for character sprites.",
+			helpString:
+				"(Prome Visual Novel Extension) Toggles sprite shadows for character sprites.",
 		}),
 	);
 
@@ -232,7 +237,8 @@ export function prepareSlashCommands() {
 				);
 				return extension_settings[extensionName].worldTint;
 			},
-			helpString: "Toggles the tint mode for the Prome VN UI.",
+			helpString:
+				"(Prome Visual Novel Extension) Toggles the tint mode for the Prome VN UI.",
 		}),
 	);
 
@@ -252,7 +258,8 @@ export function prepareSlashCommands() {
 				return extension_settings[extensionName].currentTintValues.world
 					.enabled;
 			},
-			helpString: "Toggles the world tint for the Prome VN UI.",
+			helpString:
+				"(Prome Visual Novel Extension) Toggles the world tint for the Prome VN UI.",
 		}),
 	);
 
@@ -273,7 +280,8 @@ export function prepareSlashCommands() {
 				return extension_settings[extensionName].currentTintValues.character
 					.enabled;
 			},
-			helpString: "Toggles the character tint for the Prome VN UI.",
+			helpString:
+				"(Prome Visual Novel Extension) Toggles the character tint for the Prome VN UI.",
 		}),
 	);
 
@@ -293,7 +301,7 @@ export function prepareSlashCommands() {
 				return extension_settings[extensionName].currentTintValues.shared;
 			},
 			helpString:
-				"Toggles the world tint to character sprites (This will override Character Tint).",
+				"(Prome Visual Novel Extension) Toggles the world tint to character sprites (This will override Character Tint).",
 		}),
 	);
 
@@ -316,7 +324,40 @@ export function prepareSlashCommands() {
 					typeList: [ARGUMENT_TYPE.STRING],
 				}),
 			],
-			helpString: "Sets the expression for the user sprite.",
+			helpString:
+				"(Prome Visual Novel Extension) Sets the expression for the user sprite.",
+		}),
+	);
+
+	SlashCommandParser.addCommandObject(
+		SlashCommand.fromProps({
+			name: "set-user-set",
+			/** @type {(args: { name: string | undefined }) => void} */
+			callback: async (args, _) => {
+				if (args.name) {
+					const spriteSetExists = await getSpriteList(args.name);
+					if (!spriteSetExists.ok) {
+						toastr.error(
+							`The sprite set "${args.name}" does not exist.`,
+							"Invalid Sprite Set",
+						);
+						return;
+					}
+					setSpriteSetName(args.name);
+					return args.name;
+				}
+				toastr.error("Please provide a sprite set name.", "No Name Provided");
+			},
+			namedArgumentList: [
+				SlashCommandNamedArgument.fromProps({
+					name: "name",
+					description: "The name of the sprite set to use for the user sprite.",
+					isRequired: true,
+					typeList: [ARGUMENT_TYPE.STRING],
+				}),
+			],
+			helpString:
+				"(Prome Visual Novel Extension) Sets the sprite set name for the user sprite.",
 		}),
 	);
 }
@@ -425,4 +466,10 @@ function setUserExpression(expression) {
 			"src",
 			`/characters/${extension_settings[extensionName].userSprite}/${expression}.png`,
 		);
+}
+
+function setSpriteSetName(name) {
+	extension_settings[extensionName].userSprite = name;
+	saveSettingsDebounced();
+	$("#prome-user-sprite-input").val(name).trigger("input");
 }
