@@ -67,6 +67,11 @@ body.waifuMode.vLetterBox #visual-novel-letterbox-two {
 	filter: brightness(1);
 }
 
+#expression-wrapper > div {
+	transition: transform var(--prom-sprite-zoom-speed)
+		var(--prom-sprite-zoom-animation), filter 0.4s ease-in;
+}
+
 /* Sprite Focus to Last Message Character on 'expression-holder' */
 body.waifuMode.spriteZoom .prome-sprite-focus {
 	transform: scale(1.05);
@@ -109,8 +114,11 @@ body.waifuMode.spriteShake.spriteZoom
 	animation: shakeAndFocus 0.35s infinite;
 }
 
-body.waifuMode.spriteShake.spriteZoom .prome-sprite-shake {
+body.waifuMode.spriteShake.spriteZoom:not(.userSprite) .prome-sprite-shake {
 	animation: shake 0.35s infinite;
+}
+body.waifuMode.spriteShake.spriteZoom.userSprite .prome-sprite-shake {
+	animation: shakeAndFocus 0.35s infinite;
 }
 
 @keyframes shake {
@@ -280,4 +288,18 @@ body.worldTint.sharedTint.spriteShadow
 			var(--prom-sprite-shadow-offsetx) var(--prom-sprite-shadow-offsety)
 				var(--prom-sprite-shadow-blur) #111
 		);
+}
+
+/* 
+ * Prome User Sprite Overrides
+ * (For ST)
+ */
+body.userSprite #expression-wrapper {
+	position: absolute;
+	height: max-content;
+	bottom: 0;
+}
+
+body.userSprite .expression-holder {
+	position: unset;
 }

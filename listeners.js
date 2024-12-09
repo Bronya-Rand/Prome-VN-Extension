@@ -24,15 +24,18 @@ export const applyShakeDebounce = debounce(async () => {
 }, debounce_timeout.short);
 
 // Check if the current chat has more than one member
-function zoomListenerPreconditions() {
+function zoomListenerPreconditions(allowSolo = false) {
 	const context = getContext();
 	const group = context.groups.find((x) => x.id === context.groupId);
-	if (!group) return false;
-
-	const filteredMembers = group.members.filter(
-		(x) => !group.disabled_members.includes(x),
-	);
-	if (filteredMembers.length < 1) return false;
+	if (allowSolo && group === undefined) {
+		if (!isUserSpriteEnabled()) return false;
+	} else {
+		if (!group) return false;
+		const filteredMembers = group.members.filter(
+			(x) => !group.disabled_members.includes(x),
+		);
+		if (filteredMembers.length < 1) return false;
+	}
 	return true;
 }
 
@@ -43,9 +46,14 @@ function isDisabledMember(name) {
 	return group.disabled_members.includes(name);
 }
 
+function isGroupChat() {
+	const context = getContext();
+	return context.groupId !== null;
+}
+
 // Apply focus class to the sprite
 async function applyZoom() {
-	if (!zoomListenerPreconditions()) return;
+	if (!zoomListenerPreconditions(true)) return;
 
 	// check if there are any messages
 	const lastMessagesWithoutSystem = getLastChatMessage();
@@ -59,49 +67,77 @@ async function applyZoom() {
 	// if so, remove the focus class
 	const lastMessage = lastMessagesWithoutSystem[0];
 	if (lastMessage.is_user) {
-		$("#visual-novel-wrapper > div").removeClass("prome-sprite-focus");
-		if (isUserSpriteEnabled())
-			$("#expression-prome-user").addClass("prome-sprite-focus");
-		return;
-	}
-	// check if the last message is from a disabled group member
-	// if so, remove the focus class
-	if (isDisabledMember(lastMessage.original_avatar)) {
-		$("#visual-novel-wrapper > div").removeClass("prome-sprite-focus");
-		return;
-	}
-
-	const spriteDiv = `#visual-novel-wrapper [id='expression-${lastMessage.original_avatar}']`;
-	let sprite = $(spriteDiv);
-
-	// apply focus class to the sprite
-	const applyFocusClass = () => {
-		// apply focus class to the focused sprite
-		sprite.addClass("prome-sprite-focus");
-
-		// remove focus class from other sprites
-		$("#visual-novel-wrapper > div")
-			.not(sprite)
-			.removeClass("prome-sprite-focus");
-	};
-
-	if (sprite.length === 0) {
-		// give time for the sprite to load on the page
-		const checkInterval = setInterval(() => {
-			sprite = $(spriteDiv);
-			if (sprite.length > 0) {
-				applyFocusClass();
-				clearInterval(checkInterval);
+		if (isGroupChat()) {
+			$("#visual-novel-wrapper > div").removeClass("prome-sprite-focus");
+			if (isUserSpriteEnabled())
+				$("#expression-prome-user").addClass("prome-sprite-focus");
+		} else {
+			if (isUserSpriteEnabled()) {
+				$("#expression-holder").removeClass("prome-sprite-focus");
+				$("#expression-prome-user").addClass("prome-sprite-focus");
 			}
-		}, 100);
+		}
+		return;
+	}
+
+	if (isGroupChat()) {
+		// check if the last message is from a disabled group member
+		// if so, remove the focus class
+		if (isDisabledMember(lastMessage.original_avatar)) {
+			$("#visual-novel-wrapper > div").removeClass("prome-sprite-focus");
+			return;
+		}
+
+		const spriteDiv = `#visual-novel-wrapper [id='expression-${lastMessage.original_avatar}']`;
+		let sprite = $(spriteDiv);
+
+		// apply focus class to the sprite
+		const applyFocusClass = () => {
+			// apply focus class to the focused sprite
+			sprite.addClass("prome-sprite-focus");
+
+			// remove focus class from other sprites
+			$("#visual-novel-wrapper > div")
+				.not(sprite)
+				.removeClass("prome-sprite-focus");
+		};
+
+		if (sprite.length === 0) {
+			// give time for the sprite to load on the page
+			const checkInterval = setInterval(() => {
+				sprite = $(spriteDiv);
+				if (sprite.length > 0) {
+					applyFocusClass();
+					clearInterval(checkInterval);
+				}
+			}, 100);
+		} else {
+			applyFocusClass();
+		}
 	} else {
-		applyFocusClass();
+		const spriteDiv = $("#expression-holder");
+
+		const applyFocusClass = () => {
+			spriteDiv.addClass("prome-sprite-focus");
+			$("#expression-prome-user").removeClass("prome-sprite-focus");
+		};
+
+		if (spriteDiv.length === 0) {
+			const checkInterval = setInterval(() => {
+				if (spriteDiv.length > 0) {
+					applyFocusClass();
+					clearInterval(checkInterval);
+				}
+			}, 100);
+		} else {
+			applyFocusClass();
+		}
 	}
 }
 
 // Apply defocus class to the sprites
 async function applyDefocus() {
-	if (!zoomListenerPreconditions()) return;
+	if (!zoomListenerPreconditions(true)) return;
 
 	// check if there are any messages
 	const lastMessagesWithoutSystem = getLastChatMessage();
@@ -115,47 +151,75 @@ async function applyDefocus() {
 	// if so, defocus all sprites
 	const lastMessage = lastMessagesWithoutSystem[0];
 	if (lastMessage.is_user) {
-		// if user sprite is enabled, defocus all sprites except the user sprite
-		if (isUserSpriteEnabled()) {
-			$("#visual-novel-wrapper > div")
-				.not("#expression-prome-user")
-				.addClass("prome-sprite-defocus");
-			$("#expression-prome-user").removeClass("prome-sprite-defocus");
+		if (isGroupChat()) {
+			// if user sprite is enabled, defocus all sprites except the user sprite
+			if (isUserSpriteEnabled()) {
+				$("#visual-novel-wrapper > div")
+					.not("#expression-prome-user")
+					.addClass("prome-sprite-defocus");
+				$("#expression-prome-user").removeClass("prome-sprite-defocus");
+			} else {
+				$("#visual-novel-wrapper > div").addClass("prome-sprite-defocus");
+			}
 		} else {
-			$("#visual-novel-wrapper > div").addClass("prome-sprite-defocus");
+			if (isUserSpriteEnabled()) {
+				$("#expression-holder").addClass("prome-sprite-defocus");
+				$("#expression-prome-user").removeClass("prome-sprite-defocus");
+			}
 		}
 		return;
 	}
-	// check if last message is from a disabled group member
-	// if so, defocus all sprites
-	if (isDisabledMember(lastMessage.original_avatar)) {
-		$("#visual-novel-wrapper > div").addClass("prome-sprite-defocus");
-		return;
-	}
 
-	const focusedSpriteDiv = `#visual-novel-wrapper [id='expression-${lastMessage.original_avatar}']`;
-	let focusedSprite = $(focusedSpriteDiv);
+	if (isGroupChat()) {
+		// check if last message is from a disabled group member
+		// if so, defocus all sprites
+		if (isDisabledMember(lastMessage.original_avatar)) {
+			$("#visual-novel-wrapper > div").addClass("prome-sprite-defocus");
+			return;
+		}
 
-	const applyDefocusClass = () => {
-		// remove defocus class from all sprites
-		$("#visual-novel-wrapper > div").removeClass("prome-sprite-defocus");
+		const focusedSpriteDiv = `#visual-novel-wrapper [id='expression-${lastMessage.original_avatar}']`;
+		let focusedSprite = $(focusedSpriteDiv);
 
-		// apply defocus class to all sprites except the focused sprite
-		$("#visual-novel-wrapper > div")
-			.not(focusedSprite)
-			.addClass("prome-sprite-defocus");
-	};
+		const applyDefocusClass = () => {
+			// remove defocus class from all sprites
+			$("#visual-novel-wrapper > div").removeClass("prome-sprite-defocus");
 
-	if (focusedSprite.length === 0) {
-		const checkInterval = setInterval(() => {
-			focusedSprite = $(focusedSpriteDiv);
-			if (focusedSprite.length > 0) {
-				applyDefocusClass();
-				clearInterval(checkInterval);
-			}
-		}, 100);
+			// apply defocus class to all sprites except the focused sprite
+			$("#visual-novel-wrapper > div")
+				.not(focusedSprite)
+				.addClass("prome-sprite-defocus");
+		};
+
+		if (focusedSprite.length === 0) {
+			const checkInterval = setInterval(() => {
+				focusedSprite = $(focusedSpriteDiv);
+				if (focusedSprite.length > 0) {
+					applyDefocusClass();
+					clearInterval(checkInterval);
+				}
+			}, 100);
+		} else {
+			applyDefocusClass();
+		}
 	} else {
-		applyDefocusClass();
+		const spriteDiv = $("#expression-holder");
+
+		const applyDefocusClass = () => {
+			spriteDiv.removeClass("prome-sprite-defocus");
+			$("#expression-prome-user").addClass("prome-sprite-defocus");
+		};
+
+		if (spriteDiv.length === 0) {
+			const checkInterval = setInterval(() => {
+				if (spriteDiv.length > 0) {
+					applyDefocusClass();
+					clearInterval(checkInterval);
+				}
+			}, 100);
+		} else {
+			applyDefocusClass();
+		}
 	}
 }
 
@@ -268,7 +332,7 @@ async function applyShake() {
 		}
 	} else {
 		// Apply Shake to Main Sprite in 1:1 Chat
-		$("#expression-wrapper .expression-holder").addClass("prome-sprite-shake");
+		$("#expression-holder").addClass("prome-sprite-shake");
 	}
 }
 
@@ -286,9 +350,7 @@ export function stopShake() {
 		if (group) {
 			$("#visual-novel-wrapper > div").removeClass("prome-sprite-shake");
 		} else {
-			$("#expression-wrapper .expression-holder").removeClass(
-				"prome-sprite-shake",
-			);
+			$("#expression-holder").removeClass("prome-sprite-shake");
 		}
 	};
 
