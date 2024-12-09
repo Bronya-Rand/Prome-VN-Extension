@@ -35,10 +35,14 @@ export async function handleUserSprite() {
 	if (groupIndex === -1) return;
 	const group = context.groups[groupIndex];
 
-	if (!context.characters.find((x) => x.name === "prome-user")) {
+	if (!context.characters.find((x) => x.avatar === "prome-user")) {
 		context.characters.push({
 			name: `${extension_settings[extensionName].userSprite}`,
 			avatar: "prome-user",
+			data: {
+				creator_notes:
+					"This is your 'character' used for Group Chat sprites. Do not interact with this entry.",
+			},
 		});
 	}
 
@@ -51,8 +55,6 @@ export async function handleUserSprite() {
 		group.members = group.members.filter((x) => x !== "prome-user");
 		group.disabled_members.push("prome-user");
 	}
-
-	await eventSource.emit(event_types.GROUP_UPDATED);
 }
 
 async function applyUserSpriteAttributes() {
