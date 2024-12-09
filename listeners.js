@@ -220,6 +220,9 @@ async function applyShake() {
 
 	const context = getContext();
 	const group = context.groups.find((x) => x.id === context.groupId);
+	const streamingProcessor = context.streamingProcessor;
+	const isStreaming = streamingProcessor && !streamingProcessor.isStopped;
+	if (!isStreaming) return;
 
 	// If Group Chat, Apply Shake to Speaking Sprite
 	if (group) {

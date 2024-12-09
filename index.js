@@ -257,13 +257,12 @@ jQuery(async () => {
 	eventSource.on(event_types.CHAT_CHANGED, () => {
 		applyZoomDebounce();
 		applyDefocusDebounce();
+		handleUserSprite();
 	});
 	eventSource.on(event_types.MESSAGE_DELETED, () => {
 		applyZoomDebounce();
 		applyDefocusDebounce();
 	});
-
-	eventSource.on(event_types.CHAT_CHANGED, handleUserSprite);
 
 	// Show info message if Sheld is hidden
 	if (!isSheldVisible()) {
