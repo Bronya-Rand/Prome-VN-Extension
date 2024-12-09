@@ -14,9 +14,9 @@ The Prome Visual Novel Extension is a extension for SillyTavern that remodernize
 > [!NOTE]
 > Tinting choices available are: Blur, Brightness, Contrast, Grayscale, Hue, Invert, Saturate and Sepia. The World Tint can be shared with characters and both tints can be enabled or disabled in the Prome menu.
 
-      <center>
-         <img src="./.github/world-tint.png">
-      </center>
+    <center>
+       <img src="./.github/world-tint.png">
+    </center>
 
 3. **[BETA]** User Sprites - Prome's second biggest feature. Want to be part of the conversation? Borrow someone else's sprites or use your own for your own persona whilst using all of Prome's other features!
 
