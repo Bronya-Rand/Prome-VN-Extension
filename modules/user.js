@@ -64,7 +64,9 @@ export async function handleUserSprite() {
 
 		// CHeck if Prome's Expression Image IMG is in the Expression Holder Div
 		const expressionHolder = $("#expression-wrapper");
-		const promeExpression = $("#expression-prome-user");
+		const promeExpression = $("#expression-wrapper").children(
+			"#expression-prome-user",
+		);
 		if (promeExpression.length === 0) {
 			// Create the Expression DIV
 			const html = `
