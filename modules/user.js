@@ -8,7 +8,17 @@ import {
 } from "../../../../../script.js";
 import { getSpriteList } from "../utils.js";
 
+function getGroupIndex() {
+	const context = getContext();
+	const groupIndex = context.groups.findIndex((x) => {
+		return x.id === context.groupId;
+	});
+	return groupIndex;
+}
+
 export function applyUserSprite() {
+	const groupIndex = getGroupIndex();
+
 	if (
 		extension_settings[extensionName].enableUserSprite === (null || undefined)
 	) {
@@ -25,6 +35,7 @@ export function applyUserSprite() {
 		"userSprite",
 		extension_settings[extensionName].enableUserSprite,
 	);
+	if (groupIndex !== -1) eventSource.emit(event_types.GROUP_UPDATED);
 }
 
 /*
@@ -32,9 +43,8 @@ export function applyUserSprite() {
  */
 export async function handleUserSprite() {
 	const context = getContext();
-	const groupIndex = context.groups.findIndex((x) => {
-		return x.id === context.groupId;
-	});
+	const groupIndex = getGroupIndex();
+
 	if (groupIndex !== -1) {
 		// Group Chat
 		const group = context.groups[groupIndex];
@@ -61,6 +71,7 @@ export async function handleUserSprite() {
 		}
 	} else {
 		// One-on-One Chat
+		if (context.characterId === undefined) return;
 
 		// CHeck if Prome's Expression Image IMG is in the Expression Holder Div
 		const expressionHolder = $("#expression-wrapper");
