@@ -224,56 +224,90 @@ async function applyDefocus() {
 }
 
 async function emulateSprites() {
-	if (!zoomListenerPreconditions()) return;
+	if (!zoomListenerPreconditions(true)) return;
 
 	const context = getContext();
 	const group = context.groups.find((x) => x.id === context.groupId);
-	const filteredMembers = group.members.filter(
-		(x) => !group.disabled_members.includes(x),
-	);
 
-	for (const member of filteredMembers) {
-		const character = context.characters.find((x) => x.avatar === member);
-		if (!character) {
-			continue;
-		}
-		if (character.avatar === "prome-user") return;
+	if (group) {
+		const filteredMembers = group.members.filter(
+			(x) => !group.disabled_members.includes(x),
+		);
 
-		const sprites = await getSpriteList(character.name);
-		if (sprites.length === 0) {
-			if (!isDisabledMember(character.avatar)) {
-				console.debug(
-					`[${extensionName}] No sprites found for character: ${character.name}. Emulating via character card image.`,
-				);
-
-				// grab the sprite div
-				const spriteDiv = `#visual-novel-wrapper [id='expression-${character.avatar}']`;
-				let sprite = $(spriteDiv);
-
-				// apply the sprite card image to <img id="expression-image"> in the spriteDiv
-				const applySpriteCardImage = (div, member) => {
-					// grab the sprite img element in the sprite div
-					const expressionImage = $(`${div} > img`)[0];
-
-					// apply the sprite card image to the img src
-					expressionImage.src = `/characters/${member}`;
-				};
-
-				if (sprite.length === 0) {
-					// give time for the sprite to load on the page
-					const checkInterval = setInterval(() => {
-						sprite = $(spriteDiv);
-						if (sprite.length > 0) {
-							applySpriteCardImage(spriteDiv, character.avatar);
-							clearInterval(checkInterval);
-						}
-					}, 100);
-				} else {
-					applySpriteCardImage(spriteDiv, character.avatar);
-				}
-				// apply the prome-render-sprite class to the sprite div
-				sprite.addClass("prome-render-sprite");
+		for (const member of filteredMembers) {
+			const character = context.characters.find((x) => x.avatar === member);
+			if (!character) {
+				continue;
 			}
+			if (character.avatar === "prome-user") return;
+
+			const sprites = await getSpriteList(character.name);
+			if (sprites.length === 0) {
+				if (!isDisabledMember(character.avatar)) {
+					console.debug(
+						`[${extensionName}] No sprites found for character: ${character.name}. Emulating via character card image.`,
+					);
+
+					// grab the sprite div
+					const spriteDiv = `#visual-novel-wrapper [id='expression-${character.avatar}']`;
+					let sprite = $(spriteDiv);
+
+					// apply the sprite card image to <img id="expression-image"> in the spriteDiv
+					const applySpriteCardImage = (div, member) => {
+						// grab the sprite img element in the sprite div
+						const expressionImage = $(`${div} > img`)[0];
+
+						// apply the sprite card image to the img src
+						expressionImage.src = `/characters/${member}`;
+					};
+
+					if (sprite.length === 0) {
+						// give time for the sprite to load on the page
+						const checkInterval = setInterval(() => {
+							sprite = $(spriteDiv);
+							if (sprite.length > 0) {
+								applySpriteCardImage(spriteDiv, character.avatar);
+								clearInterval(checkInterval);
+							}
+						}, 100);
+					} else {
+						applySpriteCardImage(spriteDiv, character.avatar);
+					}
+					// apply the prome-render-sprite class to the sprite div
+					sprite.addClass("prome-render-sprite");
+				}
+			}
+		}
+	} else {
+		if (context.characterId === null) return;
+
+		const character = context.characters[context.characterId];
+		const sprites = await getSpriteList(character.name);
+
+		if (sprites.length === 0) {
+			console.debug(
+				`[${extensionName}] No sprites found for character: ${character.name}. Emulating via character card image.`,
+			);
+
+			const spriteDiv = $("#expression-holder");
+
+			const applySpriteCardImage = () => {
+				spriteDiv
+					.children("img")
+					.attr("src", `/characters/${character.avatar}`);
+			};
+
+			if (spriteDiv.length === 0) {
+				const checkInterval = setInterval(() => {
+					if (spriteDiv.length > 0) {
+						applySpriteCardImage();
+						clearInterval(checkInterval);
+					}
+				}, 100);
+			} else {
+				applySpriteCardImage();
+			}
+			spriteDiv.addClass("prome-render-sprite");
 		}
 	}
 }
