@@ -303,3 +303,13 @@ body.waifuMode.userSprite #expression-wrapper {
 body.waifuMode.userSprite #expression-wrapper .expression-holder {
 	position: unset;
 }
+
+body #expression-prome-user {
+	display: none;
+	visibility: hidden;
+}
+
+body.waifuMode.userSprite #expression-prome-user {
+	display: flex;
+	visibility: visible;
+}
