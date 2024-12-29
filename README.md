@@ -108,3 +108,5 @@ A SillyTavern that supports extensions.
 4. Click on _Extensions_ again and click down on the `Prome (Visual Novel Extension)` dropdown and toggle _Enable Prome VN Mode_.
    > If you already have Visual Novel Mode on, you can skip this step.
 5. Profit.
+
+The Prome Visual Novel Extension, the Prome Visual Novel Extension Code, Copyright 2024-2025 Bronya-Rand. All rights reserved. 

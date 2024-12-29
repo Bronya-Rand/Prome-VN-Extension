@@ -111,4 +111,6 @@ export const defaultSettings = {
 	tintPresets: defaultTintPresets,
 	enableUserSprite: false,
 	userSprite: "",
+	autoHideSprites: false,
+	maxViewableCharacters: 5,
 };
