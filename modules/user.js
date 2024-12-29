@@ -6,21 +6,11 @@ import {
 	eventSource,
 	event_types,
 } from "../../../../../script.js";
-import { getSpriteList } from "../utils.js";
+import { getGroupIndex, getSpriteList } from "../utils.js";
 import { loadMovingUIState } from "../../../../power-user.js";
 import { dragElement } from "../../../../RossAscends-mods.js";
 
-function getGroupIndex() {
-	const context = getContext();
-	const groupIndex = context.groups.findIndex((x) => {
-		return x.id === context.groupId;
-	});
-	return groupIndex;
-}
-
 export function applyUserSprite() {
-	const groupIndex = getGroupIndex();
-
 	if (
 		extension_settings[extensionName].enableUserSprite === (null || undefined)
 	) {
@@ -37,7 +27,6 @@ export function applyUserSprite() {
 		"userSprite",
 		extension_settings[extensionName].enableUserSprite,
 	);
-	if (groupIndex !== -1) eventSource.emit(event_types.GROUP_UPDATED);
 }
 
 /*
@@ -63,13 +52,15 @@ export async function handleUserSprite() {
 		}
 
 		if (extension_settings[extensionName].enableUserSprite) {
-			group.members.push("prome-user");
+			if (!group.members.includes("prome-user")) 
+				group.members.push("prome-user");
 			group.disabled_members = group.disabled_members.filter(
 				(x) => x !== "prome-user",
 			);
 		} else {
 			group.members = group.members.filter((x) => x !== "prome-user");
-			group.disabled_members.push("prome-user");
+			if (!group.disabled_members.includes("prome-user"))
+				group.disabled_members.push("prome-user");
 		}
 	} else {
 		// One-on-One Chat
@@ -77,23 +68,20 @@ export async function handleUserSprite() {
 
 		// CHeck if Prome's Expression Image IMG is in the Expression Holder Div
 		const expressionHolder = $("#expression-wrapper");
-		const promeExpression = $("#expression-wrapper").children(
+		let promeExpression = $("#expression-wrapper").children(
 			"#expression-prome-user",
 		);
 		if (promeExpression.length === 0) {
-			const expHolder = $("#expression-holder").children(
-				"#expression-holder")
-			
 			const html = `<div id="expression-prome-user" class="expression-holder displayNone">
 					<div id="expression-prome-userheader" class="fa-solid fa-grip drag-grabber"></div>
 					<img id="expression-image" class="" src=""/>
 				</div>`;
-		
+				
 			expressionHolder.append(html);
 			
-			const test = $('#expression-prome-user');
+			promeExpression = $('#expression-prome-user');
 			loadMovingUIState();
-			dragElement(test);
+			dragElement(promeExpression);
 		}
 		if (extension_settings[extensionName].enableUserSprite) {
 			$("#expression-prome-user").removeClass("displayNone");
