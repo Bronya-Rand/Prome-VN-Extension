@@ -7,6 +7,8 @@ import {
 	event_types,
 } from "../../../../../script.js";
 import { getSpriteList } from "../utils.js";
+import { loadMovingUIState } from "../../../../power-user.js";
+import { dragElement } from "../../../../RossAscends-mods.js";
 
 function getGroupIndex() {
 	const context = getContext();
@@ -79,13 +81,19 @@ export async function handleUserSprite() {
 			"#expression-prome-user",
 		);
 		if (promeExpression.length === 0) {
-			// Create the Expression DIV
-			const html = `
-				<div id="expression-prome-user" class="expression-holder displayNone">
+			const expHolder = $("#expression-holder").children(
+				"#expression-holder")
+			
+			const html = `<div id="expression-prome-user" class="expression-holder displayNone">
+					<div id="expression-prome-userheader" class="fa-solid fa-grip drag-grabber"></div>
 					<img id="expression-image" class="" src=""/>
-				</div>
-			`;
+				</div>`;
+		
 			expressionHolder.append(html);
+			
+			const test = $('#expression-prome-user');
+			loadMovingUIState();
+			dragElement(test);
 		}
 		if (extension_settings[extensionName].enableUserSprite) {
 			$("#expression-prome-user").removeClass("displayNone");
