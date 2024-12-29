@@ -77,12 +77,12 @@ The Prome Visual Novel Extension is a extension for SillyTavern that remodernize
 
 9. Sheld Visibility - Hide the Sheld (Message Box) to capture the moment of a given chat.
 
-   > [!NOTE]
-   > This feature can be toggled in the Settings Menu or by pressing `Ctrl` + `F1`.
+> [!NOTE]
+> This feature can be toggled in the Settings Menu or by pressing `Ctrl` + `F1`.
 
-      <center>
-       <img src="./.github/sheld_hide.png"/>
-      </center>
+   <center>
+      <img src="./.github/sheld_hide.png"/>
+   </center>
 
 Most of Prome's feature settings can be found under _Extensions_ > `Prome (Visual Novel Extension)`. Other features like Chat History will be located under the wand tool in the ST chatbox.
 | Extension Settings | Wand Options |
