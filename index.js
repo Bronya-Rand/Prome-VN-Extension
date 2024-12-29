@@ -71,6 +71,7 @@ import {
 	onUserSprite_Click,
 	onUserSprite_Input,
 } from "./modules/user.js";
+import { applyAutoHideSprites, handleAutoHideSprites, setupAutoHideHTML, setupAutoHideJQuery } from "./modules/auto-hide.js";
 
 async function loadSettings() {
 	extension_settings[extensionName] = extension_settings[extensionName] || {};
@@ -133,6 +134,9 @@ async function loadSettings() {
 		extension_settings[extensionName].userSprite,
 	);
 
+	// Auto Hide Sprites
+	setupAutoHideHTML();
+
 	// Traditional VN Mode Updates
 	$("#prome-sheld-last_mes").prop(
 		"checked",
@@ -174,6 +178,8 @@ async function loadSettings() {
 	applySpriteShadowBlur();
 	// User Sprite
 	applyUserSprite();
+	// Auto Hide Sprites
+	applyAutoHideSprites();
 }
 
 /* Prome Core Listeners */
@@ -259,6 +265,7 @@ jQuery(async () => {
 	/* Prome Feature Initialization */
 	addLetterbox();
 	setupTintJQuery();
+	setupAutoHideJQuery();
 	loadSettings();
 	prepareSlashCommands();
 
@@ -267,13 +274,19 @@ jQuery(async () => {
 	eventSource.on(event_types.CHAT_CHANGED, () => {
 		applyZoomDebounce();
 		applyDefocusDebounce();
+		applyAutoHideSprites();
+		handleAutoHideSprites();
 		handleUserSprite();
 	});
 	eventSource.on(event_types.MESSAGE_DELETED, () => {
 		applyZoomDebounce();
 		applyDefocusDebounce();
+		handleAutoHideSprites();
 	});
-	eventSource.on(event_types.GROUP_UPDATED, handleUserSprite);
+	eventSource.on(event_types.GROUP_UPDATED, () => {
+		handleAutoHideSprites();
+		handleUserSprite();
+	});
 
 	// Show info message if Sheld is hidden
 	if (!isSheldVisible()) {
@@ -296,6 +309,7 @@ $(document).ready(() => {
 					applyZoomDebounce();
 					applyDefocusDebounce();
 					applyShakeDebounce();
+					handleAutoHideSprites();
 				}
 				if (
 					node.tagName === "DIV" &&
@@ -303,6 +317,7 @@ $(document).ready(() => {
 				) {
 					applyZoomDebounce();
 					applyDefocusDebounce();
+					handleAutoHideSprites();
 				}
 			}
 		};

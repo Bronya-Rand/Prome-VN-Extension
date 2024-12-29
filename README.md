@@ -24,7 +24,8 @@ The Prome Visual Novel Extension is a extension for SillyTavern that remodernize
 > There is a possibility that SillyTavern may display a warning saying _'prome-user' is not in the list of group members_ in a Group Chat. Ignore this warning as this is your persona and Prome has already added it to the group chat.
 
 > [!IMPORTANT]
-> When changing chats, you might spot a "broken" character in the character/group list. Do not interact with it as this is Prome making a "dummy character" for your persona to use in a group chat. You can however move it's position to be elsewhere in a group chat.
+> 1. When changing chats, you might spot a "broken" character in the character/group list. Do not interact with it as this is Prome making a "dummy character" for your persona to use in a group chat. You can however move it's position to be elsewhere in a group chat.
+> 2. If your persona or decide to use the name of a character that exists in the group chat, your user sprite *may* change expressions to that of said character. This is primarily a ST limitation but you can always revert it via `/express` or by duplicating the character folder and renaming it to something else.
 
    <center>
       <img src="./.github/user-sprite.png">
@@ -42,6 +43,12 @@ The Prome Visual Novel Extension is a extension for SillyTavern that remodernize
    <center>
     <img src="./.github/defocus.png"/>
    </center>
+
+6. Auto-Hide Sprites (an alternative to disabling characters) - Wanted to keep everyone in chat but there are just too many people on screen to see them all? Give Prome a limit of sprites to show in the VN screen! Whether you want 3, 6 or 8, Prome will auto-hide anyone who hasn't partaken in the conversation, making the screen easier to see.
+   <center>
+    <img src="./.github/auto-hide.png">
+   </center>
+
 6. Sprite Shadows & Shake (Emulates Speaking) - Wanted a bit more "realism" to your character sprites? Prome has the ability to mimic a character talking by shaking the sprite subtly and add a shadow to the sprite itself, making the character blend in more into the environment you've chosen!
 
 > [!IMPORTANT]
@@ -70,12 +77,12 @@ The Prome Visual Novel Extension is a extension for SillyTavern that remodernize
 
 9. Sheld Visibility - Hide the Sheld (Message Box) to capture the moment of a given chat.
 
-   > [!NOTE]
-   > This feature can be toggled in the Settings Menu or by pressing `Ctrl` + `F1`.
+> [!NOTE]
+> This feature can be toggled in the Settings Menu or by pressing `Ctrl` + `F1`.
 
-      <center>
-       <img src="./.github/sheld_hide.png"/>
-      </center>
+   <center>
+      <img src="./.github/sheld_hide.png"/>
+   </center>
 
 Most of Prome's feature settings can be found under _Extensions_ > `Prome (Visual Novel Extension)`. Other features like Chat History will be located under the wand tool in the ST chatbox.
 | Extension Settings | Wand Options |
@@ -108,3 +115,5 @@ A SillyTavern that supports extensions.
 4. Click on _Extensions_ again and click down on the `Prome (Visual Novel Extension)` dropdown and toggle _Enable Prome VN Mode_.
    > If you already have Visual Novel Mode on, you can skip this step.
 5. Profit.
+
+The Prome Visual Novel Extension, the Prome Visual Novel Extension Code, Copyright 2024-2025 Bronya-Rand. All rights reserved. 

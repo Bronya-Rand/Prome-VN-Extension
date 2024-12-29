@@ -294,13 +294,13 @@ body.worldTint.sharedTint.spriteShadow
  * Prome User Sprite Overrides
  * (For ST)
  */
-body.waifuMode.userSprite #expression-wrapper {
+body.waifuMode.userSprite:not(.movingUI) #expression-wrapper {
 	position: absolute;
 	height: max-content;
 	bottom: 0;
 }
 
-body.waifuMode.userSprite #expression-wrapper .expression-holder {
+body.waifuMode.userSprite:not(.movingUI) #expression-wrapper .expression-holder {
 	position: unset;
 }
 
