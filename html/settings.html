@@ -13,13 +13,14 @@
             <div class="prome-drawer-content">
                 <small class="flex-container justifyCenter">
                     <span data-i18n="Brought to you by">Brought to you by </span>
-                    <a href="https://github.com/Bronya-Rand">Bronya Rand</a>
+                    <a href="https://github.com/Bronya-Rand" data-i18n="Bronya Rand">Bronya Rand</a>
                     <span data-i18n="and Prometheus."> and Prometheus.</span>
                 </small>
 
                 <div class="prome_vn_block flex-container flexFlowColumn">
                     <label class="checkbox_label" for="prome-enable-vn"
-                        title="Toggles Prome, VN Mode and other Prome features.">
+                        title="Toggles Prome, VN Mode and other Prome features."
+                        data-i18n="[title]Toggles Prome, VN Mode and other Prome features.">
                         <input id="prome-enable-vn" type="checkbox" />
                         <span data-i18n="Enable Prome">Enable Prome</span>
                     </label>
@@ -38,12 +39,14 @@
                     <h4 data-i18n="Sheld Configuration">Sheld Configuration</h4>
                     <div class="prome_vn_block flex-container flexFlowRow">
                         <label class="checkbox_label" for="prome-hide-sheld"
-                            title="Hide the message box (sheld) in the ST UI.">
+                            title="Hide the message box (sheld) in the ST UI."
+                            data-i18n="[title]Hide the message box (sheld) in the ST UI.">
                             <input id="prome-hide-sheld" type="checkbox" />
                             <span data-i18n="Hide Sheld (Message Box)">Hide Sheld (Message Box)</span>
                         </label>
                         <label class="checkbox_label" for="prome-sheld-last_mes"
-                            title="Only Show Last Message in Chat (Requires Prome to be enabled).">
+                            title="Only Show Last Message in Chat (Requires Prome to be enabled)."
+                            data-i18n="[title]Only Show Last Message in Chat (Requires Prome to be enabled).">
                             <input id="prome-sheld-last_mes" type="checkbox" />
                             <span data-i18n="Enable Traditional VN Mode">Enable Traditional VN Mode*</span>
                         </label>
@@ -114,14 +117,16 @@
                     <div class="prome_vn_block flex-container flexFlowColumn prome_details_padding">
                         <div class="prome_vn_block flex-container flexFlowColumn">
                             <label class="checkbox_label" for="prome-emulate-sprites"
-                                title="Emulates the character card of a character to be a sprite. (Requires Prome to be enabled).">
+                                title="Emulates the character card of a character to be a sprite. (Requires Prome to be enabled)."
+                                data-i18n="[title]Emulates the character card of a character to be a sprite. (Requires Prome to be enabled).">
                                 <input id="prome-emulate-sprites" type="checkbox" />
                                 <span data-i18n="Emulate Character Card as Sprite">[BETA] Emulate Character Card as
                                     Sprite</span>
                             </label>
 
                             <label class="checkbox_label" for="prome-sprite-shake"
-                                title="Shakes the character sprite when the character is speaking (Only works if Streaming is enabled in Preset Settings).">
+                                title="Shakes the character sprite when the character is speaking (Only works if Streaming is enabled in Preset Settings)."
+                                data-i18n="[title]Shakes the character sprite when the character is speaking (Only works if Streaming is enabled in Preset Settings).">
                                 <input id="prome-sprite-shake" type="checkbox" />
                                 <span data-i18n="Enable Sprite Shake">[BETA] Enable Sprite Shake</span>
                             </label>
@@ -129,13 +134,15 @@
 
                         <div class="prome_vn_block flex-container flexFlowRow">
                             <label class="checkbox_label" for="prome-sprite-zoom"
-                                title="Focuses the current speaking character in chat. (Requires Prome to be enabled).">
+                                title="Focuses the current speaking character in chat. (Requires Prome to be enabled)."
+                                data-i18n="[title]Focuses the current speaking character in chat. (Requires Prome to be enabled).">
                                 <input id="prome-sprite-zoom" type="checkbox" />
                                 <span data-i18n="Enable Focus Mode">Enable Focus Mode</span>
                             </label>
 
                             <label class="checkbox_label" for="prome-sprite-defocus-tint"
-                                title="Darkens non-speaking (unfocused) characters. (Requires Prome to be enabled).">
+                                title="Darkens non-speaking (unfocused) characters. (Requires Prome to be enabled)."
+                                data-i18n="[title]Darkens non-speaking (unfocused) characters. (Requires Prome to be enabled).">
                                 <input id="prome-sprite-defocus-tint" type="checkbox" />
                                 <span data-i18n="Darken Unfocused Character Sprites">Darken Character Sprites</span>
                             </label>
@@ -143,7 +150,8 @@
 
                         <div class="prome_vn_block flex-container flexFlowRow">
                             <label class="checkbox_label" for="prome-auto-hide-sprites"
-                                title="Auto-hides characters from the screen that haven't been in the conversation for a while up to X characters. (Requires Prome to be enabled).">
+                                title="Auto-hides characters from the screen that haven't been in the conversation for a while up to X characters. (Requires Prome to be enabled)."
+                                data-i18n="[title]Auto-hides characters from the screen that haven't been in the conversation for a while up to X characters. (Requires Prome to be enabled).">
                                 <input id="prome-auto-hide-sprites" type="checkbox" />
                                 <span data-i18n="Auto-Hide Sprites">Auto-Hide Sprites</span>
                             </label>
@@ -156,9 +164,7 @@
                                         <i class="fa-solid fa-clock-rotate-left fa-sm"></i>
                                     </div>
                                 </label>
-                                <small data-i18n="Set the maximum number of visible sprites.">Set the maximum number of
-                                    visible
-                                    sprites that appears in the VN screen.</small>
+                                <small data-i18n="Set the maximum number of visible sprites that appears in the VN screen.">Set the maximum number of visible sprites that appears in the VN screen.</small>
                                 <input class="neo-range-input" id="prome-sprite-max-visible" type="number" min="1"
                                     max="8" step="1" data-for="prome-sprite-max-visible" />
                             </div>
@@ -280,7 +286,8 @@
                             </summary>
                             <div class="prome_vn_block flex-container flexFlowColumn prome_details_padding">
                                 <label class="checkbox_label" for="prome-user-sprite"
-                                    title="Enables the ability to use a user sprite for your persona.">
+                                    title="Enables the ability to use a user sprite for your persona."
+                                    data-i18n="[title]Enables the ability to use a user sprite for your persona.">
                                     <input id="prome-user-sprite" type="checkbox" />
                                     <span data-i18n="Enable User Sprite">Enable User Sprite</span>
                                 </label>
@@ -295,7 +302,8 @@
 
                                     <textarea id="prome-user-sprite-input" type="text"
                                         class="text_pole textarea_compact"
-                                        placeholder="Enter the name of your sprite"></textarea>
+                                        placeholder="Enter the name of your sprite"
+                                        data-i18n="[placeholder]Enter the name of your sprite"></textarea>
 
                                     <p>
                                         <small data-i18n="Note: Create a sprite folder in the ">Note: Create a sprite
@@ -319,13 +327,15 @@
                     <div class="prome_vn_block flex-container flexFlowColumn prome_details_padding">
                         <div class="prome_vn_block flex-container flexFlowRow">
                             <label class="checkbox_label" for="prome-tint-chat"
-                                title="Tints the chat background and/or character sprites.">
+                                title="Tints the chat background and/or character sprites."
+                                data-i18n="Tints the chat background and/or character sprites.">
                                 <input id="prome-tint-enable" type="checkbox" />
                                 <span data-i18n="Enable Chat Tint">Enable Chat Tint</span>
                             </label>
 
                             <label for="prome-world-tint-share" class="title_restorable"
-                                title="Applies the world tint to character sprites (Requires Prome to be enabled. This will override your character tint settings).">
+                                title="Applies the world tint to character sprites (Requires Prome to be enabled. This will override your character tint settings)."
+                                data-i18n="[title]Applies the world tint to character sprites (Requires Prome to be enabled. This will override your character tint settings).">
                                 <input id="prome-tint-share" type="checkbox" />
                                 <span data-i18n="Share World Tint With Characters">Share World Tint With
                                     Characters*</span>
@@ -339,10 +349,10 @@
                                 the Prome VN UI.</small>
                             <div class="flex-container flexFlowRow">
                                 <select id="prome-tint-preset"></select>
-                                <div id="prome-tint-save" data-i18n="Save tint" title="Save tint" class="menu_button">
+                                <div id="prome-tint-save" data-i18n="[title]Save tint" title="Save tint" class="menu_button">
                                     <i class="fa-solid fa-save"></i>
                                 </div>
-                                <div id="prome-tint-delete" data-i18n="Delete tint" title="Delete tint"
+                                <div id="prome-tint-delete" data-i18n="[title]Delete tint" title="Delete tint"
                                     class="menu_button">
                                     <i class="fa-solid fa-trash-can"></i>
                                 </div>
@@ -354,7 +364,8 @@
                             <div class="prome_vn_block flex-container flexFlowColumn">
                                 <span data-i18n="World Tint Settings">World Tint Settings</span>
                                 <label class="checkbox_label" for="prome-world-tint"
-                                    title="Tints the world background.">
+                                    title="Tints the world background."
+                                    data-i18n="[title]Tints the world background.">
                                     <input id="prome-world-tint" type="checkbox" />
                                     <span data-i18n="Enable World Tint">Enable World Tint</span>
                                 </label>
@@ -424,7 +435,8 @@
                             <div class="prome_vn_block flex-container flexFlowColumn">
                                 <span data-i18n="Character Tint Settings">Character Tint Settings*</span>
                                 <label class="checkbox_label" for="prome-character-tint"
-                                    title="Tints the character sprites.">
+                                    title="Tints the character sprites."
+                                    data-i18n="[title]Tints the character sprites.">
                                     <input id="prome-character-tint" type="checkbox" />
                                     <span data-i18n="Enable Character Tint (Requires Prome to be enabled)">Enable
                                         Character Tint</span>
