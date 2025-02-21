@@ -25,7 +25,7 @@ export const applyShakeDebounce = debounce(async () => {
 }, debounce_timeout.short);
 export const handleUserSpriteDebounce = debounce(async () => {
 	await handleUserSprite();
-}, debounce_timeout.standard);
+}, 450);
 
 // Check if the current chat has more than one member
 function zoomListenerPreconditions(allowSolo = false) {

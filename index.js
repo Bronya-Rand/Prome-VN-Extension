@@ -301,6 +301,9 @@ jQuery(async () => {
 		await handleAutoHideSprites();
 		await handleUserSpriteDebounce();
 	});
+	$(window).on("resize", async () => {
+		await handleUserSpriteDebounce();
+	});
 
 	// Show info message if Sheld is hidden
 	if (!isSheldVisible()) {
