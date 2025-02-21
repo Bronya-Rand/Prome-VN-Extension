@@ -90,6 +90,14 @@ async function loadSettings() {
 		}
 	}
 
+	// Add a expression override for the user sprite
+	if (!extension_settings.expressionOverrides.find((e) => e.name === "prome-user"))
+		extension_settings.expressionOverrides.push({
+			name: "prome-user",
+			path: `${extension_settings[extensionName].userSprite}`,
+		});
+	saveSettingsDebounced();
+
 	// Prome Updates
 	$("#prome-enable-vn").prop(
 		"checked",

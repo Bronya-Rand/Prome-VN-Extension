@@ -1,14 +1,11 @@
 import { extensionName } from "../constants.js";
 import { extension_settings } from "../../../../extensions.js";
 import { getContext } from "../../../../extensions.js";
-import {
-	saveSettingsDebounced,
-	eventSource,
-	event_types,
-} from "../../../../../script.js";
+import { saveSettingsDebounced } from "../../../../../script.js";
 import { getGroupIndex, getSpriteList } from "../utils.js";
 import { loadMovingUIState } from "../../../../power-user.js";
 import { dragElement } from "../../../../RossAscends-mods.js";
+import { sendExpressionCall } from "../../../expressions/index.js";
 
 export function applyUserSprite() {
 	if (
@@ -42,7 +39,7 @@ export async function handleUserSprite() {
 
 		if (!context.characters.find((x) => x.avatar === "prome-user")) {
 			context.characters.push({
-				name: `${extension_settings[extensionName].userSprite}`,
+				name: "Prome User Sprite (Do Not Interact)",
 				avatar: "prome-user",
 				data: {
 					creator_notes:
@@ -52,7 +49,7 @@ export async function handleUserSprite() {
 		}
 
 		if (extension_settings[extensionName].enableUserSprite) {
-			if (!group.members.includes("prome-user")) 
+			if (!group.members.includes("prome-user"))
 				group.members.push("prome-user");
 			group.disabled_members = group.disabled_members.filter(
 				(x) => x !== "prome-user",
@@ -66,7 +63,7 @@ export async function handleUserSprite() {
 		// One-on-One Chat
 		if (context.characterId === undefined) return;
 
-		// CHeck if Prome's Expression Image IMG is in the Expression Holder Div
+		// Check if Prome's Expression Image IMG is in the Expression Holder Div
 		const expressionHolder = $("#expression-wrapper");
 		let promeExpression = $("#expression-wrapper").children(
 			"#expression-prome-user",
@@ -76,10 +73,10 @@ export async function handleUserSprite() {
 					<div id="expression-prome-userheader" class="fa-solid fa-grip drag-grabber"></div>
 					<img id="expression-image" class="" src=""/>
 				</div>`;
-				
+
 			expressionHolder.append(html);
-			
-			promeExpression = $('#expression-prome-user');
+
+			promeExpression = $("#expression-prome-user");
 			loadMovingUIState();
 			dragElement(promeExpression);
 		}
@@ -88,12 +85,12 @@ export async function handleUserSprite() {
 		} else {
 			$("#expression-prome-user").addClass("displayNone");
 		}
-		applyUserSpriteAttributes();
 	}
+	await applyUserSpriteAttributes();
 }
 
 async function applyUserSpriteAttributes() {
-	const context = getContext();
+	const groupIndex = getGroupIndex();
 
 	if (extension_settings[extensionName].enableUserSprite) {
 		if (extension_settings[extensionName].userSprite.length === 0) return;
@@ -102,19 +99,45 @@ async function applyUserSpriteAttributes() {
 		);
 		if (spritePackExists.length === 0) return;
 
-		const originalSrc = $("#expression-prome-user").children("img").attr("src");
-		let originalExpression = originalSrc.split("/").pop();
-		if (originalExpression.length === 0) originalExpression = "neutral.png";
-
-		$("#expression-prome-user")
-			.children("img")
-			.attr(
-				"src",
-				`/characters/${extension_settings[extensionName].userSprite}/${originalExpression}`,
+		// Update the User Sprite Pack
+		const existingOverrideIndex =
+			extension_settings.expressionOverrides.findIndex(
+				(e) => e.name === "prome-user",
 			);
+		if (existingOverrideIndex === -1) {
+			extension_settings.expressionOverrides.push({
+				name: "prome-user",
+				path: extension_settings[extensionName].userSprite,
+			});
+		} else {
+			extension_settings.expressionOverrides[existingOverrideIndex].path =
+				extension_settings[extensionName].userSprite;
+		}
+		saveSettingsDebounced();
 
-		if (context.groupId !== null)
-			await eventSource.emit(event_types.GROUP_UPDATED);
+		// Update the User Sprite
+		const originalSrc = $("#expression-prome-user").children("img").attr("src");
+		let originalExpression = "neutral";
+		if (originalSrc !== undefined) {
+			const srcData = originalSrc.split("/").pop();
+			if (srcData.length > 0) originalExpression = srcData.split(".")[0];
+		}
+
+		if (groupIndex !== -1) {
+			// Group Chat
+			await sendExpressionCall(
+				extension_settings[extensionName].userSprite,
+				originalExpression,
+			);
+		} else {
+			// One-on-One Chat
+			$("#expression-prome-user")
+				.children("img")
+				.attr(
+					"src",
+					`/characters/${extension_settings[extensionName].userSprite}/${originalExpression}.png`,
+				);
+		}
 	}
 }
 
