@@ -39,11 +39,11 @@ export async function handleUserSprite() {
 
 		if (!context.characters.find((x) => x.avatar === "prome-user")) {
 			context.characters.push({
-				name: "Prome User Sprite (Do Not Interact)",
+				name: "Prome User Sprite (Do Not Click)",
 				avatar: "prome-user",
 				data: {
 					creator_notes:
-						"This is a dummy bot made for Prome's user sprites. Do not interact with this entry.",
+						"This is a dummy card made for Prome. Don't click this entry.",
 				},
 			});
 		}
@@ -51,13 +51,15 @@ export async function handleUserSprite() {
 		if (extension_settings[extensionName].enableUserSprite) {
 			if (!group.members.includes("prome-user"))
 				group.members.push("prome-user");
-			group.disabled_members = group.disabled_members.filter(
-				(x) => x !== "prome-user",
-			);
+			if (group.disabled_members.includes("prome-user"))
+				group.disabled_members = group.disabled_members.filter(
+					(x) => x !== "prome-user",
+				);
 		} else {
-			group.members = group.members.filter((x) => x !== "prome-user");
 			if (!group.disabled_members.includes("prome-user"))
 				group.disabled_members.push("prome-user");
+			if (group.members.includes("prome-user"))
+				group.members = group.members.filter((x) => x !== "prome-user");
 		}
 	} else {
 		// One-on-One Chat
@@ -89,7 +91,7 @@ export async function handleUserSprite() {
 	await applyUserSpriteAttributes();
 }
 
-async function applyUserSpriteAttributes() {
+async function applyUserSpriteAttributes(newSpritePack = false) {
 	const groupIndex = getGroupIndex();
 
 	if (extension_settings[extensionName].enableUserSprite) {
@@ -100,20 +102,22 @@ async function applyUserSpriteAttributes() {
 		if (spritePackExists.length === 0) return;
 
 		// Update the User Sprite Pack
-		const existingOverrideIndex =
-			extension_settings.expressionOverrides.findIndex(
-				(e) => e.name === "prome-user",
-			);
-		if (existingOverrideIndex === -1) {
-			extension_settings.expressionOverrides.push({
-				name: "prome-user",
-				path: extension_settings[extensionName].userSprite,
-			});
-		} else {
-			extension_settings.expressionOverrides[existingOverrideIndex].path =
-				extension_settings[extensionName].userSprite;
+		if (newSpritePack) {
+			const existingOverrideIndex =
+				extension_settings.expressionOverrides.findIndex(
+					(e) => e.name === "prome-user",
+				);
+			if (existingOverrideIndex === -1) {
+				extension_settings.expressionOverrides.push({
+					name: "prome-user",
+					path: extension_settings[extensionName].userSprite,
+				});
+			} else {
+				extension_settings.expressionOverrides[existingOverrideIndex].path =
+					extension_settings[extensionName].userSprite;
+			}
+			saveSettingsDebounced();
 		}
-		saveSettingsDebounced();
 
 		// Update the User Sprite
 		const originalSrc = $("#expression-prome-user").children("img").attr("src");
@@ -123,20 +127,19 @@ async function applyUserSpriteAttributes() {
 			if (srcData.length > 0) originalExpression = srcData.split(".")[0];
 		}
 
+		$("#expression-prome-user")
+			.children("img")
+			.attr(
+				"src",
+				`/characters/${extension_settings[extensionName].userSprite}/${originalExpression}.png`,
+			);
+
 		if (groupIndex !== -1) {
 			// Group Chat
 			await sendExpressionCall(
 				extension_settings[extensionName].userSprite,
 				originalExpression,
 			);
-		} else {
-			// One-on-One Chat
-			$("#expression-prome-user")
-				.children("img")
-				.attr(
-					"src",
-					`/characters/${extension_settings[extensionName].userSprite}/${originalExpression}.png`,
-				);
 		}
 	}
 }
@@ -154,5 +157,5 @@ export function onUserSprite_Input() {
 	console.debug(`[${extensionName}] User Sprite: ${value}`);
 	extension_settings[extensionName].userSprite = value;
 	saveSettingsDebounced();
-	applyUserSpriteAttributes();
+	applyUserSpriteAttributes(true);
 }

@@ -13,18 +13,18 @@ export function getLastChatMessage() {
 }
 
 /**
- * Lists out the characters that have spoken recently 
+ * Lists out the characters that have spoken recently
  * @param {number?} limit - The number of characters to return
  * @returns {string[]} - An array of character original avatars
  */
 export function getRecentTalkingCharacters(limit) {
 	const context = getContext();
 	const reversedChat = context.chat.slice().reverse();
-	
+
 	// Filter out system messages, images, and user messages
 	const talkingCharacters = reversedChat
 		.filter((mes) => !mes.is_system && !mes.extra?.image && !mes.is_user)
-		.map((mes) => mes.original_avatar)
+		.map((mes) => mes.original_avatar);
 
 	if (limit) {
 		// Limit the number of characters to return

@@ -23,6 +23,7 @@ import {
 	emulateSpritesDebounce,
 	applyShakeDebounce,
 	stopShake,
+	handleUserSpriteDebounce,
 } from "./listeners.js";
 
 /* Prome Feature Imports */
@@ -67,11 +68,15 @@ import {
 import { setupTintHTML, setupTintJQuery } from "./modules/tint.js";
 import {
 	applyUserSprite,
-	handleUserSprite,
 	onUserSprite_Click,
 	onUserSprite_Input,
 } from "./modules/user.js";
-import { applyAutoHideSprites, handleAutoHideSprites, setupAutoHideHTML, setupAutoHideJQuery } from "./modules/auto-hide.js";
+import {
+	applyAutoHideSprites,
+	handleAutoHideSprites,
+	setupAutoHideHTML,
+	setupAutoHideJQuery,
+} from "./modules/auto-hide.js";
 
 async function loadSettings() {
 	extension_settings[extensionName] = extension_settings[extensionName] || {};
@@ -91,7 +96,9 @@ async function loadSettings() {
 	}
 
 	// Add a expression override for the user sprite
-	if (!extension_settings.expressionOverrides.find((e) => e.name === "prome-user"))
+	if (
+		!extension_settings.expressionOverrides.find((e) => e.name === "prome-user")
+	)
 		extension_settings.expressionOverrides.push({
 			name: "prome-user",
 			path: `${extension_settings[extensionName].userSprite}`,
@@ -279,21 +286,20 @@ jQuery(async () => {
 
 	eventSource.on(event_types.MESSAGE_SWIPED, applyShakeDebounce);
 	eventSource.on(event_types.CHARACTER_MESSAGE_RENDERED, stopShake);
-	eventSource.on(event_types.CHAT_CHANGED, () => {
-		applyZoomDebounce();
-		applyDefocusDebounce();
-		applyAutoHideSprites();
-		handleAutoHideSprites();
-		handleUserSprite();
+	eventSource.on(event_types.CHAT_CHANGED, async () => {
+		await applyZoomDebounce();
+		await applyDefocusDebounce();
+		await handleAutoHideSprites();
+		await handleUserSpriteDebounce();
 	});
-	eventSource.on(event_types.MESSAGE_DELETED, () => {
-		applyZoomDebounce();
-		applyDefocusDebounce();
-		handleAutoHideSprites();
+	eventSource.on(event_types.MESSAGE_DELETED, async () => {
+		await applyZoomDebounce();
+		await applyDefocusDebounce();
+		await handleAutoHideSprites();
 	});
-	eventSource.on(event_types.GROUP_UPDATED, () => {
-		handleAutoHideSprites();
-		handleUserSprite();
+	eventSource.on(event_types.GROUP_UPDATED, async () => {
+		await handleAutoHideSprites();
+		await handleUserSpriteDebounce();
 	});
 
 	// Show info message if Sheld is hidden
