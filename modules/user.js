@@ -1,11 +1,37 @@
 import { extensionName } from "../constants.js";
 import { extension_settings } from "../../../../extensions.js";
 import { getContext } from "../../../../extensions.js";
-import { saveSettingsDebounced } from "../../../../../script.js";
+import {
+	saveSettingsDebounced,
+	eventSource,
+	event_types,
+} from "../../../../../script.js";
 import { getGroupIndex, getSpriteList } from "../utils.js";
 import { loadMovingUIState } from "../../../../power-user.js";
 import { dragElement } from "../../../../RossAscends-mods.js";
 import { sendExpressionCall } from "../../../expressions/index.js";
+
+async function spritePackExists(spritePack) {
+	const spritePackExists = await getSpriteList(`${spritePack}`);
+	if (spritePackExists.length === 0) return false;
+	return true;
+}
+
+function setSpritePack(spritePack) {
+	const existingOverrideIndex =
+		extension_settings.expressionOverrides.findIndex(
+			(e) => e.name === "prome-user",
+		);
+	if (existingOverrideIndex === -1) {
+		extension_settings.expressionOverrides.push({
+			name: "prome-user",
+			path: spritePack,
+		});
+	} else {
+		extension_settings.expressionOverrides[existingOverrideIndex].path =
+			spritePack;
+	}
+}
 
 export function applyUserSprite() {
 	if (
@@ -36,6 +62,11 @@ export async function handleUserSprite() {
 	if (groupIndex !== -1) {
 		// Group Chat
 		const group = context.groups[groupIndex];
+		if (group.disabled_members.includes("prome-user")) {
+			group.disabled_members = group.disabled_members.filter(
+				(x) => x !== "prome-user",
+			);
+		}
 
 		if (!context.characters.find((x) => x.avatar === "prome-user")) {
 			context.characters.push({
@@ -51,13 +82,7 @@ export async function handleUserSprite() {
 		if (extension_settings[extensionName].enableUserSprite) {
 			if (!group.members.includes("prome-user"))
 				group.members.push("prome-user");
-			if (group.disabled_members.includes("prome-user"))
-				group.disabled_members = group.disabled_members.filter(
-					(x) => x !== "prome-user",
-				);
 		} else {
-			if (!group.disabled_members.includes("prome-user"))
-				group.disabled_members.push("prome-user");
 			if (group.members.includes("prome-user"))
 				group.members = group.members.filter((x) => x !== "prome-user");
 		}
@@ -88,40 +113,21 @@ export async function handleUserSprite() {
 			$("#expression-prome-user").addClass("displayNone");
 		}
 	}
-	await applyUserSpriteAttributes();
 }
 
-async function applyUserSpriteAttributes(newSpritePack = false) {
+export async function applyUserSpriteAttributes() {
 	const groupIndex = getGroupIndex();
+	let originalExpression = "";
 
 	if (extension_settings[extensionName].enableUserSprite) {
-		if (extension_settings[extensionName].userSprite.length === 0) return;
-		const spritePackExists = await getSpriteList(
-			`${extension_settings[extensionName].userSprite}`,
-		);
-		if (spritePackExists.length === 0) return;
-
-		// Update the User Sprite Pack
-		if (newSpritePack) {
-			const existingOverrideIndex =
-				extension_settings.expressionOverrides.findIndex(
-					(e) => e.name === "prome-user",
-				);
-			if (existingOverrideIndex === -1) {
-				extension_settings.expressionOverrides.push({
-					name: "prome-user",
-					path: extension_settings[extensionName].userSprite,
-				});
-			} else {
-				extension_settings.expressionOverrides[existingOverrideIndex].path =
-					extension_settings[extensionName].userSprite;
-			}
-			saveSettingsDebounced();
+		if (!spritePackExists(extension_settings[extensionName].userSprite)) {
+			return;
 		}
 
 		// Update the User Sprite
 		const originalSrc = $("#expression-prome-user").children("img").attr("src");
-		let originalExpression = "neutral";
+
+		originalExpression = "neutral";
 		if (originalSrc !== undefined) {
 			const srcData = originalSrc.split("/").pop();
 			if (srcData.length > 0) originalExpression = srcData.split(".")[0];
@@ -133,14 +139,15 @@ async function applyUserSpriteAttributes(newSpritePack = false) {
 				"src",
 				`/characters/${extension_settings[extensionName].userSprite}/${originalExpression}.png`,
 			);
+	}
 
-		if (groupIndex !== -1) {
-			// Group Chat
-			await sendExpressionCall(
-				extension_settings[extensionName].userSprite,
-				originalExpression,
-			);
-		}
+	console.log(originalExpression);
+	if (groupIndex !== -1) {
+		// Group Chat
+		await sendExpressionCall(
+			extension_settings[extensionName].userSprite,
+			originalExpression,
+		);
 	}
 }
 
@@ -150,12 +157,15 @@ export function onUserSprite_Click(event) {
 	saveSettingsDebounced();
 	applyUserSprite();
 	handleUserSprite();
+	applyUserSpriteAttributes();
 }
 
 export function onUserSprite_Input() {
+	if (!spritePackExists(this.value)) return;
 	const value = this.value;
 	console.debug(`[${extensionName}] User Sprite: ${value}`);
 	extension_settings[extensionName].userSprite = value;
+	setSpritePack(value);
 	saveSettingsDebounced();
-	applyUserSpriteAttributes(true);
+	eventSource.emit(event_types.GROUP_UPDATED);
 }

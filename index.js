@@ -2,6 +2,7 @@
 import {
 	extension_settings,
 	renderExtensionTemplateAsync,
+	getContext,
 } from "../../../extensions.js";
 import {
 	saveSettingsDebounced,
@@ -23,7 +24,7 @@ import {
 	emulateSpritesDebounce,
 	applyShakeDebounce,
 	stopShake,
-	handleUserSpriteDebounce,
+	applyUserAttributesDebounce,
 } from "./listeners.js";
 
 /* Prome Feature Imports */
@@ -41,7 +42,7 @@ import {
 	onSheld_Click,
 	onSheldMode_Click,
 } from "./modules/sheld.js";
-import { isSheldVisible } from "./utils.js";
+import { getGroupIndex, isSheldVisible } from "./utils.js";
 import {
 	applySpriteZoomTimer,
 	applySpriteZoomAnimation,
@@ -68,6 +69,7 @@ import {
 import { setupTintHTML, setupTintJQuery } from "./modules/tint.js";
 import {
 	applyUserSprite,
+	handleUserSprite,
 	onUserSprite_Click,
 	onUserSprite_Input,
 } from "./modules/user.js";
@@ -289,8 +291,9 @@ jQuery(async () => {
 	eventSource.on(event_types.CHAT_CHANGED, async () => {
 		await applyZoomDebounce();
 		await applyDefocusDebounce();
+		await handleUserSprite();
+		await applyUserAttributesDebounce();
 		await handleAutoHideSprites();
-		await handleUserSpriteDebounce();
 	});
 	eventSource.on(event_types.MESSAGE_DELETED, async () => {
 		await applyZoomDebounce();
@@ -298,11 +301,38 @@ jQuery(async () => {
 		await handleAutoHideSprites();
 	});
 	eventSource.on(event_types.GROUP_UPDATED, async () => {
+		await applyUserAttributesDebounce();
 		await handleAutoHideSprites();
-		await handleUserSpriteDebounce();
 	});
+
+	// Prevents the User Sprite from Genning Content
+	eventSource.on(event_types.GENERATION_AFTER_COMMANDS, () => {
+		if (!extension_settings[extensionName].enableUserSprite) return;
+
+		const context = getContext();
+		const groupIndex = getGroupIndex();
+		if (groupIndex !== -1) {
+			const group = context.groups[groupIndex];
+			if (group.members.includes("prome-user")) {
+				group.members = group.members.filter((x) => x !== "prome-user");
+			}
+		}
+	});
+	eventSource.on(event_types.GENERATE_AFTER_COMBINE_PROMPTS, () => {
+		if (!extension_settings[extensionName].enableUserSprite) return;
+
+		const context = getContext();
+		const groupIndex = getGroupIndex();
+		if (groupIndex !== -1) {
+			const group = context.groups[groupIndex];
+			if (!group.members.includes("prome-user")) {
+				group.members.push("prome-user");
+			}
+		}
+	});
+
 	$(window).on("resize", async () => {
-		await handleUserSpriteDebounce();
+		await applyUserAttributesDebounce();
 	});
 
 	// Show info message if Sheld is hidden
