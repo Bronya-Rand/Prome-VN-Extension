@@ -7,5 +7,6 @@
   "css": "style.css",
   "author": "Bronya-Rand",
   "version": "1.2.0",
-  "homePage": "https://github.com/Bronya-Rand/Prome-VN-Extension"
+  "homePage": "https://github.com/Bronya-Rand/Prome-VN-Extension",
+  "auto_update": true
 }
