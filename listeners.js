@@ -2,6 +2,7 @@ import { debounce_timeout } from "../../../constants.js";
 import { debounce } from "../../../utils.js";
 import { getContext } from "../../../extensions.js";
 import { extensionName } from "./constants.js";
+import { applyUserSpriteAttributes } from "./modules/user.js";
 import {
 	getLastChatMessage,
 	getSpriteList,
@@ -22,6 +23,9 @@ export const emulateSpritesDebounce = debounce(async () => {
 export const applyShakeDebounce = debounce(async () => {
 	await applyShake();
 }, debounce_timeout.short);
+export const applyUserAttributesDebounce = debounce(async () => {
+	await applyUserSpriteAttributes();
+}, debounce_timeout.relaxed);
 
 // Check if the current chat has more than one member
 function zoomListenerPreconditions(allowSolo = false) {

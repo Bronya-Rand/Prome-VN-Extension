@@ -9,6 +9,33 @@ import {
 import { getGroupIndex, getSpriteList } from "../utils.js";
 import { loadMovingUIState } from "../../../../power-user.js";
 import { dragElement } from "../../../../RossAscends-mods.js";
+import { sendExpressionCall } from "../../../expressions/index.js";
+
+async function spritePackExists(spritePack) {
+	if (spritePack.length === 0) return false;
+	const spritePackExists = await getSpriteList(`${spritePack}`).then(
+		(data) => data.length > 0,
+	);
+	return spritePackExists;
+}
+
+function setSpritePack(spritePack) {
+	if (spritePack.length === 0) return;
+
+	const existingOverrideIndex =
+		extension_settings.expressionOverrides.findIndex(
+			(e) => e.name === "prome-user",
+		);
+	if (existingOverrideIndex === -1) {
+		extension_settings.expressionOverrides.push({
+			name: "prome-user",
+			path: spritePack,
+		});
+	} else {
+		extension_settings.expressionOverrides[existingOverrideIndex].path =
+			spritePack;
+	}
+}
 
 export function applyUserSprite() {
 	if (
@@ -39,34 +66,35 @@ export async function handleUserSprite() {
 	if (groupIndex !== -1) {
 		// Group Chat
 		const group = context.groups[groupIndex];
+		if (group.disabled_members.includes("prome-user")) {
+			group.disabled_members = group.disabled_members.filter(
+				(x) => x !== "prome-user",
+			);
+		}
 
 		if (!context.characters.find((x) => x.avatar === "prome-user")) {
 			context.characters.push({
-				name: `${extension_settings[extensionName].userSprite}`,
+				name: "Prome User Sprite (Do Not Click)",
 				avatar: "prome-user",
 				data: {
 					creator_notes:
-						"This is a dummy bot made for Prome's user sprites. Do not interact with this entry.",
+						"This is a dummy card made for Prome. Don't click this entry.",
 				},
 			});
 		}
 
 		if (extension_settings[extensionName].enableUserSprite) {
-			if (!group.members.includes("prome-user")) 
+			if (!group.members.includes("prome-user"))
 				group.members.push("prome-user");
-			group.disabled_members = group.disabled_members.filter(
-				(x) => x !== "prome-user",
-			);
 		} else {
-			group.members = group.members.filter((x) => x !== "prome-user");
-			if (!group.disabled_members.includes("prome-user"))
-				group.disabled_members.push("prome-user");
+			if (group.members.includes("prome-user"))
+				group.members = group.members.filter((x) => x !== "prome-user");
 		}
 	} else {
 		// One-on-One Chat
 		if (context.characterId === undefined) return;
 
-		// CHeck if Prome's Expression Image IMG is in the Expression Holder Div
+		// Check if Prome's Expression Image IMG is in the Expression Holder Div
 		const expressionHolder = $("#expression-wrapper");
 		let promeExpression = $("#expression-wrapper").children(
 			"#expression-prome-user",
@@ -76,10 +104,10 @@ export async function handleUserSprite() {
 					<div id="expression-prome-userheader" class="fa-solid fa-grip drag-grabber"></div>
 					<img id="expression-image" class="" src=""/>
 				</div>`;
-				
+
 			expressionHolder.append(html);
-			
-			promeExpression = $('#expression-prome-user');
+
+			promeExpression = $("#expression-prome-user");
 			loadMovingUIState();
 			dragElement(promeExpression);
 		}
@@ -88,33 +116,42 @@ export async function handleUserSprite() {
 		} else {
 			$("#expression-prome-user").addClass("displayNone");
 		}
-		applyUserSpriteAttributes();
 	}
 }
 
-async function applyUserSpriteAttributes() {
-	const context = getContext();
+export async function applyUserSpriteAttributes() {
+	if (!spritePackExists(extension_settings[extensionName].userSprite)) {
+		return;
+	}
+
+	const groupIndex = getGroupIndex();
+	let originalExpression = "";
 
 	if (extension_settings[extensionName].enableUserSprite) {
-		if (extension_settings[extensionName].userSprite.length === 0) return;
-		const spritePackExists = await getSpriteList(
-			`${extension_settings[extensionName].userSprite}`,
-		);
-		if (spritePackExists.length === 0) return;
-
+		// Update the User Sprite
 		const originalSrc = $("#expression-prome-user").children("img").attr("src");
-		let originalExpression = originalSrc.split("/").pop();
-		if (originalExpression.length === 0) originalExpression = "neutral.png";
+
+		originalExpression = "neutral";
+		if (originalSrc !== undefined) {
+			const srcData = originalSrc.split("/").pop();
+			if (srcData.length > 0) originalExpression = srcData.split(".")[0];
+		}
 
 		$("#expression-prome-user")
 			.children("img")
 			.attr(
 				"src",
-				`/characters/${extension_settings[extensionName].userSprite}/${originalExpression}`,
+				`/characters/${extension_settings[extensionName].userSprite}/${originalExpression}.png`,
 			);
+	}
 
-		if (context.groupId !== null)
-			await eventSource.emit(event_types.GROUP_UPDATED);
+	console.log(originalExpression);
+	if (groupIndex !== -1) {
+		// Group Chat
+		await sendExpressionCall(
+			extension_settings[extensionName].userSprite,
+			originalExpression,
+		);
 	}
 }
 
@@ -124,12 +161,16 @@ export function onUserSprite_Click(event) {
 	saveSettingsDebounced();
 	applyUserSprite();
 	handleUserSprite();
+	applyUserSpriteAttributes();
 }
 
-export function onUserSprite_Input() {
+export async function onUserSprite_Input() {
+	const packExists = await spritePackExists(this.value);
+	if (!packExists) return false;
 	const value = this.value;
 	console.debug(`[${extensionName}] User Sprite: ${value}`);
 	extension_settings[extensionName].userSprite = value;
+	setSpritePack(value);
 	saveSettingsDebounced();
-	applyUserSpriteAttributes();
+	eventSource.emit(event_types.GROUP_UPDATED);
 }

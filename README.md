@@ -24,8 +24,8 @@ The Prome Visual Novel Extension is a extension for SillyTavern that remodernize
 > There is a possibility that SillyTavern may display a warning saying _'prome-user' is not in the list of group members_ in a Group Chat. Ignore this warning as this is your persona and Prome has already added it to the group chat.
 
 > [!IMPORTANT]
-> 1. When changing chats, you might spot a "broken" character in the character/group list. Do not interact with it as this is Prome making a "dummy character" for your persona to use in a group chat. You can however move it's position to be elsewhere in a group chat.
-> 2. If your persona or decide to use the name of a character that exists in the group chat, your user sprite *may* change expressions to that of said character. This is primarily a ST limitation but you can always revert it via `/express` or by duplicating the character folder and renaming it to something else.
+> 1. When changing chats, you might spot a "broken" character in the character/group list named `Prome User Sprite (Do Not Click)`. Do not interact with it as this is Prome making a "dummy character" for your persona to use in a group chat. You can however move it's position to be elsewhere in a group chat.
+> 2. If you decide to use the name of a character that exists in the group chat or your persona name is the same as a character in chat, your user sprite *may* change expressions to that of said character. This is primarily a ST limitation but you can always revert it via `/express` or by duplicating the character folder and renaming it to something else.
 
    <center>
       <img src="./.github/user-sprite.png">

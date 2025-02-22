@@ -2,6 +2,7 @@
 import {
 	extension_settings,
 	renderExtensionTemplateAsync,
+	getContext,
 } from "../../../extensions.js";
 import {
 	saveSettingsDebounced,
@@ -23,6 +24,7 @@ import {
 	emulateSpritesDebounce,
 	applyShakeDebounce,
 	stopShake,
+	applyUserAttributesDebounce,
 } from "./listeners.js";
 
 /* Prome Feature Imports */
@@ -40,7 +42,7 @@ import {
 	onSheld_Click,
 	onSheldMode_Click,
 } from "./modules/sheld.js";
-import { isSheldVisible } from "./utils.js";
+import { getGroupIndex, isSheldVisible } from "./utils.js";
 import {
 	applySpriteZoomTimer,
 	applySpriteZoomAnimation,
@@ -71,7 +73,12 @@ import {
 	onUserSprite_Click,
 	onUserSprite_Input,
 } from "./modules/user.js";
-import { applyAutoHideSprites, handleAutoHideSprites, setupAutoHideHTML, setupAutoHideJQuery } from "./modules/auto-hide.js";
+import {
+	applyAutoHideSprites,
+	handleAutoHideSprites,
+	setupAutoHideHTML,
+	setupAutoHideJQuery,
+} from "./modules/auto-hide.js";
 
 async function loadSettings() {
 	extension_settings[extensionName] = extension_settings[extensionName] || {};
@@ -89,6 +96,16 @@ async function loadSettings() {
 			extension_settings[extensionName][key] = defaultSettings[key];
 		}
 	}
+
+	// Add a expression override for the user sprite
+	if (
+		!extension_settings.expressionOverrides.find((e) => e.name === "prome-user")
+	)
+		extension_settings.expressionOverrides.push({
+			name: "prome-user",
+			path: `${extension_settings[extensionName].userSprite}`,
+		});
+	saveSettingsDebounced();
 
 	// Prome Updates
 	$("#prome-enable-vn").prop(
@@ -271,21 +288,51 @@ jQuery(async () => {
 
 	eventSource.on(event_types.MESSAGE_SWIPED, applyShakeDebounce);
 	eventSource.on(event_types.CHARACTER_MESSAGE_RENDERED, stopShake);
-	eventSource.on(event_types.CHAT_CHANGED, () => {
-		applyZoomDebounce();
-		applyDefocusDebounce();
-		applyAutoHideSprites();
-		handleAutoHideSprites();
-		handleUserSprite();
+	eventSource.on(event_types.CHAT_CHANGED, async () => {
+		await applyZoomDebounce();
+		await applyDefocusDebounce();
+		await handleAutoHideSprites();
+		await handleUserSprite();
+		await applyUserAttributesDebounce();
 	});
-	eventSource.on(event_types.MESSAGE_DELETED, () => {
-		applyZoomDebounce();
-		applyDefocusDebounce();
-		handleAutoHideSprites();
+	eventSource.on(event_types.MESSAGE_DELETED, async () => {
+		await applyZoomDebounce();
+		await applyDefocusDebounce();
+		await handleAutoHideSprites();
 	});
-	eventSource.on(event_types.GROUP_UPDATED, () => {
-		handleAutoHideSprites();
-		handleUserSprite();
+	eventSource.on(event_types.GROUP_UPDATED, async () => {
+		await handleAutoHideSprites();
+		await applyUserAttributesDebounce();
+	});
+
+	// Prevents the User Sprite from Genning Content
+	eventSource.on(event_types.GENERATION_AFTER_COMMANDS, () => {
+		if (!extension_settings[extensionName].enableUserSprite) return;
+
+		const context = getContext();
+		const groupIndex = getGroupIndex();
+		if (groupIndex !== -1) {
+			const group = context.groups[groupIndex];
+			if (group.members.includes("prome-user")) {
+				group.members = group.members.filter((x) => x !== "prome-user");
+			}
+		}
+	});
+	eventSource.on(event_types.GENERATE_AFTER_COMBINE_PROMPTS, () => {
+		if (!extension_settings[extensionName].enableUserSprite) return;
+
+		const context = getContext();
+		const groupIndex = getGroupIndex();
+		if (groupIndex !== -1) {
+			const group = context.groups[groupIndex];
+			if (!group.members.includes("prome-user")) {
+				group.members.push("prome-user");
+			}
+		}
+	});
+
+	$(window).on("resize", async () => {
+		await applyUserAttributesDebounce();
 	});
 
 	// Show info message if Sheld is hidden
@@ -306,18 +353,18 @@ $(document).ready(() => {
 		const handleNode = (node) => {
 			if (node.classList) {
 				if (node.classList.contains("mes")) {
+					handleAutoHideSprites();
 					applyZoomDebounce();
 					applyDefocusDebounce();
 					applyShakeDebounce();
-					handleAutoHideSprites();
 				}
 				if (
 					node.tagName === "DIV" &&
 					node.classList.contains("expression-holder")
 				) {
+					handleAutoHideSprites();
 					applyZoomDebounce();
 					applyDefocusDebounce();
-					handleAutoHideSprites();
 				}
 			}
 		};
