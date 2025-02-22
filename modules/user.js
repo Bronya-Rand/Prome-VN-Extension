@@ -12,12 +12,16 @@ import { dragElement } from "../../../../RossAscends-mods.js";
 import { sendExpressionCall } from "../../../expressions/index.js";
 
 async function spritePackExists(spritePack) {
-	const spritePackExists = await getSpriteList(`${spritePack}`);
-	if (spritePackExists.length === 0) return false;
-	return true;
+	if (spritePack.length === 0) return false;
+	const spritePackExists = await getSpriteList(`${spritePack}`).then(
+		(data) => data.length > 0,
+	);
+	return spritePackExists;
 }
 
 function setSpritePack(spritePack) {
+	if (spritePack.length === 0) return;
+
 	const existingOverrideIndex =
 		extension_settings.expressionOverrides.findIndex(
 			(e) => e.name === "prome-user",
@@ -116,14 +120,14 @@ export async function handleUserSprite() {
 }
 
 export async function applyUserSpriteAttributes() {
+	if (!spritePackExists(extension_settings[extensionName].userSprite)) {
+		return;
+	}
+
 	const groupIndex = getGroupIndex();
 	let originalExpression = "";
 
 	if (extension_settings[extensionName].enableUserSprite) {
-		if (!spritePackExists(extension_settings[extensionName].userSprite)) {
-			return;
-		}
-
 		// Update the User Sprite
 		const originalSrc = $("#expression-prome-user").children("img").attr("src");
 
@@ -160,8 +164,9 @@ export function onUserSprite_Click(event) {
 	applyUserSpriteAttributes();
 }
 
-export function onUserSprite_Input() {
-	if (!spritePackExists(this.value)) return;
+export async function onUserSprite_Input() {
+	const packExists = await spritePackExists(this.value);
+	if (!packExists) return false;
 	const value = this.value;
 	console.debug(`[${extensionName}] User Sprite: ${value}`);
 	extension_settings[extensionName].userSprite = value;
