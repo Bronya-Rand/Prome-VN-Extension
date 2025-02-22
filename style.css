@@ -89,7 +89,7 @@ body.waifuMode.spriteDefocusTint .prome-sprite-defocus {
 /* Prome Sprite Emulation */
 
 /* Sprites are shown if feature is on */
-body.waifuMode.spriteEmulation .prome-render-sprite {
+body.waifuMode.spriteEmulation .prome-render-sprite:not(.displayNone) {
 	display: flex !important;
 	visibility: visible !important;
 }

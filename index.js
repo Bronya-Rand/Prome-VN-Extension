@@ -291,9 +291,9 @@ jQuery(async () => {
 	eventSource.on(event_types.CHAT_CHANGED, async () => {
 		await applyZoomDebounce();
 		await applyDefocusDebounce();
+		await handleAutoHideSprites();
 		await handleUserSprite();
 		await applyUserAttributesDebounce();
-		await handleAutoHideSprites();
 	});
 	eventSource.on(event_types.MESSAGE_DELETED, async () => {
 		await applyZoomDebounce();
@@ -301,8 +301,8 @@ jQuery(async () => {
 		await handleAutoHideSprites();
 	});
 	eventSource.on(event_types.GROUP_UPDATED, async () => {
-		await applyUserAttributesDebounce();
 		await handleAutoHideSprites();
+		await applyUserAttributesDebounce();
 	});
 
 	// Prevents the User Sprite from Genning Content
@@ -353,18 +353,18 @@ $(document).ready(() => {
 		const handleNode = (node) => {
 			if (node.classList) {
 				if (node.classList.contains("mes")) {
+					handleAutoHideSprites();
 					applyZoomDebounce();
 					applyDefocusDebounce();
 					applyShakeDebounce();
-					handleAutoHideSprites();
 				}
 				if (
 					node.tagName === "DIV" &&
 					node.classList.contains("expression-holder")
 				) {
+					handleAutoHideSprites();
 					applyZoomDebounce();
 					applyDefocusDebounce();
-					handleAutoHideSprites();
 				}
 			}
 		};
