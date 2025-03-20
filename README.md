@@ -144,11 +144,11 @@ Prome has two branches to choose from:
    git clone https://github.com/Bronya-Rand/Prome-VN-Extension
    ```
 
-   > [!NOTE]
-   > If you want to use the `dev` branch of Prome, run this command instead: 
-   > ```
-   > git clone https://github.com/Bronya-Rand/Prome-VN-Extension -b dev
-   > ```
+> [!NOTE]
+> If you want to use the `dev` branch of Prome, run this command instead: 
+> ```sh
+> git clone https://github.com/Bronya-Rand/Prome-VN-Extension -b dev
+> ```
 3. Refresh the SillyTavern page or start up SillyTavern (if it's not running).
 4. Click on _Extensions_ again and click down on the `Prome (Visual Novel Extension)` dropdown and toggle _Enable Prome_.
    > If you already have Visual Novel Mode on, you can skip this step.
