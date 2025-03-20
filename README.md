@@ -105,7 +105,7 @@ Most of Prome's feature settings can be found under _Extensions_ > `Prome (Visua
 
 ## Prerequisites
 
-A SillyTavern that supports extensions.
+- SillyTavern 1.12.13+ 
 
 ## Installation and Usage
 
