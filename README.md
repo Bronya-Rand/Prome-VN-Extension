@@ -25,12 +25,11 @@ The Prome Visual Novel Extension is a extension for SillyTavern that remodernize
 3. **[BETA]** User Sprites - Prome's second biggest feature. Want to be part of the conversation? Borrow someone else's sprites or use your own for your own persona whilst using all of Prome's other features!
 
 > [!WARNING]
-> There is a possibility that SillyTavern may display a warning saying _'prome-user' is not in the list of group members_ in a Group Chat. Ignore this warning as this is your persona and Prome has already added it to the group chat.
+> On rare occassons, SillyTavern may display a warning saying _'prome-user' is not in the list of group members_ in a Group Chat. Ignore this warning as this is your persona and Prome has already added it to the group chat.
 
 > [!IMPORTANT]
 > 1. When changing chats, you might spot a "broken" character in the character/group list named `Prome User Sprite (Do Not Click)`. Do not interact with it as this is Prome making a "dummy character" for your persona to use in a group chat. You can however move it's position to be elsewhere in a group chat.
 > 2. If you decide to use the name of a character that exists in the group chat or your persona name is the same as a character in chat, your user sprite *may* change expressions to that of said character. This is primarily a ST limitation but you can always revert it via `/express` or by duplicating the character folder and renaming it to something else.
-> 3. On rare occassons, a ST warning may appear that the Prome User Sprite was not found in the list and will be purged. Ignore this warning.
 
    <center>
       <img src="./.github/user-sprite.png">
@@ -112,13 +111,20 @@ A SillyTavern that supports extensions.
 
 ### Installation
 
+Prome has two branches to choose from:
+1. `main` - The stable version of Prome that works for all SillyTavern versions (unless staging breaks a Prome dependency).
+2. `dev` - Basically a beta version of Prome where stuff I plan to add/fix go before moving to staging. May not work fully and stuff in it may change at any time.
+
+> [!NOTE]
+> If you are installing Prome via ST's *Download Extensions & Assets* or *Install Extension* methods, you will only be able to use the `main` branch of Prome. If you desire to use the `dev` branch of Prome, see the [Git](#via-git) install method.
+
 #### Via Download Extensions & Assets (Easiest)
 
 1. Click _Extensions_ then **Download Extensions & Assets**
 2. Click the red power plug button and then OK.
 3. Scroll down to find `Prome Visual Novel Extension` and click the Download button.
 4. Refresh the SillyTavern page.
-5. Click on _Extensions_ again and click down on the `Prome (Visual Novel Extension)` dropdown and toggle _Enable Prome VN Mode_.
+5. Click on _Extensions_ again and click down on the `Prome (Visual Novel Extension)` dropdown and toggle _Enable Prome_.
    > If you already have Visual Novel Mode on, you can skip this step.
 6. Profit.
 
@@ -127,7 +133,24 @@ A SillyTavern that supports extensions.
 1. Click _Extensions_ then **Install Extension**
 2. Paste in the following **link** into the text field and click Save: `https://github.com/Bronya-Rand/Prome-VN-Extension`.
 3. Refresh the SillyTavern page.
-4. Click on _Extensions_ again and click down on the `Prome (Visual Novel Extension)` dropdown and toggle _Enable Prome VN Mode_.
+4. Click on _Extensions_ again and click down on the `Prome (Visual Novel Extension)` dropdown and toggle _Enable Prome_.
+   > If you already have Visual Novel Mode on, you can skip this step.
+5. Profit.
+
+#### Via Git
+1. Go to your extensions folder (usually in `/data/default-user/extensions`).
+2. Open Command Prompt, Terminal, Windows Powershell, etc. and run the following command: 
+   ```sh
+   git clone https://github.com/Bronya-Rand/Prome-VN-Extension
+   ```
+
+   > [!NOTE]
+   > If you want to use the `dev` branch of Prome, run this command instead: 
+   > ```
+   > git clone https://github.com/Bronya-Rand/Prome-VN-Extension -b dev
+   > ```
+3. Refresh the SillyTavern page or start up SillyTavern (if it's not running).
+4. Click on _Extensions_ again and click down on the `Prome (Visual Novel Extension)` dropdown and toggle _Enable Prome_.
    > If you already have Visual Novel Mode on, you can skip this step.
 5. Profit.
 
