@@ -25,6 +25,7 @@ import {
 	applyShakeDebounce,
 	stopShake,
 	applyUserAttributesDebounce,
+	applyScaleDebounce,
 } from "./listeners.js";
 
 /* Prome Feature Imports */
@@ -79,6 +80,11 @@ import {
 	setupAutoHideHTML,
 	setupAutoHideJQuery,
 } from "./modules/auto-hide.js";
+import {
+	applySpriteScale,
+	setupScaleHTML,
+	setupScaleJQuery,
+} from "./modules/scale.js";
 
 async function loadSettings() {
 	extension_settings[extensionName] = extension_settings[extensionName] || {};
@@ -142,7 +148,7 @@ async function loadSettings() {
 	/// Sprite Shadow
 	setupSpriteShadowHTML();
 
-	// User Sprite Updates
+	/// User Sprite Updates
 	$("#prome-user-sprite").prop(
 		"checked",
 		extension_settings[extensionName].enableUserSprite,
@@ -151,8 +157,11 @@ async function loadSettings() {
 		extension_settings[extensionName].userSprite,
 	);
 
-	// Auto Hide Sprites
+	/// Auto Hide Sprites
 	setupAutoHideHTML();
+
+	/// Sprite Scale
+	setupScaleHTML();
 
 	// Traditional VN Mode Updates
 	$("#prome-sheld-last_mes").prop(
@@ -180,23 +189,25 @@ async function loadSettings() {
 	// Apply Sprite Settings
 	/// Sprite Emulation
 	applySpriteEmulation();
-	// Focus Mode
+	/// Focus Mode
 	applySpriteZoomTimer();
 	applySpriteZoomAnimation();
 	applySpriteZoom();
-	// Defocus Tint
+	/// Defocus Tint
 	applySpriteDefocusTint();
-	// Sprite Shake
+	/// Sprite Shake
 	applySpriteShake();
-	// Sprite Shadow
+	/// Sprite Shadow
 	applySpriteShadow();
 	applySpriteShadowOffsetX();
 	applySpriteShadowOffsetY();
 	applySpriteShadowBlur();
-	// User Sprite
+	/// User Sprite
 	applyUserSprite();
-	// Auto Hide Sprites
+	/// Auto Hide Sprites
 	applyAutoHideSprites();
+	/// Sprite Scale
+	applySpriteScale();
 }
 
 /* Prome Core Listeners */
@@ -274,6 +285,8 @@ jQuery(async () => {
 	$("#prome-sprite-shake").on("click", onSpriteShake_Click);
 	// Sprite Shadow
 	setupSpriteShadowJQuery();
+	// Sprite Scale
+	setupScaleJQuery();
 
 	// User Sprite
 	$("#prome-user-sprite").on("click", onUserSprite_Click);
@@ -292,6 +305,7 @@ jQuery(async () => {
 		await applyZoomDebounce();
 		await applyDefocusDebounce();
 		await handleAutoHideSprites();
+		await applyScaleDebounce();
 		await handleUserSprite();
 		await applyUserAttributesDebounce();
 	});
@@ -303,6 +317,7 @@ jQuery(async () => {
 	eventSource.on(event_types.GROUP_UPDATED, async () => {
 		await handleAutoHideSprites();
 		await applyUserAttributesDebounce();
+		await applyScaleDebounce();
 	});
 
 	// Prevents the User Sprite from Genning Content
@@ -338,8 +353,8 @@ jQuery(async () => {
 	// Show info message if Sheld is hidden
 	if (!isSheldVisible()) {
 		toastr.info(
-			"Head to Extensions > Prome (Visual Novel Extension) and uncheck 'Hide Sheld (Message Box)' to show it again.",
-			"Sheld is currently hidden by the Prome VN Extension.",
+			"Head to Extensions > Prome (Visual Novel Extension) > Sheld Configuration and uncheck 'Hide Sheld (Message Box)' to show it again.",
+			"Sheld is currently hidden by the Prome Visual Novel Extension.",
 		);
 	}
 });

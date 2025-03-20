@@ -9,11 +9,15 @@ import {
 	isUserSpriteEnabled,
 } from "./utils.js";
 import { textgenerationwebui_settings as textgen_settings } from "../../../textgen-settings.js";
+import { applyScale } from "./modules/scale.js";
 
 /* Debouncers */
 export const applyZoomDebounce = debounce(async () => {
 	await applyZoom();
 }, debounce_timeout.short);
+export const applyScaleDebounce = debounce(() => {
+	applyScale();
+}, debounce_timeout.relaxed);
 export const applyDefocusDebounce = debounce(async () => {
 	await applyDefocus();
 }, debounce_timeout.short);
