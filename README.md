@@ -13,7 +13,7 @@ The Prome Visual Novel Extension is a extension for SillyTavern that remodernize
 ## Features
 
 1. Easy integration with SillyTavern and it's Visual Novel Mode
-2. **[BETA]** World + Character Tinting - Prome's biggest feature to date. Wanted to make a chat take place in the evening for that special 'date' or experience a post-alter version of a game world, but were unable to get such weather/events to happen (such as a locked day cycle in Honkai: Star Rail)? Now you can by setting the world and/or character colors to be how **YOU** want it to be.
+2. World + Character Tinting - Prome's biggest feature to date. Wanted to make a chat take place in the evening for that special 'date' or experience a post-alter version of a game world, but were unable to get such weather/events to happen (such as a locked day cycle in Honkai: Star Rail)? Now you can by setting the world and/or character colors to be how **YOU** want it to be.
 
 > [!NOTE]
 > Tinting choices available are: Blur, Brightness, Contrast, Grayscale, Hue, Invert, Saturate and Sepia. The World Tint can be shared with characters and both tints can be enabled or disabled in the Prome menu.
@@ -30,6 +30,7 @@ The Prome Visual Novel Extension is a extension for SillyTavern that remodernize
 > [!IMPORTANT]
 > 1. When changing chats, you might spot a "broken" character in the character/group list named `Prome User Sprite (Do Not Click)`. Do not interact with it as this is Prome making a "dummy character" for your persona to use in a group chat. You can however move it's position to be elsewhere in a group chat.
 > 2. If you decide to use the name of a character that exists in the group chat or your persona name is the same as a character in chat, your user sprite *may* change expressions to that of said character. This is primarily a ST limitation but you can always revert it via `/express` or by duplicating the character folder and renaming it to something else.
+> 3. On rare occassons, a ST warning may appear that the Prome User Sprite was not found in the list and will be purged. Ignore this warning.
 
    <center>
       <img src="./.github/user-sprite.png">
@@ -53,7 +54,7 @@ The Prome Visual Novel Extension is a extension for SillyTavern that remodernize
     <img src="./.github/auto-hide.png">
    </center>
 
-6. Sprite Shadows & Shake (Emulates Speaking) - Wanted a bit more "realism" to your character sprites? Prome has the ability to mimic a character talking by shaking the sprite subtly and add a shadow to the sprite itself, making the character blend in more into the environment you've chosen!
+7. Sprite Shadows & Shake (Emulates Speaking) - Wanted a bit more "realism" to your character sprites? Prome has the ability to mimic a character talking by shaking the sprite subtly and add a shadow to the sprite itself, making the character blend in more into the environment you've chosen!
 
 > [!IMPORTANT]
 > These features will not work on emulated sprite characters. Sprite Shake will only work if `Streaming` is enabled in your preset settings. Sprite Shadows can be adjusted in X and Y distances as well as blur strength.
@@ -61,7 +62,17 @@ The Prome Visual Novel Extension is a extension for SillyTavern that remodernize
    <center>
        <img src="./.github/sprite-shadow.png">
     </center>
-7. Letterbox Mode - Make your VN experience more 'cinematic' or 'retro' with letterboxes of the past!
+
+8. Sprite Scaling - Are your sprite(s) having a small tendency to clip out of bounds or maybe they are just too dang big? Or is it the opposite and they're tiny as heck? Scale them up or down as you wish!
+
+> [!NOTE] 
+> This is a global scaler and will affect all sprites in the chat (including User Sprites).
+
+|                       Default (1.0)                       |                          Reduced (0.75)                         |
+| :-------------------------------------------------------: | :-------------------------------------------------------------: | 
+| ![sprite-scale-base.png](./.github/sprite-scale-base.png) | ![sprite-scale-reduced.png](./.github/sprite-scale-reduced.png) |
+
+9. Letterbox Mode - Make your VN experience more 'cinematic' or 'retro' with letterboxes of the past!
 
 > [!NOTE]
 > Letterboxes can be rendered horizontalally or vertically and can be adjusted in size and color in the Prome menu.
@@ -70,7 +81,7 @@ The Prome Visual Novel Extension is a extension for SillyTavern that remodernize
 | :-----------------------------------------: | :-------------------------------------: |
 | ![horizontal.png](./.github/horizontal.png) | ![vertical.png](./.github/vertical.png) |
 
-8. Traditional VN Mode - Want a even further visual novel experience of one reply at a time? Enabling Traditional VN Mode will make Prome transform the SillyTavern VN screen to behave more similarly to some Visual Novels like Katawa Shoujo or NVL (long text) type games.
+10. Traditional VN Mode - Want a even further visual novel experience of one reply at a time? Enabling Traditional VN Mode will make Prome transform the SillyTavern VN screen to behave more similarly to some Visual Novels like Katawa Shoujo or NVL (long text) type games.
    <center>
     <img src="./.github/single-message.png"/>
     </center>
@@ -79,7 +90,7 @@ The Prome Visual Novel Extension is a extension for SillyTavern that remodernize
 > To view chat history with Traditional VN Mode on, click on the Wand Icon and click _Open Chat History_.
 > ![single-chat-history-log.png](./.github/single-chat-history-log.png)
 
-9. Sheld Visibility - Hide the Sheld (Message Box) to capture the moment of a given chat.
+11. Sheld Visibility - Hide the Sheld (Message Box) to capture the moment of a given chat.
 
 > [!NOTE]
 > This feature can be toggled in the Settings Menu or by pressing `Ctrl` + `F1`.
