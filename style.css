@@ -165,21 +165,25 @@ body.waifuMode.spriteZoom:not(.spriteScale) .prome-sprite-focus {
  */
 
 body.waifuMode.spriteShake .prome-sprite-shake {
+	transform: translateZ(0);
 	animation: shake var(--prome-shake-duration) var(--prome-shake-timing)
 		infinite;
 }
 
 body.waifuMode.spriteShake.spriteZoom .prome-sprite-shake {
+	transform: translateZ(0);
 	animation: shakeAndFocus var(--prome-shake-duration) var(--prome-shake-timing)
 		infinite;
 }
 
 body.waifuMode.spriteShake.spriteScale .prome-sprite-shake {
+	transform: translateZ(0);
 	animation: shakeAndScale var(--prome-shake-duration) var(--prome-shake-timing)
 		infinite;
 }
 
 body.waifuMode.spriteShake.spriteZoom.spriteScale .prome-sprite-shake {
+	transform: translateZ(0);
 	animation: shakeFocusAndScale var(--prome-shake-duration)
 		var(--prome-shake-timing) infinite;
 }
@@ -269,21 +273,25 @@ body.waifuMode.spriteShake.spriteZoom.spriteScale .prome-sprite-shake {
 
 @media (prefers-reduced-motion: reduce) {
 	body.waifuMode.spriteShake .prome-sprite-shake {
+		transform: translateZ(0);
 		animation: shake var(--prome-shake-duration-reduced)
 			var(--prome-shake-timing) infinite;
 	}
 
 	body.waifuMode.spriteShake.spriteZoom .prome-sprite-shake {
+		transform: translateZ(0);
 		animation: shakeAndFocus var(--prome-shake-duration-reduced)
 			var(--prome-shake-timing) infinite;
 	}
 
 	body.waifuMode.spriteShake.spriteScale .prome-sprite-shake {
+		transform: translateZ(0);
 		animation: shakeAndScale var(--prome-shake-duration-reduced)
 			var(--prome-shake-timing) infinite;
 	}
 
 	body.waifuMode.spriteShake.spriteZoom.spriteScale .prome-sprite-shake {
+		transform: translateZ(0);
 		animation: shakeFocusAndScale var(--prome-shake-duration-reduced)
 			var(--prome-shake-timing) infinite;
 	}
@@ -383,10 +391,13 @@ body.waifuMode.userSprite:not(.movingUI)
 
 body #expression-prome-user {
 	display: none;
-	visibility: hidden;
 }
 
 body.waifuMode.userSprite #expression-prome-user {
 	display: flex;
 	visibility: visible;
+}
+
+#visual-novel-wrapper {
+	contain: layout style;
 }
