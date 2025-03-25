@@ -64,10 +64,10 @@ export function applyScale() {
 	for (const d of sprites) {
 		if (extension_settings[extensionName].scaleSprites) {
 			// apply scale
-			$(d).find("img").addClass("prome-sprite-scale");
+			$(d).addClass("prome-sprite-scale");
 		} else {
 			// remove scale
-			$(d).find("img").removeClass("prome-sprite-scale");
+			$(d).removeClass("prome-sprite-scale");
 		}
 	}
 }

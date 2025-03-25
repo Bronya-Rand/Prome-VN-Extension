@@ -97,6 +97,14 @@ body.waifuMode.spriteDefocusTint .prome-sprite-defocus {
 	transform-origin: bottom;
 }
 
+body.waifuMode.spriteScale.spriteZoom .prome-sprite-scale.prome-sprite-focus {
+	transform: scale(calc(var(--prom-sprite-scale) * var(--prome-focus-scale)));
+}
+
+body.waifuMode.spriteZoom:not(.spriteScale) .prome-sprite-focus {
+	transform: scale(var(--prome-focus-scale));
+}
+
 /* Prome Sprite Emulation */
 
 /* Sprites are shown if feature is on */
