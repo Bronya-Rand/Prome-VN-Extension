@@ -23,10 +23,43 @@
 		brightness(var(--prome-defocus-brightness));
 
 	/* Prome World/Character Tint */
+	--prome-character-tint-with-shadow: var(--prome-character-tint-filter)
+		var(--prome-shadow-filter);
+	--prome-character-tint-with-defocus: var(--prome-character-tint-filter)
+		var(--prome-shadow-filter-defocus);
+	--prome-character-tint-with-shadow-defocus: var(--prome-character-tint-filter)
+		var(--prome-shadow-filter-defocus) var(--prome-shadow-filter);
+
+	--prome-background-tint-with-shadow: var(--prome-background-tint-filter)
+		var(--prome-shadow-filter);
+	--prome-background-tint-with-defocus: var(--prome-background-tint-filter)
+		var(--prome-shadow-filter-defocus);
+	--prome-background-tint-with-shadow-defocus: var(
+			--prome-background-tint-filter
+		)
+		var(--prome-shadow-filter-defocus) var(--prome-shadow-filter);
+
 	--prome-combined-filter-character: var(--prome-character-tint-filter);
-    --prome-combined-filter-background: var(--prome-background-tint-filter);
-    --prome-combined-filter-character-shadow: var(--prome-character-tint-with-shadow);
-	--prome-combined-filter-background-shadow: var(--prome-background-tint-with-shadow);
+	--prome-combined-filter-character-shadow: var(
+		--prome-character-tint-with-shadow
+	);
+	--prome-combined-filter-character-defocus: var(
+		--prome-character-tint-with-defocus
+	);
+	--prome-combined-filter-character-shadow-defocus: var(
+		--prome-character-tint-with-shadow-defocus
+	);
+
+	--prome-combined-filter-background: var(--prome-background-tint-filter);
+	--prome-combined-filter-background-shadow: var(
+		--prome-background-tint-with-shadow
+	);
+	--prome-combined-filter-background-defocus: var(
+		--prome-background-tint-with-defocus
+	);
+	--prome-combined-filter-background-shadow-defocus: var(
+		--prome-background-tint-with-shadow-defocus
+	);
 }
 
 .prome-drawer-content {
@@ -274,6 +307,12 @@ body.waifuMode.spriteDefocusTint.spriteShadow
 	filter: var(--prome-shadow-filter-defocus);
 }
 
+body.waifuMode.spriteDefocusTint.spriteShadow
+	#expression-wrapper
+	.expression-holder.prome-sprite-defocus {
+	filter: var(--prome-shadow-filter-defocus);
+}
+
 /* 
  * Prome Background Tint
  */
@@ -298,12 +337,32 @@ body.worldTint.tintCharacter.spriteShadow {
 	--current-char-tint-filter: var(--prome-combined-filter-character-shadow);
 }
 
+body.worldTint.tintCharacter.spriteDefocusTint {
+	--current-char-tint-filter: var(--prome-combined-filter-character-defocus);
+}
+
+body.worldTint.tintCharacter.spriteDefocusTint.spriteShadow {
+	--current-char-tint-filter: var(
+		--prome-combined-filter-character-shadow-defocus
+	);
+}
+
 body.worldTint.tintShared {
 	--current-char-tint-filter: var(--prome-combined-filter-background);
 }
 
 body.worldTint.tintShared.spriteShadow {
 	--current-char-tint-filter: var(--prome-combined-filter-background-shadow);
+}
+
+body.worldTint.tintShared.spriteDefocusTint {
+	--current-char-tint-filter: var(--prome-combined-filter-background-defocus);
+}
+
+body.worldTint.tintShared.spriteDefocusTint.spriteShadow {
+	--current-char-tint-filter: var(
+		--prome-combined-filter-background-shadow-defocus
+	);
 }
 
 /* 
