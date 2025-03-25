@@ -56,7 +56,7 @@ export function applyScale() {
 	// find all divs in #visual-novel-wrapper
 	const sprites = $("#visual-novel-wrapper").find("div");
 	document.documentElement.style.setProperty(
-		"--prom-sprite-scale",
+		"--prome-sprite-scale",
 		extension_settings[extensionName].maxSpriteScale,
 	);
 

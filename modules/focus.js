@@ -50,14 +50,14 @@ export function applySpriteDefocusTint() {
 
 export function applySpriteZoomTimer() {
 	document.documentElement.style.setProperty(
-		"--prom-sprite-zoom-speed",
+		"--prome-sprite-zoom-speed",
 		`${extension_settings[extensionName].zoomSpeed}s`,
 	);
 }
 
 export function applySpriteZoomAnimation() {
 	document.documentElement.style.setProperty(
-		"--prom-sprite-zoom-animation",
+		"--prome-sprite-zoom-animation",
 		extension_settings[extensionName].zoomAnimation,
 	);
 }
