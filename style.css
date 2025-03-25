@@ -12,6 +12,15 @@
 	--prome-shake-duration: 0.35s;
 	--prome-shake-duration-reduced: 0.7s;
 	--prome-shake-timing: ease-in-out;
+
+	/* Prome Sprite Shadows */
+	--prome-shadow-color: #111;
+	--prome-shadow-filter: drop-shadow(
+		var(--prom-sprite-shadow-offsetx) var(--prom-sprite-shadow-offsety)
+			var(--prom-sprite-shadow-blur) var(--prome-shadow-color)
+	);
+	--prome-shadow-filter-defocus: var(--prome-shadow-filter)
+		brightness(var(--prome-defocus-brightness));
 }
 
 .prome-drawer-content {
@@ -71,13 +80,15 @@ body.waifuMode.vLetterBox #visual-novel-letterbox-two {
 #visual-novel-wrapper [id*="expression-"] {
 	will-change: transform, filter;
 	transition: transform var(--prom-sprite-zoom-speed)
-		var(--prom-sprite-zoom-animation), filter var(--prome-focus-filter-transition);
+		var(--prom-sprite-zoom-animation), filter
+		var(--prome-focus-filter-transition);
 }
 
 #expression-wrapper > div {
 	will-change: transform, filter;
 	transition: transform var(--prom-sprite-zoom-speed)
-		var(--prom-sprite-zoom-animation), filter var(--prome-focus-filter-transition);
+		var(--prom-sprite-zoom-animation), filter
+		var(--prome-focus-filter-transition);
 }
 
 /* Sprite Focus to Last Message Character on 'expression-holder' */
@@ -97,7 +108,7 @@ body.waifuMode.spriteDefocusTint .prome-sprite-defocus {
 /*
  * Prome Sprite Scale
  */
- body.waifuMode.spriteScale .prome-sprite-scale {
+body.waifuMode.spriteScale .prome-sprite-scale {
 	transform: scale(var(--prom-sprite-scale));
 	transform-origin: bottom;
 }
@@ -115,19 +126,23 @@ body.waifuMode.spriteZoom:not(.spriteScale) .prome-sprite-focus {
  */
 
 body.waifuMode.spriteShake .prome-sprite-shake {
-	animation: shake var(--prome-shake-duration) var(--prome-shake-timing) infinite;
+	animation: shake var(--prome-shake-duration) var(--prome-shake-timing)
+		infinite;
 }
 
 body.waifuMode.spriteShake.spriteZoom .prome-sprite-shake {
-	animation: shakeAndFocus var(--prome-shake-duration) var(--prome-shake-timing) infinite;
+	animation: shakeAndFocus var(--prome-shake-duration) var(--prome-shake-timing)
+		infinite;
 }
 
 body.waifuMode.spriteShake.spriteScale .prome-sprite-shake {
-	animation: shakeAndScale var(--prome-shake-duration) var(--prome-shake-timing) infinite;
+	animation: shakeAndScale var(--prome-shake-duration) var(--prome-shake-timing)
+		infinite;
 }
 
 body.waifuMode.spriteShake.spriteZoom.spriteScale .prome-sprite-shake {
-	animation: shakeFocusAndScale var(--prome-shake-duration) var(--prome-shake-timing) infinite;
+	animation: shakeFocusAndScale var(--prome-shake-duration)
+		var(--prome-shake-timing) infinite;
 }
 
 @keyframes shake {
@@ -153,13 +168,16 @@ body.waifuMode.spriteShake.spriteZoom.spriteScale .prome-sprite-shake {
 		transform: translate(0px, 0px) rotate(0deg) scale(var(--prom-sprite-scale));
 	}
 	25% {
-		transform: translate(1px, 0px) rotate(0.1deg) scale(var(--prom-sprite-scale));
+		transform: translate(1px, 0px) rotate(0.1deg)
+			scale(var(--prom-sprite-scale));
 	}
 	50% {
-		transform: translate(0px, 0px) rotate(0.2deg) scale(var(--prom-sprite-scale));
+		transform: translate(0px, 0px) rotate(0.2deg)
+			scale(var(--prom-sprite-scale));
 	}
 	75% {
-		transform: translate(-1px, 0px) rotate(0.1deg) scale(var(--prom-sprite-scale));
+		transform: translate(-1px, 0px) rotate(0.1deg)
+			scale(var(--prom-sprite-scale));
 	}
 	100% {
 		transform: translate(0px, 0px) rotate(0deg) scale(var(--prom-sprite-scale));
@@ -171,13 +189,16 @@ body.waifuMode.spriteShake.spriteZoom.spriteScale .prome-sprite-shake {
 		transform: translate(0px, 0px) rotate(0deg) scale(var(--prome-focus-scale));
 	}
 	25% {
-		transform: translate(1px, 0px) rotate(0.1deg) scale(var(--prome-focus-scale));
+		transform: translate(1px, 0px) rotate(0.1deg)
+			scale(var(--prome-focus-scale));
 	}
 	50% {
-		transform: translate(0px, 0px) rotate(0.2deg) scale(var(--prome-focus-scale));
+		transform: translate(0px, 0px) rotate(0.2deg)
+			scale(var(--prome-focus-scale));
 	}
 	75% {
-		transform: translate(-1px, 0px) rotate(0.1deg) scale(var(--prome-focus-scale));
+		transform: translate(-1px, 0px) rotate(0.1deg)
+			scale(var(--prome-focus-scale));
 	}
 	100% {
 		transform: translate(0px, 0px) rotate(0deg) scale(var(--prome-focus-scale));
@@ -186,37 +207,46 @@ body.waifuMode.spriteShake.spriteZoom.spriteScale .prome-sprite-shake {
 
 @keyframes shakeFocusAndScale {
 	0% {
-		transform: translate(0px, 0px) rotate(0deg) scale(calc(var(--prom-sprite-scale) * var(--prome-focus-scale)));
+		transform: translate(0px, 0px) rotate(0deg)
+			scale(calc(var(--prom-sprite-scale) * var(--prome-focus-scale)));
 	}
 	25% {
-		transform: translate(1px, 0px) rotate(0.1deg) scale(calc(var(--prom-sprite-scale) * var(--prome-focus-scale)));
+		transform: translate(1px, 0px) rotate(0.1deg)
+			scale(calc(var(--prom-sprite-scale) * var(--prome-focus-scale)));
 	}
 	50% {
-		transform: translate(0px, 0px) rotate(0.2deg) scale(calc(var(--prom-sprite-scale) * var(--prome-focus-scale)));
+		transform: translate(0px, 0px) rotate(0.2deg)
+			scale(calc(var(--prom-sprite-scale) * var(--prome-focus-scale)));
 	}
 	75% {
-		transform: translate(-1px, 0px) rotate(0.1deg) scale(calc(var(--prom-sprite-scale) * var(--prome-focus-scale)));
+		transform: translate(-1px, 0px) rotate(0.1deg)
+			scale(calc(var(--prom-sprite-scale) * var(--prome-focus-scale)));
 	}
 	100% {
-		transform: translate(0px, 0px) rotate(0deg) scale(calc(var(--prom-sprite-scale) * var(--prome-focus-scale)));
+		transform: translate(0px, 0px) rotate(0deg)
+			scale(calc(var(--prom-sprite-scale) * var(--prome-focus-scale)));
 	}
 }
 
 @media (prefers-reduced-motion: reduce) {
 	body.waifuMode.spriteShake .prome-sprite-shake {
-		animation: shake var(--prome-shake-duration-reduced) var(--prome-shake-timing) infinite;
+		animation: shake var(--prome-shake-duration-reduced)
+			var(--prome-shake-timing) infinite;
 	}
 
 	body.waifuMode.spriteShake.spriteZoom .prome-sprite-shake {
-		animation: shakeAndFocus var(--prome-shake-duration-reduced) var(--prome-shake-timing) infinite;
+		animation: shakeAndFocus var(--prome-shake-duration-reduced)
+			var(--prome-shake-timing) infinite;
 	}
 
 	body.waifuMode.spriteShake.spriteScale .prome-sprite-shake {
-		animation: shakeAndScale var(--prome-shake-duration-reduced) var(--prome-shake-timing) infinite;
+		animation: shakeAndScale var(--prome-shake-duration-reduced)
+			var(--prome-shake-timing) infinite;
 	}
 
 	body.waifuMode.spriteShake.spriteZoom.spriteScale .prome-sprite-shake {
-		animation: shakeFocusAndScale var(--prome-shake-duration-reduced) var(--prome-shake-timing) infinite;
+		animation: shakeFocusAndScale var(--prome-shake-duration-reduced)
+			var(--prome-shake-timing) infinite;
 	}
 }
 
@@ -224,29 +254,18 @@ body.waifuMode.spriteShake.spriteZoom.spriteScale .prome-sprite-shake {
  * Prome Sprite Shadows
  */
 
-body.waifuMode.spriteShadow:not(.spriteEmulation)
-	#visual-novel-wrapper
-	[id*="expression-"] {
-	filter: drop-shadow(
-		var(--prom-sprite-shadow-offsetx) var(--prom-sprite-shadow-offsety)
-			var(--prom-sprite-shadow-blur) #111
-	);
-}
-
-body.waifuMode.spriteShadow.spriteDefocusTint:not(.spriteEmulation)
-	.prome-sprite-defocus {
-	filter: drop-shadow(
-			var(--prom-sprite-shadow-offsetx) var(--prom-sprite-shadow-offsety)
-				var(--prom-sprite-shadow-blur) #111
-		)
-		brightness(0.5) !important;
+body.waifuMode.spriteShadow #visual-novel-wrapper [id*="expression-"] {
+	filter: var(--prome-shadow-filter);
 }
 
 body.waifuMode.spriteShadow #expression-wrapper .expression-holder {
-	filter: drop-shadow(
-		var(--prom-sprite-shadow-offsetx) var(--prom-sprite-shadow-offsety)
-			var(--prom-sprite-shadow-blur) #111
-	);
+	filter: var(--prome-shadow-filter);
+}
+
+body.waifuMode.spriteDefocusTint.spriteShadow
+	#visual-novel-wrapper
+	[id*="expression-"].prome-sprite-defocus {
+	filter: var(--prome-shadow-filter-defocus);
 }
 
 /* 
