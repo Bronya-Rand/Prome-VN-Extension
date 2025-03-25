@@ -56,7 +56,7 @@ The Prome Visual Novel Extension is a extension for SillyTavern that remodernize
 7. Sprite Shadows & Shake (Emulates Speaking) - Wanted a bit more "realism" to your character sprites? Prome has the ability to mimic a character talking by shaking the sprite subtly and add a shadow to the sprite itself, making the character blend in more into the environment you've chosen!
 
 > [!IMPORTANT]
-> These features will not work on emulated sprite characters. Sprite Shake will only work if `Streaming` is enabled in your preset settings. Sprite Shadows can be adjusted in X and Y distances as well as blur strength.
+> Sprite Shake will only work if `Streaming` is enabled in your preset settings. Sprite Shadows can be adjusted in X and Y distances as well as blur strength.
 
    <center>
        <img src="./.github/sprite-shadow.png">
