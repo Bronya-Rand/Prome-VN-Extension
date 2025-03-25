@@ -304,19 +304,21 @@ jQuery(async () => {
 	eventSource.on(event_types.CHAT_CHANGED, async () => {
 		await applyZoomDebounce();
 		await applyDefocusDebounce();
-		await handleAutoHideSprites();
+		// await handleAutoHideSprites();
 		await applyScaleDebounce();
-		await handleUserSprite();
-		await applyUserAttributesDebounce();
+		await emulateSpritesDebounce();
+		// await handleUserSprite();
+		// await applyUserAttributesDebounce();
 	});
 	eventSource.on(event_types.MESSAGE_DELETED, async () => {
 		await applyZoomDebounce();
 		await applyDefocusDebounce();
-		await handleAutoHideSprites();
+		// await handleAutoHideSprites();
 	});
 	eventSource.on(event_types.GROUP_UPDATED, async () => {
-		await handleAutoHideSprites();
-		await applyUserAttributesDebounce();
+		await emulateSpritesDebounce();
+		// await handleAutoHideSprites();
+		// await applyUserAttributesDebounce();
 		await applyScaleDebounce();
 	});
 
@@ -347,7 +349,8 @@ jQuery(async () => {
 	});
 
 	$(window).on("resize", async () => {
-		await applyUserAttributesDebounce();
+		await emulateSpritesDebounce();
+		// await applyUserAttributesDebounce();
 	});
 
 	// Show info message if Sheld is hidden
@@ -368,16 +371,16 @@ $(document).ready(() => {
 		const handleNode = (node) => {
 			if (node.classList) {
 				if (node.classList.contains("mes")) {
-					handleAutoHideSprites();
+					// handleAutoHideSprites();
 					applyZoomDebounce();
 					applyDefocusDebounce();
-					applyShakeDebounce();
+					// applyShakeDebounce();
 				}
 				if (
 					node.tagName === "DIV" &&
 					node.classList.contains("expression-holder")
 				) {
-					handleAutoHideSprites();
+					// handleAutoHideSprites();
 					applyZoomDebounce();
 					applyDefocusDebounce();
 				}

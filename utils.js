@@ -113,3 +113,15 @@ export function isGroupChat() {
 	const context = getContext();
 	return context.groupId !== null;
 }
+
+/**
+ * Check if the member is disabled in the group chat
+ * @param {string} name - The member name
+ * @returns {boolean} - Whether the member is disabled in the group chat
+ */
+export function isDisabledMember(name) {
+	const context = getContext();
+	const group = context.groups.find((x) => x.id === context.groupId);
+	if (!group) return false;
+	return group.disabled_members.includes(name);
+}

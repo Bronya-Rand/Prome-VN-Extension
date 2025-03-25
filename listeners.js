@@ -11,16 +11,18 @@ import {
 } from "./utils.js";
 import { textgenerationwebui_settings as textgen_settings } from "../../../textgen-settings.js";
 import { applyScale } from "./modules/scale.js";
+import { isDisabledMember } from "./utils.js";
+// import { visualNovelUpdateLayers } from "../../expressions/index.js";
 
 /* Debouncers */
-export const applyZoomDebounce = debounce(async () => {
-	await applyZoom();
+export const applyZoomDebounce = debounce(() => {
+	applyZoom();
 }, debounce_timeout.short);
 export const applyScaleDebounce = debounce(() => {
 	applyScale();
 }, debounce_timeout.relaxed);
-export const applyDefocusDebounce = debounce(async () => {
-	await applyDefocus();
+export const applyDefocusDebounce = debounce(() => {
+	applyDefocus();
 }, debounce_timeout.short);
 export const emulateSpritesDebounce = debounce(async () => {
 	await emulateSprites();
@@ -32,7 +34,15 @@ export const applyUserAttributesDebounce = debounce(async () => {
 	await applyUserSpriteAttributes();
 }, debounce_timeout.relaxed);
 
-// Check if the current chat has more than one member
+//
+// Helper Functions
+//
+
+/**
+ * Check if the preconditions are met for the zoom listener
+ * @param {boolean} allowSolo - Allow zoom listener to work in a 1:1 chat
+ * @returns {boolean} - Whether the preconditions are met
+ */
 function zoomListenerPreconditions(allowSolo = false) {
 	const context = getContext();
 	const group = context.groups.find((x) => x.id === context.groupId);
@@ -48,277 +58,220 @@ function zoomListenerPreconditions(allowSolo = false) {
 	return true;
 }
 
-function isDisabledMember(name) {
-	const context = getContext();
-	const group = context.groups.find((x) => x.id === context.groupId);
-	if (!group) return false;
-	return group.disabled_members.includes(name);
+/**
+ * Wait for an element to exist before running a callback
+ * @param {string} selector - The element selector
+ * @param {function} callback - The callback function
+ * @param {number} maxAttempts - The maximum number of attempts to wait for the element
+ * @returns {void}
+ */
+function waitForElement(selector, callback, maxAttempts = 50) {
+	let element = $(selector);
+	let attempts = 0;
+
+	if (element.length) {
+		callback(element);
+		return;
+	}
+
+	const interval = setInterval(() => {
+		element = $(selector);
+		attempts++;
+
+		if (element.length > 0 || attempts >= maxAttempts) {
+			clearInterval(interval);
+			if (element.length > 0) callback(element);
+		}
+	}, 100);
 }
 
 // Apply focus class to the sprite
-async function applyZoom() {
+function applyZoom() {
 	if (!zoomListenerPreconditions(true)) return;
 
-	// check if there are any messages
+	// Cache selectors
+	const visualNovelWrapperSprites = $("#visual-novel-wrapper > div");
+	const promeUserSprite = $("#expression-prome-user");
+	const expressionHolder = $("#expression-holder");
+
+	// Check if there are any messages
 	const lastMessagesWithoutSystem = getLastChatMessage();
-	// if there are no messages, remove the focus class
 	if (lastMessagesWithoutSystem.length === 0) {
-		$("#visual-novel-wrapper > div").removeClass("prome-sprite-focus");
+		visualNovelWrapperSprites.removeClass("prome-sprite-focus");
 		return;
 	}
 
-	// check if the last message is from a user
-	// if so, remove the focus class
 	const lastMessage = lastMessagesWithoutSystem[0];
-	if (lastMessage.is_user) {
-		if (isGroupChat()) {
-			$("#visual-novel-wrapper > div").removeClass("prome-sprite-focus");
-			if (isUserSpriteEnabled())
-				$("#expression-prome-user").addClass("prome-sprite-focus");
-		} else {
-			if (isUserSpriteEnabled()) {
-				$("#expression-holder").removeClass("prome-sprite-focus");
-				$("#expression-prome-user").addClass("prome-sprite-focus");
-			}
+	const isUserMessage = lastMessage.is_user;
+	const groupChat = isGroupChat();
+	const userSpriteEnabled = isUserSpriteEnabled();
+
+	// Handle User Messages
+	if (isUserMessage) {
+		visualNovelWrapperSprites.removeClass("prome-sprite-focus");
+
+		if (userSpriteEnabled) {
+			promeUserSprite.addClass("prome-sprite-focus");
+			if (!groupChat) expressionHolder.removeClass("prome-sprite-focus");
 		}
 		return;
 	}
 
-	if (isGroupChat()) {
-		// check if the last message is from a disabled group member
-		// if so, remove the focus class
+	if (groupChat) {
 		if (isDisabledMember(lastMessage.original_avatar)) {
-			$("#visual-novel-wrapper > div").removeClass("prome-sprite-focus");
+			visualNovelWrapperSprites.removeClass("prome-sprite-focus");
 			return;
 		}
 
-		const spriteDiv = `#visual-novel-wrapper [id='expression-${lastMessage.original_avatar}']`;
-		let sprite = $(spriteDiv);
+		const spriteDivSelector = `#visual-novel-wrapper [id='expression-${lastMessage.original_avatar}']`;
 
-		// apply focus class to the sprite
-		const applyFocusClass = () => {
-			// apply focus class to the focused sprite
+		return waitForElement(spriteDivSelector, (sprite) => {
+			// Focus the sprite and defocus the rest
 			sprite.addClass("prome-sprite-focus");
-
-			// remove focus class from other sprites
-			$("#visual-novel-wrapper > div")
-				.not(sprite)
-				.removeClass("prome-sprite-focus");
-		};
-
-		if (sprite.length === 0) {
-			// give time for the sprite to load on the page
-			const checkInterval = setInterval(() => {
-				sprite = $(spriteDiv);
-				if (sprite.length > 0) {
-					applyFocusClass();
-					clearInterval(checkInterval);
-				}
-			}, 100);
-		} else {
-			applyFocusClass();
-		}
-	} else {
-		const spriteDiv = $("#expression-holder");
-
-		const applyFocusClass = () => {
-			spriteDiv.addClass("prome-sprite-focus");
-			$("#expression-prome-user").removeClass("prome-sprite-focus");
-		};
-
-		if (spriteDiv.length === 0) {
-			const checkInterval = setInterval(() => {
-				if (spriteDiv.length > 0) {
-					applyFocusClass();
-					clearInterval(checkInterval);
-				}
-			}, 100);
-		} else {
-			applyFocusClass();
-		}
+			visualNovelWrapperSprites.not(sprite).removeClass("prome-sprite-focus");
+		});
 	}
+
+	return waitForElement("#expression-holder", (sprite) => {
+		sprite.addClass("prome-sprite-focus");
+		promeUserSprite.removeClass("prome-sprite-focus");
+	});
 }
 
 // Apply defocus class to the sprites
-async function applyDefocus() {
+function applyDefocus() {
 	if (!zoomListenerPreconditions(true)) return;
 
-	// check if there are any messages
+	// Cache selectors
+	const visualNovelWrapperSprites = $("#visual-novel-wrapper > div");
+	const promeUserSprite = $("#expression-prome-user");
+	const expressionHolder = $("#expression-holder");
+
+	// Check if there are any messages
 	const lastMessagesWithoutSystem = getLastChatMessage();
-	// if there are no messages, defocus all sprites
 	if (lastMessagesWithoutSystem.length === 0) {
-		$("#visual-novel-wrapper > div").addClass("prome-sprite-defocus");
+		visualNovelWrapperSprites.removeClass("prome-sprite-focus");
 		return;
 	}
 
-	// check if last message is from a user
-	// if so, defocus all sprites
 	const lastMessage = lastMessagesWithoutSystem[0];
-	if (lastMessage.is_user) {
-		if (isGroupChat()) {
-			// if user sprite is enabled, defocus all sprites except the user sprite
-			if (isUserSpriteEnabled()) {
-				$("#visual-novel-wrapper > div")
-					.not("#expression-prome-user")
-					.addClass("prome-sprite-defocus");
-				$("#expression-prome-user").removeClass("prome-sprite-defocus");
-			} else {
-				$("#visual-novel-wrapper > div").addClass("prome-sprite-defocus");
-			}
-		} else {
-			if (isUserSpriteEnabled()) {
-				$("#expression-holder").addClass("prome-sprite-defocus");
-				$("#expression-prome-user").removeClass("prome-sprite-defocus");
-			}
+	const isUserMessage = lastMessage.is_user;
+	const groupChat = isGroupChat();
+	const userSpriteEnabled = isUserSpriteEnabled();
+
+	if (isUserMessage) {
+		visualNovelWrapperSprites.addClass("prome-sprite-defocus");
+
+		if (userSpriteEnabled) {
+			promeUserSprite.removeClass("prome-sprite-defocus");
+			if (!groupChat) expressionHolder.removeClass("prome-sprite-defocus");
 		}
 		return;
 	}
 
-	if (isGroupChat()) {
+	if (groupChat) {
 		// check if last message is from a disabled group member
 		// if so, defocus all sprites
 		if (isDisabledMember(lastMessage.original_avatar)) {
-			$("#visual-novel-wrapper > div").addClass("prome-sprite-defocus");
+			visualNovelWrapperSprites.addClass("prome-sprite-defocus");
 			return;
 		}
 
-		const focusedSpriteDiv = `#visual-novel-wrapper [id='expression-${lastMessage.original_avatar}']`;
-		let focusedSprite = $(focusedSpriteDiv);
+		const spriteDivSelector = `#visual-novel-wrapper [id='expression-${lastMessage.original_avatar}']`;
 
-		const applyDefocusClass = () => {
-			// remove defocus class from all sprites
-			$("#visual-novel-wrapper > div").removeClass("prome-sprite-defocus");
-
-			// apply defocus class to all sprites except the focused sprite
-			$("#visual-novel-wrapper > div")
-				.not(focusedSprite)
-				.addClass("prome-sprite-defocus");
-		};
-
-		if (focusedSprite.length === 0) {
-			const checkInterval = setInterval(() => {
-				focusedSprite = $(focusedSpriteDiv);
-				if (focusedSprite.length > 0) {
-					applyDefocusClass();
-					clearInterval(checkInterval);
-				}
-			}, 100);
-		} else {
-			applyDefocusClass();
-		}
-	} else {
-		const spriteDiv = $("#expression-holder");
-
-		const applyDefocusClass = () => {
-			spriteDiv.removeClass("prome-sprite-defocus");
-			$("#expression-prome-user").addClass("prome-sprite-defocus");
-		};
-
-		if (spriteDiv.length === 0) {
-			const checkInterval = setInterval(() => {
-				if (spriteDiv.length > 0) {
-					applyDefocusClass();
-					clearInterval(checkInterval);
-				}
-			}, 100);
-		} else {
-			applyDefocusClass();
-		}
+		return waitForElement(spriteDivSelector, (sprite) => {
+			// Defocus the sprite and focus the rest
+			sprite.removeClass("prome-sprite-defocus");
+			visualNovelWrapperSprites.not(sprite).addClass("prome-sprite-defocus");
+		});
 	}
+
+	return waitForElement("#expression-holder", (sprite) => {
+		sprite.removeClass("prome-sprite-defocus");
+		promeUserSprite.addClass("prome-sprite-defocus");
+	});
+}
+
+async function emulateGroupSprites() {
+	const context = getContext();
+	const group = context.groups.find((x) => x.id === context.groupId);
+	const filteredMembers = group.members.filter(
+		(x) => !group.disabled_members.includes(x) && x !== "prome-user",
+	);
+
+	await Promise.all(
+		filteredMembers.map(async (member) => {
+			const character = context.characters.find((x) => x.avatar === member);
+			if (!character || isDisabledMember(character.avatar))
+				return Promise.resolve();
+
+			const sprites = await getSpriteList(character.name);
+			if (sprites.length > 0) return Promise.resolve();
+
+			console.debug(
+				`[${extensionName}] Sprites not found for character: ${character.name}. Emulating via character card image.`,
+			);
+
+			const spriteSelector = `#visual-novel-wrapper [id='expression-${character.avatar}']`;
+
+			waitForElement(spriteSelector, (sprite) => {
+				const expressionImage = sprite.find("img")[0];
+				if (expressionImage) {
+					if (extension_settings[extensionName].emulateSprites) {
+						expressionImage.src = `/characters/${character.avatar}`;
+						sprite.removeClass("hidden");
+						sprite.css("display", "inherit");
+					} else {
+						expressionImage.src = "";
+						sprite.addClass("hidden");
+						sprite.css("display", "none");
+					}
+				}
+			});
+		}),
+	);
+}
+
+async function emulateSoloSprites() {
+	const context = getContext();
+	if (context.characterId === undefined || context.characterId === "prome-user")
+		return Promise.resolve();
+
+	const character = context.characters[context.characterId];
+	const sprites = await getSpriteList(character.name);
+	if (sprites.length > 0) return Promise.resolve();
+
+	console.debug(
+		`[${extensionName}] Sprites not found for character: ${character.name}. Emulating via character card image.`,
+	);
+
+	waitForElement("#expression-holder", (sprite) => {
+		if (!extension_settings[extensionName].emulateSprites) {
+			sprite.children("img").attr("src", "");
+			sprite.css("display", "none");
+		} else {
+			sprite.children("img").attr("src", `/characters/${character.avatar}`);
+			sprite.css("display", "inherit");
+		}
+	});
 }
 
 async function emulateSprites() {
-	if (!zoomListenerPreconditions(true)) return;
+	if (!zoomListenerPreconditions(true)) return Promise.resolve();
 
-	const context = getContext();
-	const group = context.groups.find((x) => x.id === context.groupId);
+	const groupChat = isGroupChat();
 
-	if (group) {
-		const filteredMembers = group.members.filter(
-			(x) => !group.disabled_members.includes(x),
-		);
-
-		for (const member of filteredMembers) {
-			const character = context.characters.find((x) => x.avatar === member);
-			if (!character) {
-				continue;
-			}
-			if (character.avatar === "prome-user") continue;
-
-			const sprites = await getSpriteList(character.name);
-			if (
-				sprites.length === 0 &&
-				extension_settings[extensionName].emulateSprites
-			) {
-				if (!isDisabledMember(character.avatar)) {
-					// grab the sprite div
-					const spriteDiv = `#visual-novel-wrapper [id='expression-${character.avatar}']`;
-					let sprite = $(spriteDiv);
-
-					console.debug(
-						`[${extensionName}] No sprites found for character: ${character.name}. Emulating via character card image.`,
-					);
-
-					// apply the sprite card image to <img id="expression-image"> in the spriteDiv
-					const applySpriteCardImage = (div, member) => {
-						// grab the sprite img element in the sprite div
-						const expressionImage = $(`${div} > img`)[0];
-
-						// apply the sprite card image to the img src
-						expressionImage.src = `/characters/${member}`;
-					};
-
-					if (sprite.length === 0) {
-						// give time for the sprite to load on the page
-						const checkInterval = setInterval(() => {
-							sprite = $(spriteDiv);
-							if (sprite.length > 0) {
-								applySpriteCardImage(spriteDiv, character.avatar);
-								clearInterval(checkInterval);
-							}
-						}, 100);
-					} else {
-						applySpriteCardImage(spriteDiv, character.avatar);
-					}
-
-					// remove hidden class from the sprite div
-					sprite.removeClass("hidden");
-				}
-			}
-		}
+	if (groupChat) {
+		// const vnWrapper = $("#visual-novel-wrapper");
+		await emulateGroupSprites();
+		// Execute VN Sprite Update only if User Sprite is not enabled
+		// If enabled, let the User Sprite VN Update handle it
+		// (To be enabled when ST PR is merged)
+		// if (!isUserSpriteEnabled()) {
+		// 	await visualNovelUpdateLayers(vnWrapper);
+		// }
 	} else {
-		if (context.characterId === undefined) return;
-		if (context.characterId === "prome-user") return;
-		if (!extension_settings[extensionName].emulateSprites) return;
-
-		const character = context.characters[context.characterId];
-		const sprites = await getSpriteList(character.name);
-
-		if (sprites.length === 0) {
-			console.debug(
-				`[${extensionName}] No sprites found for character: ${character.name}. Emulating via character card image.`,
-			);
-
-			const spriteDiv = $("#expression-holder");
-
-			const applySpriteCardImage = () => {
-				spriteDiv
-					.children("img")
-					.attr("src", `/characters/${character.avatar}`);
-			};
-
-			if (spriteDiv.length === 0) {
-				const checkInterval = setInterval(() => {
-					if (spriteDiv.length > 0) {
-						applySpriteCardImage();
-						clearInterval(checkInterval);
-					}
-				}, 100);
-			} else {
-				applySpriteCardImage();
-			}
-			spriteDiv.css("display", "inherit");
-		}
+		await emulateSoloSprites();
 	}
 }
 
