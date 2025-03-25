@@ -1,6 +1,7 @@
 import { extensionName, defaultSettings } from "../constants.js";
 import { extension_settings } from "../../../../extensions.js";
 import { saveSettingsDebounced } from "../../../../../script.js";
+import { isGroupChat } from "../utils.js";
 
 /* Sprite Scale Functions */
 export function applySpriteScale() {
@@ -53,12 +54,17 @@ export function onSpriteScale_Change() {
 
 export function applyScale() {
 	// apply sprite scale to all sprites
-	// find all divs in #visual-novel-wrapper
-	const sprites = $("#visual-novel-wrapper").find("div");
 	document.documentElement.style.setProperty(
 		"--prome-sprite-scale",
 		extension_settings[extensionName].maxSpriteScale,
 	);
+
+	let sprites;
+	if (isGroupChat()) {
+		sprites = $("#visual-novel-wrapper").find("div");
+	} else {
+		sprites = $("#expression-wrapper").find("div");
+	}
 
 	// loop through all divs
 	for (const d of sprites) {
