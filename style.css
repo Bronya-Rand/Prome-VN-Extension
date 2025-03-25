@@ -12,6 +12,7 @@
 	--prome-shake-duration: 0.35s;
 	--prome-shake-duration-reduced: 0.7s;
 	--prome-shake-timing: ease-in-out;
+	--prome-active-shake-duration: var(--prome-shake-duration);
 
 	/* Prome Sprite Shadows */
 	--prome-shadow-color: #111;
@@ -153,7 +154,8 @@ body.waifuMode.spriteScale .prome-sprite-scale {
 }
 
 body.waifuMode.spriteScale.spriteZoom .prome-sprite-scale.prome-sprite-focus {
-	transform: scale(calc(var(--prome-sprite-scale) * var(--prome-focus-scale)));
+	--prome-combined-scale: calc(var(--prome-sprite-scale) * var(--prome-focus-scale));
+	transform: scale(var(--prome-combined-scale));
 }
 
 body.waifuMode.spriteZoom:not(.spriteScale) .prome-sprite-focus {
@@ -164,28 +166,10 @@ body.waifuMode.spriteZoom:not(.spriteScale) .prome-sprite-focus {
  * Prome Sprite Shake 
  */
 
-body.waifuMode.spriteShake .prome-sprite-shake {
-	transform: translateZ(0);
-	animation: shake var(--prome-shake-duration) var(--prome-shake-timing)
-		infinite;
-}
-
-body.waifuMode.spriteShake.spriteZoom .prome-sprite-shake {
-	transform: translateZ(0);
-	animation: shakeAndFocus var(--prome-shake-duration) var(--prome-shake-timing)
-		infinite;
-}
-
-body.waifuMode.spriteShake.spriteScale .prome-sprite-shake {
-	transform: translateZ(0);
-	animation: shakeAndScale var(--prome-shake-duration) var(--prome-shake-timing)
-		infinite;
-}
-
-body.waifuMode.spriteShake.spriteZoom.spriteScale .prome-sprite-shake {
-	transform: translateZ(0);
-	animation: shakeFocusAndScale var(--prome-shake-duration)
-		var(--prome-shake-timing) infinite;
+@media (prefers-reduced-motion: reduce) {
+	:root {
+		--prome-active-shake-duration: var(--prome-shake-duration-reduced);
+	}
 }
 
 @keyframes shake {
@@ -271,30 +255,28 @@ body.waifuMode.spriteShake.spriteZoom.spriteScale .prome-sprite-shake {
 	}
 }
 
-@media (prefers-reduced-motion: reduce) {
-	body.waifuMode.spriteShake .prome-sprite-shake {
-		transform: translateZ(0);
-		animation: shake var(--prome-shake-duration-reduced)
-			var(--prome-shake-timing) infinite;
-	}
+body.waifuMode.spriteShake .prome-sprite-shake {
+	transform: translateZ(0);
+	animation: shake var(--prome-active-shake-duration) var(--prome-shake-timing)
+		infinite;
+}
 
-	body.waifuMode.spriteShake.spriteZoom .prome-sprite-shake {
-		transform: translateZ(0);
-		animation: shakeAndFocus var(--prome-shake-duration-reduced)
-			var(--prome-shake-timing) infinite;
-	}
+body.waifuMode.spriteShake.spriteZoom .prome-sprite-shake {
+	transform: translateZ(0);
+	animation: shakeAndFocus var(--prome-active-shake-duration) var(--prome-shake-timing)
+		infinite;
+}
 
-	body.waifuMode.spriteShake.spriteScale .prome-sprite-shake {
-		transform: translateZ(0);
-		animation: shakeAndScale var(--prome-shake-duration-reduced)
-			var(--prome-shake-timing) infinite;
-	}
+body.waifuMode.spriteShake.spriteScale .prome-sprite-shake {
+	transform: translateZ(0);
+	animation: shakeAndScale var(--prome-active-shake-duration) var(--prome-shake-timing)
+		infinite;
+}
 
-	body.waifuMode.spriteShake.spriteZoom.spriteScale .prome-sprite-shake {
-		transform: translateZ(0);
-		animation: shakeFocusAndScale var(--prome-shake-duration-reduced)
-			var(--prome-shake-timing) infinite;
-	}
+body.waifuMode.spriteShake.spriteZoom.spriteScale .prome-sprite-shake {
+	transform: translateZ(0);
+	animation: shakeFocusAndScale var(--prome-active-shake-duration)
+		var(--prome-shake-timing) infinite;
 }
 
 /* 
