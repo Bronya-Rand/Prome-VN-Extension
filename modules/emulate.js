@@ -1,6 +1,12 @@
 import { extensionName } from "../constants.js";
 import { extension_settings } from "../../../../extensions.js";
-import { saveSettingsDebounced } from "../../../../../script.js";
+import {
+	saveSettingsDebounced,
+	eventSource,
+	event_types,
+} from "../../../../../script.js";
+import { emulateSpritesDebounce } from "../listeners.js";
+import { isGroupChat } from "../utils.js";
 
 export function applySpriteEmulation() {
 	if (
@@ -15,10 +21,11 @@ export function applySpriteEmulation() {
 		`[${extensionName}] Sprite Emulation?: ${extension_settings[extensionName].emulateSprites}`,
 	);
 
-	$("body").toggleClass(
-		"spriteEmulation",
-		extension_settings[extensionName].emulateSprites,
-	);
+	emulateSpritesDebounce();
+
+	if (isGroupChat()) {
+		eventSource.emit(event_types.GROUP_UPDATED);
+	}
 }
 
 export function onSpriteEmulation_Click(event) {

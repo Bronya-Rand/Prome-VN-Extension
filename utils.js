@@ -104,3 +104,12 @@ export function getGroupIndex() {
 	});
 	return groupIndex;
 }
+
+/**
+ * Returns whether the current chat is a group chat
+ * @returns {boolean} - Whether the current chat is a group chat
+ */
+export function isGroupChat() {
+	const context = getContext();
+	return context.groupId !== null;
+}

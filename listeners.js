@@ -1,12 +1,13 @@
 import { debounce_timeout } from "../../../constants.js";
 import { debounce } from "../../../utils.js";
-import { getContext } from "../../../extensions.js";
+import { getContext, extension_settings } from "../../../extensions.js";
 import { extensionName } from "./constants.js";
 import { applyUserSpriteAttributes } from "./modules/user.js";
 import {
 	getLastChatMessage,
 	getSpriteList,
 	isUserSpriteEnabled,
+	isGroupChat,
 } from "./utils.js";
 import { textgenerationwebui_settings as textgen_settings } from "../../../textgen-settings.js";
 import { applyScale } from "./modules/scale.js";
@@ -52,11 +53,6 @@ function isDisabledMember(name) {
 	const group = context.groups.find((x) => x.id === context.groupId);
 	if (!group) return false;
 	return group.disabled_members.includes(name);
-}
-
-function isGroupChat() {
-	const context = getContext();
-	return context.groupId !== null;
 }
 
 // Apply focus class to the sprite
@@ -247,18 +243,21 @@ async function emulateSprites() {
 			if (!character) {
 				continue;
 			}
-			if (character.avatar === "prome-user") return;
+			if (character.avatar === "prome-user") continue;
 
 			const sprites = await getSpriteList(character.name);
-			if (sprites.length === 0) {
+			if (
+				sprites.length === 0 &&
+				extension_settings[extensionName].emulateSprites
+			) {
 				if (!isDisabledMember(character.avatar)) {
-					console.debug(
-						`[${extensionName}] No sprites found for character: ${character.name}. Emulating via character card image.`,
-					);
-
 					// grab the sprite div
 					const spriteDiv = `#visual-novel-wrapper [id='expression-${character.avatar}']`;
 					let sprite = $(spriteDiv);
+
+					console.debug(
+						`[${extensionName}] No sprites found for character: ${character.name}. Emulating via character card image.`,
+					);
 
 					// apply the sprite card image to <img id="expression-image"> in the spriteDiv
 					const applySpriteCardImage = (div, member) => {
@@ -281,13 +280,16 @@ async function emulateSprites() {
 					} else {
 						applySpriteCardImage(spriteDiv, character.avatar);
 					}
-					// apply the prome-render-sprite class to the sprite div
-					sprite.addClass("prome-render-sprite");
+
+					// remove hidden class from the sprite div
+					sprite.removeClass("hidden");
 				}
 			}
 		}
 	} else {
-		if (context.characterId === null) return;
+		if (context.characterId === undefined) return;
+		if (context.characterId === "prome-user") return;
+		if (!extension_settings[extensionName].emulateSprites) return;
 
 		const character = context.characters[context.characterId];
 		const sprites = await getSpriteList(character.name);
@@ -315,7 +317,7 @@ async function emulateSprites() {
 			} else {
 				applySpriteCardImage();
 			}
-			spriteDiv.addClass("prome-render-sprite");
+			spriteDiv.css("display", "inherit");
 		}
 	}
 }

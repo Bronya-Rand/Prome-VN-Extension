@@ -412,7 +412,7 @@ $(document).ready(() => {
 				mutation.attributeName === "class"
 			) {
 				const spriteDiv = mutation.target;
-				if (spriteDiv.classList.contains("hidden")) {
+				if (spriteDiv.classList.contains("hidden") && extension_settings[extensionName].emulateSprites) {
 					spriteDiv.classList.remove("hidden");
 				}
 			}
