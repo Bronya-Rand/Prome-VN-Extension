@@ -21,7 +21,7 @@ export function getRecentTalkingCharacters(limit) {
 	const context = getContext();
 	const reversedChat = context.chat.slice().reverse();
 	const activeGroup = context.groups.find((x) => x.id === context.groupId);
-	const members = activeGroup?.members
+	const members = activeGroup?.members;
 
 	// Filter out system messages, images, user messages, and inactive/removed characters
 	const talkingCharacters = reversedChat

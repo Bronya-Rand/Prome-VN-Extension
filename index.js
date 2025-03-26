@@ -43,7 +43,12 @@ import {
 	onSheld_Click,
 	onSheldMode_Click,
 } from "./modules/sheld.js";
-import { getGroupIndex, isSheldVisible, getSpriteList, isGroupChat } from "./utils.js";
+import {
+	getGroupIndex,
+	isSheldVisible,
+	getSpriteList,
+	isGroupChat,
+} from "./utils.js";
 import {
 	applySpriteZoomTimer,
 	applySpriteZoomAnimation,
