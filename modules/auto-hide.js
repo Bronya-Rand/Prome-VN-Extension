@@ -1,14 +1,13 @@
 import { extensionName } from "../constants.js";
 import { extension_settings } from "../../../../extensions.js";
 import { saveSettingsDebounced } from "../../../../../script.js";
-import { eventSource, event_types } from "../../../../../../script.js";
 import {
 	getGroupIndex,
 	getRecentTalkingCharacters,
 	isAutoHideSpritesEnabled,
 	isUserSpriteEnabled,
 } from "../utils.js";
-// import { visualNovelUpdateLayers } from "../../../expressions/index.js";
+import { visualNovelUpdateLayers } from "../../../expressions/index.js";
 
 export function applyAutoHideSprites() {
 	if (
@@ -23,11 +22,6 @@ export function applyAutoHideSprites() {
 		`[${extensionName}] Auto Hide Sprites?: ${extension_settings[extensionName].autoHideSprites}`,
 	);
 
-	$("body").toggleClass(
-		"autoHideSprites",
-		extension_settings[extensionName].autoHideSprites,
-	);
-
 	handleAutoHideSprites();
 }
 
@@ -38,7 +32,8 @@ export function onAutoHideSprites_Click(event) {
 	applyAutoHideSprites();
 }
 
-export function onAutoHideMaxSprites_Change() {
+export async function onAutoHideMaxSprites_Change() {
+	const vnWrapper = $("#visual-novel-wrapper");
 	const value = Number(this.value);
 	if (value < 0 || value > 8) {
 		console.error(
@@ -49,7 +44,8 @@ export function onAutoHideMaxSprites_Change() {
 	extension_settings[extensionName].maxViewableCharacters = value;
 	$("#prome-sprite-max-visible").val(value);
 	saveSettingsDebounced();
-	eventSource.emit(event_types.GROUP_UPDATED);
+	handleAutoHideSprites();
+	await visualNovelUpdateLayers(vnWrapper);
 }
 
 export function setupAutoHideHTML() {
@@ -76,8 +72,7 @@ export async function handleAutoHideSprites() {
 	// If the user is not in a group or auto-hide is disabled, exit
 	if (groupIndex === -1 || !isAutoHideSpritesEnabled()) {
 		allSprites.removeClass("displayNone").css("display", "inherit");
-		// if (groupIndex !== -1) await visualNovelUpdateLayers(vnWrapper);
-		eventSource.emit(event_types.GROUP_UPDATED);
+		if (groupIndex !== -1) await visualNovelUpdateLayers(vnWrapper);
 		return;
 	}
 
@@ -131,7 +126,6 @@ export async function handleAutoHideSprites() {
 		}
 	}
 
-	// await visualNovelUpdateLayers(vnWrapper);
-	eventSource.emit(event_types.GROUP_UPDATED);
+	await visualNovelUpdateLayers(vnWrapper);
 	return;
 }

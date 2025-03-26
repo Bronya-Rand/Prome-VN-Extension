@@ -12,7 +12,7 @@ import {
 import { textgenerationwebui_settings as textgen_settings } from "../../../textgen-settings.js";
 import { applyScale } from "./modules/scale.js";
 import { isDisabledMember } from "./utils.js";
-// import { visualNovelUpdateLayers } from "../../expressions/index.js";
+import { visualNovelUpdateLayers } from "../../expressions/index.js";
 
 /* Debouncers */
 export const applyZoomDebounce = debounce(() => {
@@ -231,12 +231,8 @@ async function emulateGroupSprites() {
 				if (expressionImage) {
 					if (extension_settings[extensionName].emulateSprites) {
 						expressionImage.src = `/characters/${character.avatar}`;
-						sprite.removeClass("hidden");
-						sprite.css("display", "inherit");
 					} else {
 						expressionImage.src = "";
-						sprite.addClass("hidden");
-						sprite.css("display", "none");
 					}
 				}
 			});
@@ -274,16 +270,15 @@ async function emulateSprites() {
 	const groupChat = isGroupChat();
 
 	if (groupChat) {
-		// const vnWrapper = $("#visual-novel-wrapper");
+		const vnWrapper = $("#visual-novel-wrapper");
 
 		await emulateGroupSprites();
 
 		// Execute VN Sprite Update only if User Sprite is not enabled
 		// If enabled, let the User Sprite VN Update handle it
-		// (To be enabled when ST PR is merged)
-		// if (!isUserSpriteEnabled()) {
-		// 	await visualNovelUpdateLayers(vnWrapper);
-		// }
+		if (!isUserSpriteEnabled()) {
+			await visualNovelUpdateLayers(vnWrapper);
+		}
 	} else {
 		await emulateSoloSprites();
 	}

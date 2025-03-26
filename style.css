@@ -162,6 +162,11 @@ body.waifuMode.spriteZoom:not(.spriteScale) .prome-sprite-focus {
 	transform: scale(var(--prome-focus-scale));
 }
 
+body.waifuMode.emulateSprites #visual-novel-wrapper .hidden:not(.displayNone) {
+	display: inherit !important;
+	visibility: visible !important;
+}
+
 /* 
  * Prome Sprite Shake 
  */

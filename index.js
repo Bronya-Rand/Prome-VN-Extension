@@ -43,7 +43,7 @@ import {
 	onSheld_Click,
 	onSheldMode_Click,
 } from "./modules/sheld.js";
-import { getGroupIndex, isSheldVisible, getSpriteList } from "./utils.js";
+import { getGroupIndex, isSheldVisible, getSpriteList, isGroupChat } from "./utils.js";
 import {
 	applySpriteZoomTimer,
 	applySpriteZoomAnimation,
@@ -85,7 +85,7 @@ import {
 	setupScaleHTML,
 	setupScaleJQuery,
 } from "./modules/scale.js";
-// import { visualNovelUpdateLayers } from "../../expressions/index.js";
+import { visualNovelUpdateLayers } from "../../expressions/index.js";
 
 async function loadSettings() {
 	extension_settings[extensionName] = extension_settings[extensionName] || {};
@@ -294,6 +294,8 @@ jQuery(async () => {
 	$("#prome-user-sprite-input").on("input", onUserSprite_Input);
 
 	/* Prome Feature Initialization */
+	const vnWrapper = $("#visual-novel-wrapper");
+
 	addLetterbox();
 	setupTintJQuery();
 	setupAutoHideJQuery();
@@ -320,6 +322,11 @@ jQuery(async () => {
 		await emulateSpritesDebounce();
 		await applyUserAttributesDebounce();
 		await applyScaleDebounce();
+		handleAutoHideSprites();
+
+		if (isGroupChat()) {
+			await visualNovelUpdateLayers(vnWrapper);
+		}
 	});
 
 	// Prevents the User Sprite from Genning Content
@@ -375,6 +382,10 @@ $(document).ready(() => {
 					applyZoomDebounce();
 					applyDefocusDebounce();
 					applyShakeDebounce();
+
+					if (isGroupChat()) {
+						visualNovelUpdateLayers($("#visual-novel-wrapper"));
+					}
 				}
 				if (
 					node.tagName === "DIV" &&
@@ -383,6 +394,10 @@ $(document).ready(() => {
 					handleAutoHideSprites();
 					applyZoomDebounce();
 					applyDefocusDebounce();
+
+					if (isGroupChat()) {
+						visualNovelUpdateLayers($("#visual-novel-wrapper"));
+					}
 				}
 			}
 		};
@@ -406,37 +421,12 @@ $(document).ready(() => {
 	const chatDiv = document.getElementById("chat");
 	promeChatObserver.observe(chatDiv, { childList: true });
 
-	/* Mutation Observer for VN Sprites */
-	/* Removes the VN Sprite's 'hidden' toggle for 'prome-render-sprite' */
-	const promeSpriteObserver = new MutationObserver((mutations) => {
-		const vnWrapper = $("#visual-novel-wrapper");
-		for (const mutation of mutations) {
-			if (
-				mutation.type === "attributes" &&
-				mutation.attributeName === "class"
-			) {
-				const spriteDiv = mutation.target;
-				getSpriteList(spriteDiv.dataset.avatar).then((sprites) => {
-					const hasSprites = sprites.length > 0
-					if (spriteDiv.classList.contains("hidden") && extension_settings[extensionName].emulateSprites && !hasSprites) {
-						spriteDiv.classList.remove("hidden");
-						// visualNovelUpdateLayers(vnWrapper);
-					}
-				});
-			}
-		}
-	});
-
 	// Since the VN Wrapper is loaded by ST, we need to wait for it to load
 	const vnWrapperInterval = setInterval(() => {
 		const vnWrapperDiv = document.getElementById("visual-novel-wrapper");
 		if (vnWrapperDiv) {
 			promeChatObserver.observe(vnWrapperDiv, {
 				childList: true,
-				subtree: true,
-			});
-			promeSpriteObserver.observe(vnWrapperDiv, {
-				attributes: true,
 				subtree: true,
 			});
 			clearInterval(vnWrapperInterval);

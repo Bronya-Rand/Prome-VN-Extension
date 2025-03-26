@@ -2,9 +2,9 @@
 
 The Prome Visual Novel Extension is a extension for SillyTavern that remodernizes the Visual Novel system by separating it from ST itself into a extension.
 
-<!-- > [!CAUTION]
-> Prome at the moment is only supported on the current staging branch of SillyTavern. Switch your SillyTavern version to `staging` using this command:
-> `git checkout -b staging && git pull` !-->
+> [!CAUTION]
+> Prome in this dev build at the moment is only supported on the current staging branch of SillyTavern. Switch your SillyTavern version to `staging` using this command:
+> `git checkout -b staging && git pull` !
 
 ## Why Prome?
 
