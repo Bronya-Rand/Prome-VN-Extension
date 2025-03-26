@@ -43,7 +43,7 @@ import {
 	onSheld_Click,
 	onSheldMode_Click,
 } from "./modules/sheld.js";
-import { getGroupIndex, isSheldVisible } from "./utils.js";
+import { getGroupIndex, isSheldVisible, getSpriteList } from "./utils.js";
 import {
 	applySpriteZoomTimer,
 	applySpriteZoomAnimation,
@@ -85,6 +85,7 @@ import {
 	setupScaleHTML,
 	setupScaleJQuery,
 } from "./modules/scale.js";
+// import { visualNovelUpdateLayers } from "../../expressions/index.js";
 
 async function loadSettings() {
 	extension_settings[extensionName] = extension_settings[extensionName] || {};
@@ -304,21 +305,20 @@ jQuery(async () => {
 	eventSource.on(event_types.CHAT_CHANGED, async () => {
 		await applyZoomDebounce();
 		await applyDefocusDebounce();
-		// await handleAutoHideSprites();
 		await applyScaleDebounce();
 		await emulateSpritesDebounce();
-		// await handleUserSprite();
-		// await applyUserAttributesDebounce();
+		await handleUserSprite();
+		await applyUserAttributesDebounce();
+		handleAutoHideSprites();
 	});
 	eventSource.on(event_types.MESSAGE_DELETED, async () => {
 		await applyZoomDebounce();
 		await applyDefocusDebounce();
-		// await handleAutoHideSprites();
+		handleAutoHideSprites();
 	});
 	eventSource.on(event_types.GROUP_UPDATED, async () => {
 		await emulateSpritesDebounce();
-		// await handleAutoHideSprites();
-		// await applyUserAttributesDebounce();
+		await applyUserAttributesDebounce();
 		await applyScaleDebounce();
 	});
 
@@ -350,7 +350,7 @@ jQuery(async () => {
 
 	$(window).on("resize", async () => {
 		await emulateSpritesDebounce();
-		// await applyUserAttributesDebounce();
+		await applyUserAttributesDebounce();
 	});
 
 	// Show info message if Sheld is hidden
@@ -371,7 +371,7 @@ $(document).ready(() => {
 		const handleNode = (node) => {
 			if (node.classList) {
 				if (node.classList.contains("mes")) {
-					// handleAutoHideSprites();
+					handleAutoHideSprites();
 					applyZoomDebounce();
 					applyDefocusDebounce();
 					applyShakeDebounce();
@@ -380,7 +380,7 @@ $(document).ready(() => {
 					node.tagName === "DIV" &&
 					node.classList.contains("expression-holder")
 				) {
-					// handleAutoHideSprites();
+					handleAutoHideSprites();
 					applyZoomDebounce();
 					applyDefocusDebounce();
 				}
@@ -409,15 +409,20 @@ $(document).ready(() => {
 	/* Mutation Observer for VN Sprites */
 	/* Removes the VN Sprite's 'hidden' toggle for 'prome-render-sprite' */
 	const promeSpriteObserver = new MutationObserver((mutations) => {
+		const vnWrapper = $("#visual-novel-wrapper");
 		for (const mutation of mutations) {
 			if (
 				mutation.type === "attributes" &&
 				mutation.attributeName === "class"
 			) {
 				const spriteDiv = mutation.target;
-				if (spriteDiv.classList.contains("hidden") && extension_settings[extensionName].emulateSprites) {
-					spriteDiv.classList.remove("hidden");
-				}
+				getSpriteList(spriteDiv.dataset.avatar).then((sprites) => {
+					const hasSprites = sprites.length > 0
+					if (spriteDiv.classList.contains("hidden") && extension_settings[extensionName].emulateSprites && !hasSprites) {
+						spriteDiv.classList.remove("hidden");
+						// visualNovelUpdateLayers(vnWrapper);
+					}
+				});
 			}
 		}
 	});

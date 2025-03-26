@@ -8,6 +8,7 @@ import {
 	isAutoHideSpritesEnabled,
 	isUserSpriteEnabled,
 } from "../utils.js";
+// import { visualNovelUpdateLayers } from "../../../expressions/index.js";
 
 export function applyAutoHideSprites() {
 	if (
@@ -26,6 +27,8 @@ export function applyAutoHideSprites() {
 		"autoHideSprites",
 		extension_settings[extensionName].autoHideSprites,
 	);
+
+	handleAutoHideSprites();
 }
 
 export function onAutoHideSprites_Click(event) {
@@ -66,39 +69,69 @@ export function setupAutoHideJQuery() {
 
 export async function handleAutoHideSprites() {
 	const groupIndex = getGroupIndex();
-
-	// If the user is not in a group, return
-	if (groupIndex === -1) return;
-
 	// Get all characters within the '#visual-novel-wrapper' div
-	let allSprites = $("#visual-novel-wrapper > div");
+	const vnWrapper = $("#visual-novel-wrapper");
+	const allSprites = vnWrapper.find("div");
 
-	// Remove user sprite from the list of sprites (if userSprite is enabled)
-	if (isUserSpriteEnabled()) {
-		allSprites = allSprites.not("#expression-prome-user");
+	// If the user is not in a group or auto-hide is disabled, exit
+	if (groupIndex === -1 || !isAutoHideSpritesEnabled()) {
+		allSprites.removeClass("displayNone").css("display", "inherit");
+		// if (groupIndex !== -1) await visualNovelUpdateLayers(vnWrapper);
+		eventSource.emit(event_types.GROUP_UPDATED);
+		return;
 	}
 
-	// Remove displayNone class from all sprites
-	allSprites.removeClass("displayNone");
+	const maxVisibleCharacters =
+		extension_settings[extensionName].maxViewableCharacters;
 
-	// Add displayNone class to all sprites after the Xth sprite
-	if (isAutoHideSpritesEnabled()) {
-		const maxVisibleCharacters =
-			extension_settings[extensionName].maxViewableCharacters;
+	// Exit if not enough characters to hide
+	if (allSprites.length <= maxVisibleCharacters) {
+		allSprites.removeClass("displayNone");
+		allSprites.css("display", "inherit");
+	} else {
+		const recentTalkingCharacters =
+			getRecentTalkingCharacters(maxVisibleCharacters);
+		const visibleCharacterIds = new Set(recentTalkingCharacters);
 
-		if (allSprites.length > maxVisibleCharacters) {
-			const recentTalkingCharacters =
-				getRecentTalkingCharacters(maxVisibleCharacters);
+		const spritesToShow = [];
+		const spritesToHide = [];
 
-			// Add displayNone to all sprites that are not in the recentTalkingCharacters list
-			allSprites.each((_, sprite) => {
-				const spriteId = $(sprite).attr("id");
-				if (
-					!recentTalkingCharacters.includes(spriteId.replace("expression-", ""))
-				) {
-					$(sprite).addClass("displayNone");
-				}
-			});
+		allSprites.each((_, sprite) => {
+			const $sprite = $(sprite);
+
+			// Skip if User Sprite
+			if (
+				isUserSpriteEnabled() &&
+				$sprite.attr("id") === "expression-prome-user"
+			) {
+				spritesToShow.push($sprite);
+				return;
+			}
+
+			const characterId = $sprite.data().avatar;
+
+			if (visibleCharacterIds.has(characterId)) {
+				spritesToShow.push($sprite);
+			} else {
+				spritesToHide.push($sprite);
+			}
+		});
+
+		if (spritesToShow.length > 0) {
+			for (const sprite of spritesToShow) {
+				sprite.removeClass("displayNone");
+				sprite.css("display", "inherit");
+			}
+		}
+
+		if (spritesToHide.length > 0) {
+			for (const sprite of spritesToHide) {
+				sprite.addClass("displayNone");
+			}
 		}
 	}
+
+	// await visualNovelUpdateLayers(vnWrapper);
+	eventSource.emit(event_types.GROUP_UPDATED);
+	return;
 }
