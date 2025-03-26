@@ -59,6 +59,18 @@ function zoomListenerPreconditions(allowSolo = false) {
 }
 
 /**
+ * Check if the preconditions are met for the shake listener
+ * @returns {boolean} - Whether the preconditions are met
+ */
+function shakeListenerPreconditions() {
+	if (!textgen_settings.streaming) return false;
+
+	const context = getContext();
+	const streamingProcessor = context.streamingProcessor;
+	return streamingProcessor && !streamingProcessor.isStopped;
+}
+
+/**
  * Wait for an element to exist before running a callback
  * @param {string} selector - The element selector
  * @param {function} callback - The callback function
@@ -263,7 +275,9 @@ async function emulateSprites() {
 
 	if (groupChat) {
 		// const vnWrapper = $("#visual-novel-wrapper");
+
 		await emulateGroupSprites();
+
 		// Execute VN Sprite Update only if User Sprite is not enabled
 		// If enabled, let the User Sprite VN Update handle it
 		// (To be enabled when ST PR is merged)
@@ -273,96 +287,122 @@ async function emulateSprites() {
 	} else {
 		await emulateSoloSprites();
 	}
+
+	return Promise.resolve();
+}
+
+function getShakeTargets(group, characterAvatar = null) {
+	const allSprites = $("#visual-novel-wrapper > div");
+
+	if (group) {
+		if (characterAvatar) {
+			const sprite = `#visual-novel-wrapper [id='expression-${characterAvatar}']`;
+			return { target: sprite, allSprites };
+		}
+		return { target: null, allSprites };
+	}
+
+	return { target: "#expression-holder" };
 }
 
 // Apply shake class to the speaking sprite
 async function applyShake() {
-	if (!textgen_settings.streaming) return;
+	if (!shakeListenerPreconditions()) return Promise.resolve();
 
 	const context = getContext();
 	const group = context.groups.find((x) => x.id === context.groupId);
-	const streamingProcessor = context.streamingProcessor;
-	const isStreaming = streamingProcessor && !streamingProcessor.isStopped;
-	if (!isStreaming) return;
 
-	// If Group Chat, Apply Shake to Speaking Sprite
+	// Get selectors
+	const { target: targetSelector, allSprites } = getShakeTargets(
+		group,
+		context.characterId,
+	);
+
+	// Group Chat Logic
 	if (group) {
 		const filteredMembers = group.members.filter(
 			(x) => !group.disabled_members.includes(x),
 		);
-		if (filteredMembers.length < 1) return;
+		if (filteredMembers.length < 1) return Promise.resolve();
 
-		if (!context.characterId) return; // ST bug or something else
+		if (!context.characterId) return Promise.resolve(); // ST bug or something else
+
 		const speakingCharacter = context.characters[context.characterId];
-		if (!speakingCharacter) {
-			console.debug(
-				"Character not found in group members. Either error or something else happened.",
-			);
-			return;
-		}
-		if (isDisabledMember(speakingCharacter.avatar)) return;
+		if (!speakingCharacter || isDisabledMember(speakingCharacter.avatar))
+			return Promise.resolve();
 
-		const spriteDiv = `#visual-novel-wrapper [id='expression-${speakingCharacter.avatar}']`;
-		let sprite = $(spriteDiv);
-
-		const applyShakeClass = () => {
-			// apply shake class to the speaking sprite
-			sprite.addClass("prome-sprite-shake");
-
-			// remove shake class from other sprites
-			$("#visual-novel-wrapper > div")
-				.not(sprite)
-				.removeClass("prome-sprite-shake");
-		};
-
-		if (sprite.length === 0) {
-			// give time for the sprite to load on the page
-			const checkInterval = setInterval(() => {
-				sprite = $(spriteDiv);
-				if (sprite.length > 0) {
-					applyShakeClass();
-					clearInterval(checkInterval);
-				}
-			}, 100);
-		} else {
-			applyShakeClass();
-		}
-	} else {
-		// Apply Shake to Main Sprite in 1:1 Chat
-		$("#expression-holder").addClass("prome-sprite-shake");
+		return new Promise((resolve) => {
+			waitForElement(targetSelector, (sprite) => {
+				sprite.addClass("prome-sprite-shake");
+				allSprites.not(sprite).removeClass("prome-sprite-shake");
+				resolve();
+			});
+		});
 	}
+
+	// Solo Chat Logic
+	return new Promise((resolve) => {
+		waitForElement(targetSelector, (sprite) => {
+			sprite.addClass("prome-sprite-shake");
+			resolve();
+		});
+	});
 }
 
 export function stopShake() {
 	const context = getContext();
-	const group = context.groups.find((x) => x.id === context.groupId);
+	const groupChat = isGroupChat();
 	const streamingProcessor = context.streamingProcessor;
-	let isStreamingDone =
+
+	// Get selectors
+	const { target: targetSelector, allSprites } = getShakeTargets(
+		groupChat,
+		context.characterId,
+	);
+
+	const applyStopShake = () => {
+		if (groupChat) {
+			// Group Chat Logic
+			allSprites.removeClass("prome-sprite-shake");
+
+			if (targetSelector) {
+				waitForElement(targetSelector, (sprite) => {
+					sprite.removeClass("prome-sprite-shake");
+				});
+			}
+		} else {
+			// Solo Chat Logic
+			waitForElement(targetSelector, (sprite) => {
+				sprite.removeClass("prome-sprite-shake");
+			});
+		}
+	};
+
+	const isStreamingDone =
 		streamingProcessor &&
 		!streamingProcessor.isStopped &&
 		streamingProcessor.isFinished;
 
-	const stopShakeClass = (group) => {
-		// If Group Chat, Apply Shake to Speaking Sprite
-		if (group) {
-			$("#visual-novel-wrapper > div").removeClass("prome-sprite-shake");
-		} else {
-			$("#expression-holder").removeClass("prome-sprite-shake");
-		}
-	};
-
-	if (!isStreamingDone) {
-		const checkInterval = setInterval(() => {
-			isStreamingDone =
-				streamingProcessor &&
-				!streamingProcessor.isStopped &&
-				streamingProcessor.isFinished;
-			if (isStreamingDone) {
-				stopShakeClass(group);
-				clearInterval(checkInterval);
-			}
-		}, 100);
-	} else {
-		stopShakeClass(group);
+	if (isStreamingDone) {
+		applyStopShake();
+		return;
 	}
+
+	const checkInterval = setInterval(() => {
+		const nowDone =
+			streamingProcessor &&
+			!streamingProcessor.isStopped &&
+			streamingProcessor.isFinished;
+
+		if (nowDone) {
+			clearInterval(checkInterval);
+			applyStopShake();
+		}
+	}, 100);
+
+	// cleanup JIC
+	setTimeout(() => {
+		clearInterval(checkInterval);
+		applyStopShake();
+	}, 10000);
 }

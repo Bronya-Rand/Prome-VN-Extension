@@ -374,7 +374,7 @@ $(document).ready(() => {
 					// handleAutoHideSprites();
 					applyZoomDebounce();
 					applyDefocusDebounce();
-					// applyShakeDebounce();
+					applyShakeDebounce();
 				}
 				if (
 					node.tagName === "DIV" &&
