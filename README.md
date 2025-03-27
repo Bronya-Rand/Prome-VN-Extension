@@ -1,4 +1,6 @@
-# Prome Visual Novel Extension
+<p align="center">
+   <img src="./.github/prome-open-graph.jpg"/>
+</p>
 
 The Prome Visual Novel Extension is a extension for SillyTavern that remodernizes the Visual Novel system by separating it from ST itself into a extension.
 
