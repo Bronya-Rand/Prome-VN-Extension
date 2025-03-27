@@ -113,4 +113,6 @@ export const defaultSettings = {
 	userSprite: "",
 	autoHideSprites: false,
 	maxViewableCharacters: 5,
+	maxSpriteScale: 1,
+	scaleSprites: false,
 };

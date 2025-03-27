@@ -96,9 +96,7 @@ export async function handleUserSprite() {
 
 		// Check if Prome's Expression Image IMG is in the Expression Holder Div
 		const expressionHolder = $("#expression-wrapper");
-		let promeExpression = $("#expression-wrapper").children(
-			"#expression-prome-user",
-		);
+		let promeExpression = expressionHolder.children("#expression-prome-user");
 		if (promeExpression.length === 0) {
 			const html = `<div id="expression-prome-user" class="expression-holder displayNone">
 					<div id="expression-prome-userheader" class="fa-solid fa-grip drag-grabber"></div>

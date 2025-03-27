@@ -24,40 +24,43 @@
                         <input id="prome-enable-vn" type="checkbox" />
                         <span data-i18n="Enable Prome">Enable Prome</span>
                     </label>
-
-                    <p>
-                        <small data-i18n="Features marked with a">
-                            Features marked with a
-                        </small>
-                        <b> * </b>
-                        <small data-i18n="require Prome to be enabled.">
-                            require Prome to be enabled.</small>
-                    </p>
                 </div>
 
-                <div class="prome_vn_block flex-container flexFlowColumn">
-                    <h4 data-i18n="Sheld Configuration">Sheld Configuration</h4>
-                    <div class="prome_vn_block flex-container flexFlowRow">
+                <!-- Sheld Configuration -->
+                <details>
+                    <summary data-i18n="Sheld Configuration">
+                        Sheld Configuration
+                    </summary>
+
+                    <div class="prome_vn_block flex-container flexFlowColumn prome_details_padding">
                         <label class="checkbox_label" for="prome-hide-sheld"
                             title="Hide the message box (sheld) in the ST UI."
                             data-i18n="[title]Hide the message box (sheld) in the ST UI.">
                             <input id="prome-hide-sheld" type="checkbox" />
-                            <span data-i18n="Hide Sheld (Message Box)">Hide Sheld (Message Box)</span>
+                            <div class="flex-container flexFlowRow alignitemscenter">
+                                <span data-i18n="Hide Sheld">Hide Sheld</span>
+                                <small data-i18n="(Message Box)">(Message Box)</small>
+                            </div>
                         </label>
                         <label class="checkbox_label" for="prome-sheld-last_mes"
                             title="Only Show Last Message in Chat (Requires Prome to be enabled)."
                             data-i18n="[title]Only Show Last Message in Chat (Requires Prome to be enabled).">
                             <input id="prome-sheld-last_mes" type="checkbox" />
-                            <span data-i18n="Enable Traditional VN Mode">Enable Traditional VN Mode*</span>
+                            <div class="flex-container flexFlowRow alignitemscenter">
+                                <span data-i18n="Enable Traditional VN Mode">Enable Traditional VN Mode</span>
+                                <small data-i18n="(Requires Prome to be enabled)">(Requires Prome to be enabled)</small>
+                            </div>
                         </label>
                     </div>
-                </div>
+                </details>
 
                 <!-- Letterbox Configuration -->
                 <details>
-                    <summary data-i18n="Letterbox Configuration*">
-                        Letterbox Configuration*
+                    <summary data-i18n="Letterbox Configuration">
+                        Letterbox Configuration
+                        <small data-i18n="(Requires Prome to be enabled)">(Requires Prome to be enabled)</small>
                     </summary>
+
                     <div class="prome_vn_block flex-container flexFlowColumn prome_details_padding">
                         <div class="prome_vn_block flex-container flexFlowColumn">
                             <label for="prome-letterbox-mode" data-i18n="Letterbox Mode">Letterbox Mode</label>
@@ -112,140 +115,74 @@
                 <!-- Sprite Configuration -->
                 <details>
                     <summary data-i18n="Sprite Configuration">
-                        Sprite Configuration*
+                        Sprite Configuration
+                        <small data-i18n="(Requires Prome to be enabled)">(Requires Prome to be enabled)</small>
                     </summary>
+
                     <div class="prome_vn_block flex-container flexFlowColumn prome_details_padding">
-                        <div class="prome_vn_block flex-container flexFlowColumn">
+                        <h4 data-i18n="General Sprite Settings">General Sprite Settings</h4>
+                        <div class="prome_vn_block flex-container flexFlowColumn prome_details_padding">
                             <label class="checkbox_label" for="prome-emulate-sprites"
                                 title="Emulates the character card of a character to be a sprite. (Requires Prome to be enabled)."
                                 data-i18n="[title]Emulates the character card of a character to be a sprite. (Requires Prome to be enabled).">
                                 <input id="prome-emulate-sprites" type="checkbox" />
-                                <span data-i18n="Emulate Character Card as Sprite">[BETA] Emulate Character Card as
+                                <span data-i18n="Emulate Character Card as Sprite">Emulate Character Card as
                                     Sprite</span>
                             </label>
-
                             <label class="checkbox_label" for="prome-sprite-shake"
                                 title="Shakes the character sprite when the character is speaking (Only works if Streaming is enabled in Preset Settings)."
                                 data-i18n="[title]Shakes the character sprite when the character is speaking (Only works if Streaming is enabled in Preset Settings).">
                                 <input id="prome-sprite-shake" type="checkbox" />
                                 <span data-i18n="Enable Sprite Shake">[BETA] Enable Sprite Shake</span>
                             </label>
-                        </div>
-
-                        <div class="prome_vn_block flex-container flexFlowRow">
-                            <label class="checkbox_label" for="prome-sprite-zoom"
-                                title="Focuses the current speaking character in chat. (Requires Prome to be enabled)."
-                                data-i18n="[title]Focuses the current speaking character in chat. (Requires Prome to be enabled).">
-                                <input id="prome-sprite-zoom" type="checkbox" />
-                                <span data-i18n="Enable Focus Mode">Enable Focus Mode</span>
+                            <label class="checkbox_label" for="prome-sprite-sprite-scale"
+                                title="Toggles sprite scaling for character sprites."
+                                data-i18n="[title]Toggles sprite scaling for character sprites.">
+                                <input id="prome-sprite-scale" type="checkbox" />
+                                <span data-i18n="Enable Sprite Scale">Enable Sprite Scale</span>
                             </label>
 
-                            <label class="checkbox_label" for="prome-sprite-defocus-tint"
-                                title="Darkens non-speaking (unfocused) characters. (Requires Prome to be enabled)."
-                                data-i18n="[title]Darkens non-speaking (unfocused) characters. (Requires Prome to be enabled).">
-                                <input id="prome-sprite-defocus-tint" type="checkbox" />
-                                <span data-i18n="Darken Unfocused Character Sprites">Darken Character Sprites</span>
-                            </label>
-                        </div>
-
-                        <div class="prome_vn_block flex-container flexFlowRow">
-                            <label class="checkbox_label" for="prome-auto-hide-sprites"
-                                title="Auto-hides characters from the screen that haven't been in the conversation for a while up to X characters. (Requires Prome to be enabled)."
-                                data-i18n="[title]Auto-hides characters from the screen that haven't been in the conversation for a while up to X characters. (Requires Prome to be enabled).">
-                                <input id="prome-auto-hide-sprites" type="checkbox" />
-                                <span data-i18n="Auto-Hide Sprites">Auto-Hide Sprites</span>
-                            </label>
-
-                            <div class="flex-container flexFlowColumn">
-                                <label for="prome-sprite-max-visible" class="title_restorable">
-                                    <span data-i18n="Max Visible Sprites">Max Visible Sprites</span>
-                                    <div id="prome-sprite-max-visible-restore" title="Restore default value"
-                                        class="right_menu_button">
-                                        <i class="fa-solid fa-clock-rotate-left fa-sm"></i>
-                                    </div>
-                                </label>
-                                <small
-                                    data-i18n="Set the maximum number of visible sprites that appears in the VN screen.">Set
-                                    the maximum number of visible sprites that appears in the VN screen.</small>
-                                <input class="neo-range-input" id="prome-sprite-max-visible" type="number" min="1"
-                                    max="8" step="1" data-for="prome-sprite-max-visible" />
-                            </div>
-                        </div>
-
-                        <details>
-                            <summary data-i18n="Sprite Shadow Configuration">
-                                Sprite Shadow Configuration
-                            </summary>
-                            <div class="prome_vn_block flex-container flexFlowColumn prome_details_padding">
-                                <label class="checkbox_label" for="prome-sprite-shadow">
-                                    <input id="prome-sprite-shadow" type="checkbox"
-                                        title="Adds a shadow to the character sprite." />
-                                    <span data-i18n="Enable Sprite Shadow">Enable Sprite Shadow</span>
-                                </label>
-
-                                <div class="prome_vn_block flex-container flexFlowRow">
-                                    <div class="prome_vn_block flex-container flexFlowColumn">
-                                        <label for="prome-sprite-shadow-offsetx" class="title_restorable">
-                                            <span data-i18n="Shadow X Offset">Shadow X Offset</span>
-                                            <div id="prome-sprite-shadow-offsetx-restore" title="Restore default value"
-                                                class="right_menu_button">
-                                                <i class="fa-solid fa-clock-rotate-left fa-sm"></i>
-                                            </div>
-                                        </label>
-                                        <small data-i18n="Set the X offset of the character shadow.">Set the X offset of
-                                            the character
-                                            shadow.</small>
-                                        <input class="neo-range-slider" id="prome-sprite-shadow-offsetx" type="range"
-                                            min="1" max="20" step="1" />
-                                        <input class="neo-range-input" id="prome-sprite-shadow-offsetx-counter"
-                                            type="number" min="1" max="20" step="1"
-                                            data-for="prome-sprite-shadow-offsetx" />
-                                    </div>
-
-                                    <div class="prome_vn_block flex-container flexFlowColumn">
-                                        <label for="prome-sprite-shadow-offsety" class="title_restorable">
-                                            <span data-i18n="Shadow Y Offset">Shadow Y Offset</span>
-                                            <div id="prome-sprite-shadow-offsety-restore" title="Restore default value"
-                                                class="right_menu_button">
-                                                <i class="fa-solid fa-clock-rotate-left fa-sm"></i>
-                                            </div>
-                                        </label>
-                                        <small data-i18n="Set the Y offset of the character shadow.">Set the Y offset of
-                                            the character
-                                            shadow.</small>
-                                        <input class="neo-range-slider" id="prome-sprite-shadow-offsety" type="range"
-                                            min="1" max="20" step="1" />
-                                        <input class="neo-range-input" id="prome-sprite-shadow-offsety-counter"
-                                            type="number" min="1" max="20" step="1"
-                                            data-for="prome-sprite-shadow-offsety" />
-                                    </div>
-
-                                    <div class="prome_vn_block flex-container flexFlowColumn">
-                                        <label for="prome-sprite-shadow-blur" class="title_restorable">
-                                            <span data-i18n="Shadow Blur">Shadow Blur</span>
-                                            <div id="prome-sprite-shadow-blur-restore" title="Restore default value"
-                                                class="right_menu_button">
-                                                <i class="fa-solid fa-clock-rotate-left fa-sm"></i>
-                                            </div>
-                                        </label>
-                                        <small data-i18n="Set the blur of the character shadow.">Set the blur of the
-                                            character
-                                            shadow.</small>
-                                        <input class="neo-range-slider" id="prome-sprite-shadow-blur" type="range"
-                                            min="1" max="20" step="1" />
-                                        <input class="neo-range-input" id="prome-sprite-shadow-blur-counter"
-                                            type="number" min="1" max="20" step="1"
-                                            data-for="prome-sprite-shadow-blur" />
-                                    </div>
+                            <div class="prome_vn_block flex-container flexFlowRow">
+                                <div class="prome_vn_block flex-container flexFlowColumn">
+                                    <label for="prome-sprite-scale-size" class="title_restorable">
+                                        <span data-i18n="Sprite Scale">Sprite Scale</span>
+                                        <div id="prome-sprite-scale-size-restore" title="Restore default value"
+                                            class="right_menu_button">
+                                            <i class="fa-solid fa-clock-rotate-left fa-sm"></i>
+                                        </div>
+                                    </label>
+                                    <small data-i18n="Set the size scale of the character sprites.">Set the size
+                                        scale of the character
+                                        sprite.</small>
+                                    <input class="neo-range-slider" id="prome-sprite-scale-size" type="range" min=".1"
+                                        max="2.0" step=".01" />
+                                    <input class="neo-range-input" id="prome-sprite-scale-size-counter" type="number"
+                                        min=".1" max="2.0" step=".01" data-for="prome-sprite-scale-size" />
                                 </div>
                             </div>
-                        </details>
+                        </div>
 
-                        <details>
-                            <summary data-i18n="Focus Mode Settings">
-                                Focus Mode Settings
-                            </summary>
-                            <div class="prome_vn_block flex-container flexFlowRow prome_details_padding">
+                        <hr />
+
+                        <!-- Focus/Defocus Mode -->
+                        <h4 data-i18n="Focus Settings">Focus Settings</h4>
+                        <div class="prome_vn_block flex-container flexFlowColumn prome_details_padding">
+                            <div class="flex-container flexFlowRow">
+                                <label class="checkbox_label" for="prome-sprite-zoom"
+                                    title="Focuses the current speaking character in chat. (Requires Prome to be enabled)."
+                                    data-i18n="[title]Focuses the current speaking character in chat. (Requires Prome to be enabled).">
+                                    <input id="prome-sprite-zoom" type="checkbox" />
+                                    <span data-i18n="Enable Focus Mode">Enable Focus Mode</span>
+                                </label>
+                                <label class="checkbox_label" for="prome-sprite-defocus-tint"
+                                    title="Darkens non-speaking (unfocused) characters. (Requires Prome to be enabled)."
+                                    data-i18n="[title]Darkens non-speaking (unfocused) characters. (Requires Prome to be enabled).">
+                                    <input id="prome-sprite-defocus-tint" type="checkbox" />
+                                    <span data-i18n="Darken Unfocused Character Sprites">Darken Character Sprites</span>
+                                </label>
+                            </div>
+
+                            <div class="prome_vn_block flex-container flexFlowColumn">
                                 <div class="prome_vn_block flex-container flexFlowColumn">
                                     <label for="prome-sprite-zoom-animation" data-i18n="Focus Mode Animation">Focus Mode
                                         Animation</label>
@@ -280,52 +217,149 @@
                                         min=".01" max="1.0" step=".01" data-for="prome-sprite-zoom-speed" />
                                 </div>
                             </div>
-                        </details>
+                        </div>
 
-                        <details>
-                            <summary data-i18n="User Sprite Configuration">
-                                [BETA] User Sprite Configuration
-                            </summary>
-                            <div class="prome_vn_block flex-container flexFlowColumn prome_details_padding">
-                                <label class="checkbox_label" for="prome-user-sprite"
-                                    title="Enables the ability to use a user sprite for your persona."
-                                    data-i18n="[title]Enables the ability to use a user sprite for your persona.">
-                                    <input id="prome-user-sprite" type="checkbox" />
-                                    <span data-i18n="Enable User Sprite">Enable User Sprite</span>
-                                </label>
+                        <hr />
+
+                        <!-- Sprite Shadows -->
+                        <h4 data-i18n="Sprite Shadow Settings">Sprite Shadow Settings</h4>
+                        <div class="prome_vn_block flex-container flexFlowColumn prome_details_padding">
+                            <label class="checkbox_label" for="prome-sprite-shadow"
+                                title="Adds a shadow to the character sprite."
+                                data-i18n="[title]Adds a shadow to the character sprite.">
+                                <input id="prome-sprite-shadow" type="checkbox" />
+                                <span data-i18n="Enable Sprite Shadow">Enable Sprite Shadow</span>
+                            </label>
+
+                            <div class="flex-container flexFlowRow">
+                                <div class="prome_vn_block flex-container flexFlowColumn">
+                                    <label for="prome-sprite-shadow-offsetx" class="title_restorable">
+                                        <span data-i18n="Shadow X Offset">Shadow X Offset</span>
+                                        <div id="prome-sprite-shadow-offsetx-restore" title="Restore default value"
+                                            class="right_menu_button">
+                                            <i class="fa-solid fa-clock-rotate-left fa-sm"></i>
+                                        </div>
+                                    </label>
+                                    <small data-i18n="Set the X offset of the character shadow.">Set the X offset of
+                                        the character
+                                        shadow.</small>
+                                    <input class="neo-range-slider" id="prome-sprite-shadow-offsetx" type="range"
+                                        min="1" max="20" step="1" />
+                                    <input class="neo-range-input" id="prome-sprite-shadow-offsetx-counter"
+                                        type="number" min="1" max="20" step="1"
+                                        data-for="prome-sprite-shadow-offsetx" />
+                                </div>
 
                                 <div class="prome_vn_block flex-container flexFlowColumn">
-                                    <label for="prome-user-sprites" data-i18n="Sprite List">Sprite Set</label>
-                                    <small
-                                        data-i18n="Type the name of the sprite set to use for your persona. (Place your sprites in the 'characters' folder in SillyTavern).">Type
-                                        the name of the sprite set to use for your persona.
-                                        (Place your sprites in the 'characters' folder in
-                                        SillyTavern).</small>
+                                    <label for="prome-sprite-shadow-offsety" class="title_restorable">
+                                        <span data-i18n="Shadow Y Offset">Shadow Y Offset</span>
+                                        <div id="prome-sprite-shadow-offsety-restore" title="Restore default value"
+                                            class="right_menu_button">
+                                            <i class="fa-solid fa-clock-rotate-left fa-sm"></i>
+                                        </div>
+                                    </label>
+                                    <small data-i18n="Set the Y offset of the character shadow.">Set the Y offset of
+                                        the character
+                                        shadow.</small>
+                                    <input class="neo-range-slider" id="prome-sprite-shadow-offsety" type="range"
+                                        min="1" max="20" step="1" />
+                                    <input class="neo-range-input" id="prome-sprite-shadow-offsety-counter"
+                                        type="number" min="1" max="20" step="1"
+                                        data-for="prome-sprite-shadow-offsety" />
+                                </div>
 
-                                    <textarea id="prome-user-sprite-input" type="text"
-                                        class="text_pole textarea_compact" placeholder="Enter the name of your sprite"
-                                        data-i18n="[placeholder]Enter the name of your sprite"></textarea>
-
-                                    <p>
-                                        <small data-i18n="Note: Create a sprite folder in the ">Note: Create a sprite
-                                            folder in the
-                                        </small>
-                                        <b>characters</b>
-                                        <small
-                                            data-i18n=" folder of your user directory (typically 'data/default-user'). Place your expressions there.">
-                                            folder of your user directory (typically
-                                            'data/default-user'). Place your expressions there.</small>
-                                    </p>
+                                <div class="prome_vn_block flex-container flexFlowColumn">
+                                    <label for="prome-sprite-shadow-blur" class="title_restorable">
+                                        <span data-i18n="Shadow Blur">Shadow Blur</span>
+                                        <div id="prome-sprite-shadow-blur-restore" title="Restore default value"
+                                            class="right_menu_button">
+                                            <i class="fa-solid fa-clock-rotate-left fa-sm"></i>
+                                        </div>
+                                    </label>
+                                    <small data-i18n="Set the blur of the character shadow.">Set the blur of the
+                                        character
+                                        shadow.</small>
+                                    <input class="neo-range-slider" id="prome-sprite-shadow-blur" type="range" min="1"
+                                        max="20" step="1" />
+                                    <input class="neo-range-input" id="prome-sprite-shadow-blur-counter" type="number"
+                                        min="1" max="20" step="1" data-for="prome-sprite-shadow-blur" />
                                 </div>
                             </div>
-                        </details>
+                        </div>
+
+                        <hr />
+
+                        <!-- Auto-Hide Sprites -->
+                        <h4 data-i18n="Auto-Hide Sprite Settings">Auto-Hide Sprite Settings</h4>
+                        <div class="prome_vn_block flex-container flexFlowColumn prome_details_padding">
+                            <label class="checkbox_label" for="prome-auto-hide-sprites"
+                                title="Auto-hides characters from the screen that haven't been in the conversation for a while up to X characters. (Requires Prome to be enabled)."
+                                data-i18n="[title]Auto-hides characters from the screen that haven't been in the conversation for a while up to X characters. (Requires Prome to be enabled).">
+                                <input id="prome-auto-hide-sprites" type="checkbox" />
+                                <span data-i18n="Auto-Hide Sprites">Auto-Hide Sprites</span>
+                            </label>
+
+                            <div class="flex-container flexFlowColumn">
+                                <label for="prome-sprite-max-visible" class="title_restorable">
+                                    <span data-i18n="Max Visible Sprites">Max Visible Sprites</span>
+                                    <div id="prome-sprite-max-visible-restore" title="Restore default value"
+                                        class="right_menu_button">
+                                        <i class="fa-solid fa-clock-rotate-left fa-sm"></i>
+                                    </div>
+                                </label>
+                                <small
+                                    data-i18n="Set the maximum number of visible sprites that appears in the VN screen.">Set
+                                    the maximum number of visible sprites that appears in the VN screen.</small>
+                                <input class="neo-range-input" id="prome-sprite-max-visible" type="number" min="1"
+                                    max="8" step="1" data-for="prome-sprite-max-visible" />
+                            </div>
+                        </div>
+
+                        <hr />
+
+                        <h4 data-i18n="User Sprite Settings">[BETA] User Sprite Settings</h4>
+                        <div class="prome_vn_block flex-container flexFlowColumn prome_details_padding">
+                            <label class="checkbox_label" for="prome-user-sprite"
+                                title="Enables the ability to use a user sprite for your persona."
+                                data-i18n="[title]Enables the ability to use a user sprite for your persona.">
+                                <input id="prome-user-sprite" type="checkbox" />
+                                <span data-i18n="Enable User Sprite">Enable User Sprite</span>
+                            </label>
+
+                            <label for="prome-user-sprites" data-i18n="Sprite List">Sprite Set</label>
+                            <small
+                                data-i18n="Type the name of the sprite set to use for your persona. (Place your sprites in the 'characters' folder in SillyTavern).">Type
+                                the name of the sprite set to use for your persona.
+                                (Place your sprites in the 'characters' folder in
+                                SillyTavern).</small>
+
+                            <textarea id="prome-user-sprite-input" type="text" class="text_pole textarea_compact"
+                                placeholder="Enter the name of your sprite"
+                                data-i18n="[placeholder]Enter the name of your sprite"></textarea>
+
+                            <p>
+                                <small data-i18n="Note: Create a sprite folder in the ">Note: Create a sprite
+                                    folder in the
+                                </small>
+                                <b>characters</b>
+                                <small
+                                    data-i18n=" folder of your user directory (typically 'data/default-user'). Place your expressions there.">
+                                    folder of your user directory (typically
+                                    'data/default-user'). Place your expressions there.</small>
+                            </p>
+                        </div>
                     </div>
                 </details>
 
                 <!-- Tint Configuration -->
                 <details>
                     <summary data-i18n="Tint Configuration">Tint Configuration</summary>
+
                     <div class="prome_vn_block flex-container flexFlowColumn prome_details_padding">
+                        <small
+                            data-i18n="Character Tint/Share World Tint With Characters requires Prome to be enabled.">Character
+                            Tint/Share World Tint With Characters requires Prome to be enabled.</small>
+
                         <div class="prome_vn_block flex-container flexFlowRow">
                             <label class="checkbox_label" for="prome-tint-chat"
                                 title="Tints the chat background and/or character sprites."
@@ -334,12 +368,12 @@
                                 <span data-i18n="Enable Chat Tint">Enable Chat Tint</span>
                             </label>
 
-                            <label for="prome-world-tint-share" class="title_restorable"
+                            <label for="prome-world-tint-share" class="checkbox_label"
                                 title="Applies the world tint to character sprites (Requires Prome to be enabled. This will override your character tint settings)."
                                 data-i18n="[title]Applies the world tint to character sprites (Requires Prome to be enabled. This will override your character tint settings).">
                                 <input id="prome-tint-share" type="checkbox" />
                                 <span data-i18n="Share World Tint With Characters">Share World Tint With
-                                    Characters*</span>
+                                    Characters</span>
                             </label>
                         </div>
 
@@ -434,7 +468,7 @@
 
                             <!-- Character Tint Settings -->
                             <div class="prome_vn_block flex-container flexFlowColumn">
-                                <span data-i18n="Character Tint Settings">Character Tint Settings*</span>
+                                <span data-i18n="Character Tint Settings">Character Tint Settings</span>
                                 <label class="checkbox_label" for="prome-character-tint"
                                     title="Tints the character sprites."
                                     data-i18n="[title]Tints the character sprites.">
@@ -510,11 +544,11 @@
                     </div>
                 </details>
 
-                <div class="prome_vn_block flex-container flexFlowColumn" style="gap: 1px">
+                <div class="prome_vn_block flex-container flexFlowColumn">
                     <small class="flex-container justifyCenter alignitemscenter">
                         <span>Prome Visual Novel Extension Version
                             <a id="prome-version-number"
-                                href="https://github.com/Bronya-Rand/Prome-VN-Extension">1.2.0</a></span>
+                                href="https://github.com/Bronya-Rand/Prome-VN-Extension">1.2.1</a></span>
                     </small>
                     <small class="flex-container justifyCenter alignitemscenter flexFlowRow">
                         <small id="prome-keybinds" class="menu_button menu_button_icon">

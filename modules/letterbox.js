@@ -49,7 +49,7 @@ function onLetterboxColor_Change(evt) {
 
 export function applyLetterboxColor() {
 	document.documentElement.style.setProperty(
-		"--prom-letterbox-color",
+		"--prome-letterbox-color",
 		extension_settings[extensionName].letterboxColor,
 	);
 }
@@ -60,7 +60,7 @@ export function applyLetterboxSize() {
 		direction = "vh";
 	}
 	document.documentElement.style.setProperty(
-		"--prom-letterbox-size",
+		"--prome-letterbox-size",
 		`${extension_settings[extensionName].letterboxSize}${direction}`,
 	);
 }

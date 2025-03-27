@@ -70,21 +70,21 @@ export function applySpriteShadow() {
 
 export function applySpriteShadowOffsetX() {
 	document.documentElement.style.setProperty(
-		"--prom-sprite-shadow-offsetx",
+		"--prome-sprite-shadow-offsetx",
 		`${extension_settings[extensionName].shadowOffsetX}px`,
 	);
 }
 
 export function applySpriteShadowOffsetY() {
 	document.documentElement.style.setProperty(
-		"--prom-sprite-shadow-offsety",
+		"--prome-sprite-shadow-offsety",
 		`${extension_settings[extensionName].shadowOffsetY}px`,
 	);
 }
 
 export function applySpriteShadowBlur() {
 	document.documentElement.style.setProperty(
-		"--prom-sprite-shadow-blur",
+		"--prome-sprite-shadow-blur",
 		`${extension_settings[extensionName].shadowBlur}px`,
 	);
 }
