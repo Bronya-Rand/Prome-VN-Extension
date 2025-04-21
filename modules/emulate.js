@@ -1,8 +1,9 @@
 import { extensionName } from "../constants.js";
 import { extension_settings } from "../../../../extensions.js";
 import { saveSettingsDebounced } from "../../../../../script.js";
+import { emulateSpritesDebounce } from "../listeners.js";
 
-export function applySpriteEmulation() {
+export async function applySpriteEmulation() {
 	if (
 		extension_settings[extensionName].emulateSprites === (null || undefined)
 	) {
@@ -16,9 +17,11 @@ export function applySpriteEmulation() {
 	);
 
 	$("body").toggleClass(
-		"spriteEmulation",
+		"emulateSprites",
 		extension_settings[extensionName].emulateSprites,
 	);
+
+	emulateSpritesDebounce();
 }
 
 export function onSpriteEmulation_Click(event) {

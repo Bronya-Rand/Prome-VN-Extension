@@ -25,6 +25,7 @@ import {
 	applyShakeDebounce,
 	stopShake,
 	applyUserAttributesDebounce,
+	applyScaleDebounce,
 } from "./listeners.js";
 
 /* Prome Feature Imports */
@@ -42,7 +43,12 @@ import {
 	onSheld_Click,
 	onSheldMode_Click,
 } from "./modules/sheld.js";
-import { getGroupIndex, isSheldVisible } from "./utils.js";
+import {
+	getGroupIndex,
+	isSheldVisible,
+	getSpriteList,
+	isGroupChat,
+} from "./utils.js";
 import {
 	applySpriteZoomTimer,
 	applySpriteZoomAnimation,
@@ -79,6 +85,12 @@ import {
 	setupAutoHideHTML,
 	setupAutoHideJQuery,
 } from "./modules/auto-hide.js";
+import {
+	applySpriteScale,
+	setupScaleHTML,
+	setupScaleJQuery,
+} from "./modules/scale.js";
+import { visualNovelUpdateLayers } from "../../expressions/index.js";
 
 async function loadSettings() {
 	extension_settings[extensionName] = extension_settings[extensionName] || {};
@@ -142,7 +154,7 @@ async function loadSettings() {
 	/// Sprite Shadow
 	setupSpriteShadowHTML();
 
-	// User Sprite Updates
+	/// User Sprite Updates
 	$("#prome-user-sprite").prop(
 		"checked",
 		extension_settings[extensionName].enableUserSprite,
@@ -151,8 +163,11 @@ async function loadSettings() {
 		extension_settings[extensionName].userSprite,
 	);
 
-	// Auto Hide Sprites
+	/// Auto Hide Sprites
 	setupAutoHideHTML();
+
+	/// Sprite Scale
+	setupScaleHTML();
 
 	// Traditional VN Mode Updates
 	$("#prome-sheld-last_mes").prop(
@@ -180,23 +195,25 @@ async function loadSettings() {
 	// Apply Sprite Settings
 	/// Sprite Emulation
 	applySpriteEmulation();
-	// Focus Mode
+	/// Focus Mode
 	applySpriteZoomTimer();
 	applySpriteZoomAnimation();
 	applySpriteZoom();
-	// Defocus Tint
+	/// Defocus Tint
 	applySpriteDefocusTint();
-	// Sprite Shake
+	/// Sprite Shake
 	applySpriteShake();
-	// Sprite Shadow
+	/// Sprite Shadow
 	applySpriteShadow();
 	applySpriteShadowOffsetX();
 	applySpriteShadowOffsetY();
 	applySpriteShadowBlur();
-	// User Sprite
+	/// User Sprite
 	applyUserSprite();
-	// Auto Hide Sprites
+	/// Auto Hide Sprites
 	applyAutoHideSprites();
+	/// Sprite Scale
+	applySpriteScale();
 }
 
 /* Prome Core Listeners */
@@ -274,12 +291,16 @@ jQuery(async () => {
 	$("#prome-sprite-shake").on("click", onSpriteShake_Click);
 	// Sprite Shadow
 	setupSpriteShadowJQuery();
+	// Sprite Scale
+	setupScaleJQuery();
 
 	// User Sprite
 	$("#prome-user-sprite").on("click", onUserSprite_Click);
 	$("#prome-user-sprite-input").on("input", onUserSprite_Input);
 
 	/* Prome Feature Initialization */
+	const vnWrapper = $("#visual-novel-wrapper");
+
 	addLetterbox();
 	setupTintJQuery();
 	setupAutoHideJQuery();
@@ -291,18 +312,26 @@ jQuery(async () => {
 	eventSource.on(event_types.CHAT_CHANGED, async () => {
 		await applyZoomDebounce();
 		await applyDefocusDebounce();
-		await handleAutoHideSprites();
+		await applyScaleDebounce();
+		await emulateSpritesDebounce();
 		await handleUserSprite();
 		await applyUserAttributesDebounce();
+		handleAutoHideSprites();
 	});
 	eventSource.on(event_types.MESSAGE_DELETED, async () => {
 		await applyZoomDebounce();
 		await applyDefocusDebounce();
-		await handleAutoHideSprites();
+		handleAutoHideSprites();
 	});
 	eventSource.on(event_types.GROUP_UPDATED, async () => {
-		await handleAutoHideSprites();
+		await emulateSpritesDebounce();
 		await applyUserAttributesDebounce();
+		await applyScaleDebounce();
+		handleAutoHideSprites();
+
+		if (isGroupChat()) {
+			await visualNovelUpdateLayers(vnWrapper);
+		}
 	});
 
 	// Prevents the User Sprite from Genning Content
@@ -332,14 +361,15 @@ jQuery(async () => {
 	});
 
 	$(window).on("resize", async () => {
+		await emulateSpritesDebounce();
 		await applyUserAttributesDebounce();
 	});
 
 	// Show info message if Sheld is hidden
 	if (!isSheldVisible()) {
 		toastr.info(
-			"Head to Extensions > Prome (Visual Novel Extension) and uncheck 'Hide Sheld (Message Box)' to show it again.",
-			"Sheld is currently hidden by the Prome VN Extension.",
+			"Head to Extensions > Prome (Visual Novel Extension) > Sheld Configuration and uncheck 'Hide Sheld (Message Box)' to show it again.",
+			"Sheld is currently hidden by the Prome Visual Novel Extension.",
 		);
 	}
 });
@@ -357,6 +387,10 @@ $(document).ready(() => {
 					applyZoomDebounce();
 					applyDefocusDebounce();
 					applyShakeDebounce();
+
+					if (isGroupChat()) {
+						visualNovelUpdateLayers($("#visual-novel-wrapper"));
+					}
 				}
 				if (
 					node.tagName === "DIV" &&
@@ -365,6 +399,10 @@ $(document).ready(() => {
 					handleAutoHideSprites();
 					applyZoomDebounce();
 					applyDefocusDebounce();
+
+					if (isGroupChat()) {
+						visualNovelUpdateLayers($("#visual-novel-wrapper"));
+					}
 				}
 			}
 		};
@@ -388,32 +426,12 @@ $(document).ready(() => {
 	const chatDiv = document.getElementById("chat");
 	promeChatObserver.observe(chatDiv, { childList: true });
 
-	/* Mutation Observer for VN Sprites */
-	/* Removes the VN Sprite's 'hidden' toggle for 'prome-render-sprite' */
-	const promeSpriteObserver = new MutationObserver((mutations) => {
-		for (const mutation of mutations) {
-			if (
-				mutation.type === "attributes" &&
-				mutation.attributeName === "class"
-			) {
-				const spriteDiv = mutation.target;
-				if (spriteDiv.classList.contains("hidden")) {
-					spriteDiv.classList.remove("hidden");
-				}
-			}
-		}
-	});
-
 	// Since the VN Wrapper is loaded by ST, we need to wait for it to load
 	const vnWrapperInterval = setInterval(() => {
 		const vnWrapperDiv = document.getElementById("visual-novel-wrapper");
 		if (vnWrapperDiv) {
 			promeChatObserver.observe(vnWrapperDiv, {
 				childList: true,
-				subtree: true,
-			});
-			promeSpriteObserver.observe(vnWrapperDiv, {
-				attributes: true,
 				subtree: true,
 			});
 			clearInterval(vnWrapperInterval);

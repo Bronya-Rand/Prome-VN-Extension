@@ -1,4 +1,68 @@
 /* Prome UI Settings */
+:root {
+	/* Prome Letterbox */
+	--prome-letterbox-zindex: 29;
+
+	/* Prome Focus/Defocus Mode */
+	--prome-focus-filter-transition: 0.4s ease-in;
+	--prome-focus-scale: 1.05;
+	--prome-defocus-brightness: 0.5;
+
+	/* Prome Sprite Shake */
+	--prome-shake-duration: 0.35s;
+	--prome-shake-duration-reduced: 0.7s;
+	--prome-shake-timing: ease-in-out;
+	--prome-active-shake-duration: var(--prome-shake-duration);
+
+	/* Prome Sprite Shadows */
+	--prome-shadow-color: #111;
+	--prome-shadow-filter: drop-shadow(
+		var(--prome-sprite-shadow-offsetx) var(--prome-sprite-shadow-offsety)
+			var(--prome-sprite-shadow-blur) var(--prome-shadow-color)
+	);
+	--prome-shadow-filter-defocus: var(--prome-shadow-filter)
+		brightness(var(--prome-defocus-brightness));
+
+	/* Prome World/Character Tint */
+	--prome-character-tint-with-shadow: var(--prome-character-tint-filter)
+		var(--prome-shadow-filter);
+	--prome-character-tint-with-defocus: var(--prome-character-tint-filter)
+		var(--prome-shadow-filter-defocus);
+	--prome-character-tint-with-shadow-defocus: var(--prome-character-tint-filter)
+		var(--prome-shadow-filter-defocus) var(--prome-shadow-filter);
+
+	--prome-background-tint-with-shadow: var(--prome-background-tint-filter)
+		var(--prome-shadow-filter);
+	--prome-background-tint-with-defocus: var(--prome-background-tint-filter)
+		var(--prome-shadow-filter-defocus);
+	--prome-background-tint-with-shadow-defocus: var(
+			--prome-background-tint-filter
+		)
+		var(--prome-shadow-filter-defocus) var(--prome-shadow-filter);
+
+	--prome-combined-filter-character: var(--prome-character-tint-filter);
+	--prome-combined-filter-character-shadow: var(
+		--prome-character-tint-with-shadow
+	);
+	--prome-combined-filter-character-defocus: var(
+		--prome-character-tint-with-defocus
+	);
+	--prome-combined-filter-character-shadow-defocus: var(
+		--prome-character-tint-with-shadow-defocus
+	);
+
+	--prome-combined-filter-background: var(--prome-background-tint-filter);
+	--prome-combined-filter-background-shadow: var(
+		--prome-background-tint-with-shadow
+	);
+	--prome-combined-filter-background-defocus: var(
+		--prome-background-tint-with-defocus
+	);
+	--prome-combined-filter-background-shadow-defocus: var(
+		--prome-background-tint-with-shadow-defocus
+	);
+}
+
 .prome-drawer-content {
 	gap: 8px;
 	display: flex;
@@ -16,45 +80,37 @@
 /* Prome Letterbox Settings */
 body.waifuMode.hLetterBox #visual-novel-letterbox-one {
 	width: 100vw;
-	height: var(--prom-letterbox-size);
+	height: var(--prome-letterbox-size);
 	top: 0;
-	position: absolute;
-	background-color: var(--prom-letterbox-color);
-	z-index: 29;
-	justify-content: center;
-	align-items: center;
+	position: fixed;
+	background-color: var(--prome-letterbox-color);
+	z-index: var(--prome-letterbox-zindex);
 }
 body.waifuMode.hLetterBox #visual-novel-letterbox-two {
 	width: 100vw;
-	height: var(--prom-letterbox-size);
+	height: var(--prome-letterbox-size);
 	bottom: 0;
-	position: absolute;
-	background-color: var(--prom-letterbox-color);
-	z-index: 29;
-	justify-content: center;
-	align-items: center;
+	position: fixed;
+	background-color: var(--prome-letterbox-color);
+	z-index: var(--prome-letterbox-zindex);
 }
 body.waifuMode.vLetterBox #visual-novel-letterbox-one {
-	width: var(--prom-letterbox-size);
+	width: var(--prome-letterbox-size);
 	height: 100vh;
 	top: 0;
 	left: 0;
 	position: fixed;
-	background-color: var(--prom-letterbox-color);
-	z-index: 29;
-	justify-content: center;
-	align-items: center;
+	background-color: var(--prome-letterbox-color);
+	z-index: var(--prome-letterbox-zindex);
 }
 body.waifuMode.vLetterBox #visual-novel-letterbox-two {
-	width: var(--prom-letterbox-size);
+	width: var(--prome-letterbox-size);
 	height: 100vh;
 	top: 0;
 	right: 0;
 	position: fixed;
-	background-color: var(--prom-letterbox-color);
-	z-index: 29;
-	justify-content: center;
-	align-items: center;
+	background-color: var(--prome-letterbox-color);
+	z-index: var(--prome-letterbox-zindex);
 }
 
 /* 
@@ -62,19 +118,22 @@ body.waifuMode.vLetterBox #visual-novel-letterbox-two {
  * For shake + focus, see Prome Sprite Shake
  */
 #visual-novel-wrapper [id*="expression-"] {
-	transition: transform var(--prom-sprite-zoom-speed)
-		var(--prom-sprite-zoom-animation), filter 0.4s ease-in;
-	filter: brightness(1);
+	will-change: transform, filter;
+	transition: transform var(--prome-sprite-zoom-speed)
+		var(--prome-sprite-zoom-animation), filter
+		var(--prome-focus-filter-transition);
 }
 
 #expression-wrapper > div {
-	transition: transform var(--prom-sprite-zoom-speed)
-		var(--prom-sprite-zoom-animation), filter 0.4s ease-in;
+	will-change: transform, filter;
+	transition: transform var(--prome-sprite-zoom-speed)
+		var(--prome-sprite-zoom-animation), filter
+		var(--prome-focus-filter-transition);
 }
 
 /* Sprite Focus to Last Message Character on 'expression-holder' */
 body.waifuMode.spriteZoom .prome-sprite-focus {
-	transform: scale(1.05);
+	transform: scale(var(--prome-focus-scale));
 }
 
 /*
@@ -83,42 +142,39 @@ body.waifuMode.spriteZoom .prome-sprite-focus {
 
 /* Sprites not in chat are lower contrast to differentiate focused sprite */
 body.waifuMode.spriteDefocusTint .prome-sprite-defocus {
-	filter: brightness(0.5) !important;
+	filter: brightness(var(--prome-defocus-brightness));
 }
 
-/* Prome Sprite Emulation */
+/*
+ * Prome Sprite Scale
+ */
+body.waifuMode.spriteScale .prome-sprite-scale {
+	transform: scale(var(--prome-sprite-scale));
+	transform-origin: bottom;
+}
 
-/* Sprites are shown if feature is on */
-body.waifuMode.spriteEmulation .prome-render-sprite:not(.displayNone) {
-	display: flex !important;
+body.waifuMode.spriteScale.spriteZoom .prome-sprite-scale.prome-sprite-focus {
+	--prome-combined-scale: calc(var(--prome-sprite-scale) * var(--prome-focus-scale));
+	transform: scale(var(--prome-combined-scale));
+}
+
+body.waifuMode.spriteZoom:not(.spriteScale) .prome-sprite-focus {
+	transform: scale(var(--prome-focus-scale));
+}
+
+body.waifuMode.emulateSprites #visual-novel-wrapper .hidden:not(.displayNone) {
+	display: inherit !important;
 	visibility: visible !important;
-}
-
-/* Sprites are hidden if feature is off */
-body.waifuMode .prome-render-sprite {
-	display: none !important;
-	visibility: hidden;
 }
 
 /* 
  * Prome Sprite Shake 
  */
 
-body.waifuMode.spriteShake .prome-sprite-shake {
-	animation: shake 0.35s infinite;
-}
-
-body.waifuMode.spriteShake.spriteZoom
-	#visual-novel-wrapper
-	.prome-sprite-shake {
-	animation: shakeAndFocus 0.35s infinite;
-}
-
-body.waifuMode.spriteShake.spriteZoom:not(.userSprite) .prome-sprite-shake {
-	animation: shake 0.35s infinite;
-}
-body.waifuMode.spriteShake.spriteZoom.userSprite .prome-sprite-shake {
-	animation: shakeAndFocus 0.35s infinite;
+@media (prefers-reduced-motion: reduce) {
+	:root {
+		--prome-active-shake-duration: var(--prome-shake-duration-reduced);
+	}
 }
 
 @keyframes shake {
@@ -139,51 +195,117 @@ body.waifuMode.spriteShake.spriteZoom.userSprite .prome-sprite-shake {
 	}
 }
 
-@keyframes shakeAndFocus {
+@keyframes shakeAndScale {
 	0% {
-		transform: translate(0px, 0px) rotate(0deg) scale(1.05);
+		transform: translate(0px, 0px) rotate(0deg) scale(var(--prome-sprite-scale));
 	}
 	25% {
-		transform: translate(1px, 0px) rotate(0.1deg) scale(1.05);
+		transform: translate(1px, 0px) rotate(0.1deg)
+			scale(var(--prome-sprite-scale));
 	}
 	50% {
-		transform: translate(0px, 0px) rotate(0.2deg) scale(1.05);
+		transform: translate(0px, 0px) rotate(0.2deg)
+			scale(var(--prome-sprite-scale));
 	}
 	75% {
-		transform: translate(-1px, 0px) rotate(0.1deg) scale(1.05);
+		transform: translate(-1px, 0px) rotate(0.1deg)
+			scale(var(--prome-sprite-scale));
 	}
 	100% {
-		transform: translate(0px, 0px) rotate(0deg) scale(1.05);
+		transform: translate(0px, 0px) rotate(0deg) scale(var(--prome-sprite-scale));
 	}
+}
+
+@keyframes shakeAndFocus {
+	0% {
+		transform: translate(0px, 0px) rotate(0deg) scale(var(--prome-focus-scale));
+	}
+	25% {
+		transform: translate(1px, 0px) rotate(0.1deg)
+			scale(var(--prome-focus-scale));
+	}
+	50% {
+		transform: translate(0px, 0px) rotate(0.2deg)
+			scale(var(--prome-focus-scale));
+	}
+	75% {
+		transform: translate(-1px, 0px) rotate(0.1deg)
+			scale(var(--prome-focus-scale));
+	}
+	100% {
+		transform: translate(0px, 0px) rotate(0deg) scale(var(--prome-focus-scale));
+	}
+}
+
+@keyframes shakeFocusAndScale {
+	0% {
+		transform: translate(0px, 0px) rotate(0deg)
+			scale(calc(var(--prome-sprite-scale) * var(--prome-focus-scale)));
+	}
+	25% {
+		transform: translate(1px, 0px) rotate(0.1deg)
+			scale(calc(var(--prome-sprite-scale) * var(--prome-focus-scale)));
+	}
+	50% {
+		transform: translate(0px, 0px) rotate(0.2deg)
+			scale(calc(var(--prome-sprite-scale) * var(--prome-focus-scale)));
+	}
+	75% {
+		transform: translate(-1px, 0px) rotate(0.1deg)
+			scale(calc(var(--prome-sprite-scale) * var(--prome-focus-scale)));
+	}
+	100% {
+		transform: translate(0px, 0px) rotate(0deg)
+			scale(calc(var(--prome-sprite-scale) * var(--prome-focus-scale)));
+	}
+}
+
+body.waifuMode.spriteShake .prome-sprite-shake {
+	transform: translateZ(0);
+	animation: shake var(--prome-active-shake-duration) var(--prome-shake-timing)
+		infinite;
+}
+
+body.waifuMode.spriteShake.spriteZoom .prome-sprite-shake {
+	transform: translateZ(0);
+	animation: shakeAndFocus var(--prome-active-shake-duration) var(--prome-shake-timing)
+		infinite;
+}
+
+body.waifuMode.spriteShake.spriteScale .prome-sprite-shake {
+	transform: translateZ(0);
+	animation: shakeAndScale var(--prome-active-shake-duration) var(--prome-shake-timing)
+		infinite;
+}
+
+body.waifuMode.spriteShake.spriteZoom.spriteScale .prome-sprite-shake {
+	transform: translateZ(0);
+	animation: shakeFocusAndScale var(--prome-active-shake-duration)
+		var(--prome-shake-timing) infinite;
 }
 
 /* 
  * Prome Sprite Shadows
  */
 
-body.waifuMode.spriteShadow:not(.spriteEmulation)
-	#visual-novel-wrapper
-	[id*="expression-"] {
-	filter: drop-shadow(
-		var(--prom-sprite-shadow-offsetx) var(--prom-sprite-shadow-offsety)
-			var(--prom-sprite-shadow-blur) #111
-	);
-}
-
-body.waifuMode.spriteShadow.spriteDefocusTint:not(.spriteEmulation)
-	.prome-sprite-defocus {
-	filter: drop-shadow(
-			var(--prom-sprite-shadow-offsetx) var(--prom-sprite-shadow-offsety)
-				var(--prom-sprite-shadow-blur) #111
-		)
-		brightness(0.5) !important;
+body.waifuMode.spriteShadow #visual-novel-wrapper [id*="expression-"] {
+	filter: var(--prome-shadow-filter);
 }
 
 body.waifuMode.spriteShadow #expression-wrapper .expression-holder {
-	filter: drop-shadow(
-		var(--prom-sprite-shadow-offsetx) var(--prom-sprite-shadow-offsety)
-			var(--prom-sprite-shadow-blur) #111
-	);
+	filter: var(--prome-shadow-filter);
+}
+
+body.waifuMode.spriteDefocusTint.spriteShadow
+	#visual-novel-wrapper
+	[id*="expression-"].prome-sprite-defocus {
+	filter: var(--prome-shadow-filter-defocus);
+}
+
+body.waifuMode.spriteDefocusTint.spriteShadow
+	#expression-wrapper
+	.expression-holder.prome-sprite-defocus {
+	filter: var(--prome-shadow-filter-defocus);
 }
 
 /* 
@@ -191,103 +313,51 @@ body.waifuMode.spriteShadow #expression-wrapper .expression-holder {
  */
 
 body.worldTint.tintWorld #bg1 {
-	filter: var(--prom-background-tint-filter);
+	filter: var(--prome-background-tint-filter);
 }
 
 body.worldTint.tintCharacter #expression-wrapper .expression-holder {
-	filter: var(--prom-character-tint-filter);
-}
-
-body.worldTint.sharedTint #expression-wrapper .expression-holder {
-	filter: var(--prom-background-tint-filter);
+	filter: var(--current-char-tint-filter);
 }
 
 body.worldTint.tintCharacter #visual-novel-wrapper [id*="expression-"] {
-	filter: var(--prom-character-tint-filter);
+	filter: var(--current-char-tint-filter);
 }
 
-body.worldTint.sharedTint #visual-novel-wrapper [id*="expression-"] {
-	filter: var(--prom-background-tint-filter);
+body.worldTint.tintCharacter {
+	--current-char-tint-filter: var(--prome-combined-filter-character);
 }
 
-body.worldTint.tintCharacter.spriteShadow:not(.spriteEmulation)
-	#visual-novel-wrapper
-	[id*="expression-"] {
-	filter: var(--prom-character-tint-filter)
-		drop-shadow(
-			var(--prom-sprite-shadow-offsetx) var(--prom-sprite-shadow-offsety)
-				var(--prom-sprite-shadow-blur) #111
-		);
+body.worldTint.tintCharacter.spriteShadow {
+	--current-char-tint-filter: var(--prome-combined-filter-character-shadow);
 }
 
-body.worldTint.sharedTint.spriteShadow:not(.spriteEmulation)
-	#visual-novel-wrapper
-	[id*="expression-"] {
-	filter: var(--prom-background-tint-filter)
-		drop-shadow(
-			var(--prom-sprite-shadow-offsetx) var(--prom-sprite-shadow-offsety)
-				var(--prom-sprite-shadow-blur) #111
-		);
+body.worldTint.tintCharacter.spriteDefocusTint {
+	--current-char-tint-filter: var(--prome-combined-filter-character-defocus);
 }
 
-body.worldTint.tintCharacter.spriteShadow.spriteDefocusTint:not(
-		.spriteEmulation
-	)
-	.prome-sprite-defocus {
-	filter: var(--prom-character-tint-filter)
-		drop-shadow(
-			var(--prom-sprite-shadow-offsetx) var(--prom-sprite-shadow-offsety)
-				var(--prom-sprite-shadow-blur) #111
-		)
-		brightness(0.5) !important;
+body.worldTint.tintCharacter.spriteDefocusTint.spriteShadow {
+	--current-char-tint-filter: var(
+		--prome-combined-filter-character-shadow-defocus
+	);
 }
 
-body.worldTint.sharedTint.spriteShadow.spriteDefocusTint:not(.spriteEmulation)
-	.prome-sprite-defocus {
-	filter: var(--prom-background-tint-filter)
-		drop-shadow(
-			var(--prom-sprite-shadow-offsetx) var(--prom-sprite-shadow-offsety)
-				var(--prom-sprite-shadow-blur) #111
-		)
-		brightness(0.5) !important;
+body.worldTint.tintShared {
+	--current-char-tint-filter: var(--prome-combined-filter-background);
 }
 
-body.worldTint.tintCharacter.spriteShadow
-	#expression-wrapper
-	.expression-holder {
-	filter: var(--prom-character-tint-filter)
-		drop-shadow(
-			var(--prom-sprite-shadow-offsetx) var(--prom-sprite-shadow-offsety)
-				var(--prom-sprite-shadow-blur) #111
-		);
+body.worldTint.tintShared.spriteShadow {
+	--current-char-tint-filter: var(--prome-combined-filter-background-shadow);
 }
 
-body.worldTint.sharedTint.spriteShadow #expression-wrapper .expression-holder {
-	filter: var(--prom-background-tint-filter)
-		drop-shadow(
-			var(--prom-sprite-shadow-offsetx) var(--prom-sprite-shadow-offsety)
-				var(--prom-sprite-shadow-blur) #111
-		);
+body.worldTint.tintShared.spriteDefocusTint {
+	--current-char-tint-filter: var(--prome-combined-filter-background-defocus);
 }
 
-body.worldTint.tintCharacter.spriteShadow
-	#visual-novel-wrapper
-	[id*="expression-"] {
-	filter: var(--prom-character-tint-filter)
-		drop-shadow(
-			var(--prom-sprite-shadow-offsetx) var(--prom-sprite-shadow-offsety)
-				var(--prom-sprite-shadow-blur) #111
-		);
-}
-
-body.worldTint.sharedTint.spriteShadow
-	#visual-novel-wrapper
-	[id*="expression-"] {
-	filter: var(--prom-background-tint-filter)
-		drop-shadow(
-			var(--prom-sprite-shadow-offsetx) var(--prom-sprite-shadow-offsety)
-				var(--prom-sprite-shadow-blur) #111
-		);
+body.worldTint.tintShared.spriteDefocusTint.spriteShadow {
+	--current-char-tint-filter: var(
+		--prome-combined-filter-background-shadow-defocus
+	);
 }
 
 /* 
@@ -308,10 +378,13 @@ body.waifuMode.userSprite:not(.movingUI)
 
 body #expression-prome-user {
 	display: none;
-	visibility: hidden;
 }
 
 body.waifuMode.userSprite #expression-prome-user {
 	display: flex;
 	visibility: visible;
+}
+
+#visual-novel-wrapper {
+	contain: layout style;
 }

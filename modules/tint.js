@@ -11,7 +11,7 @@ export function applyTint() {
 		extension_settings[extensionName].currentTintValues.shared ===
 		(null || undefined)
 	) {
-		console.debug(`[${extensionName}] sharedTint returned null or undefined.`);
+		console.debug(`[${extensionName}] tintShared returned null or undefined.`);
 	}
 
 	console.debug(
@@ -37,7 +37,7 @@ export function applyTint() {
 	);
 
 	$("body").toggleClass(
-		"sharedTint",
+		"tintShared",
 		extension_settings[extensionName].currentTintValues.shared,
 	);
 
@@ -49,11 +49,11 @@ function addTint() {
 	const characterTintFilter = `blur(${extension_settings[extensionName].currentTintValues.character.blur}px) brightness(${extension_settings[extensionName].currentTintValues.character.brightness}%) contrast(${extension_settings[extensionName].currentTintValues.character.contrast}%) grayscale(${extension_settings[extensionName].currentTintValues.character.grayscale}%) hue-rotate(${extension_settings[extensionName].currentTintValues.character.hue}deg) invert(${extension_settings[extensionName].currentTintValues.character.invert}%) saturate(${extension_settings[extensionName].currentTintValues.character.saturate}%) sepia(${extension_settings[extensionName].currentTintValues.character.sepia}%)`;
 
 	document.documentElement.style.setProperty(
-		"--prom-background-tint-filter",
+		"--prome-background-tint-filter",
 		worldTintFilter,
 	);
 	document.documentElement.style.setProperty(
-		"--prom-character-tint-filter",
+		"--prome-character-tint-filter",
 		characterTintFilter,
 	);
 }

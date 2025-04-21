@@ -20,21 +20,27 @@ export function getLastChatMessage() {
 export function getRecentTalkingCharacters(limit) {
 	const context = getContext();
 	const reversedChat = context.chat.slice().reverse();
+	const activeGroup = context.groups.find((x) => x.id === context.groupId);
+	const members = activeGroup?.members;
 
-	// Filter out system messages, images, and user messages
+	// Filter out system messages, images, user messages, and inactive/removed characters
 	const talkingCharacters = reversedChat
 		.filter((mes) => !mes.is_system && !mes.extra?.image && !mes.is_user)
-		.map((mes) => mes.original_avatar);
+		.map((mes) => mes.original_avatar)
+		.filter((avatar) => members?.some((member) => member === avatar));
+
+	// Purge duplicates
+	const uniqueTalkingCharacters = [...new Set(talkingCharacters)];
 
 	if (limit) {
 		// Limit the number of characters to return
 		// If the number of characters is less than the limit, return all characters
-		if (talkingCharacters.length < limit) {
-			return talkingCharacters;
+		if (uniqueTalkingCharacters.length < limit) {
+			return uniqueTalkingCharacters;
 		}
-		return talkingCharacters.slice(0, limit);
+		return uniqueTalkingCharacters.slice(0, limit);
 	}
-	return talkingCharacters;
+	return uniqueTalkingCharacters;
 }
 
 /**
@@ -103,4 +109,25 @@ export function getGroupIndex() {
 		return x.id === context.groupId;
 	});
 	return groupIndex;
+}
+
+/**
+ * Returns whether the current chat is a group chat
+ * @returns {boolean} - Whether the current chat is a group chat
+ */
+export function isGroupChat() {
+	const context = getContext();
+	return context.groupId !== null;
+}
+
+/**
+ * Check if the member is disabled in the group chat
+ * @param {string} name - The member name
+ * @returns {boolean} - Whether the member is disabled in the group chat
+ */
+export function isDisabledMember(name) {
+	const context = getContext();
+	const group = context.groups.find((x) => x.id === context.groupId);
+	if (!group) return false;
+	return group.disabled_members.includes(name);
 }
