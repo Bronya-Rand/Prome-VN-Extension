@@ -241,6 +241,14 @@ async function emulateGroupSprites() {
 }
 
 async function emulateSoloSprites() {
+	// Solo chats don't need emulation as clicking the char
+	// icon will show the character card image
+	if (!isUserSpriteEnabled()) {
+		$("#expression-holder").children("img").attr("src", "");
+		$("#expression-holder").css("display", "none");
+		return Promise.resolve();
+	}
+
 	const context = getContext();
 	if (context.characterId === undefined || context.characterId === "prome-user")
 		return Promise.resolve();
@@ -265,8 +273,6 @@ async function emulateSoloSprites() {
 }
 
 async function emulateSprites() {
-	if (!zoomListenerPreconditions(true)) return Promise.resolve();
-
 	const groupChat = isGroupChat();
 
 	if (groupChat) {
