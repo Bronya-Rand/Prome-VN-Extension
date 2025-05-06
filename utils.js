@@ -131,3 +131,11 @@ export function isDisabledMember(name) {
 	if (!group) return false;
 	return group.disabled_members.includes(name);
 }
+
+export async function spritePackExists(spritePack) {
+	if (spritePack.length === 0) return false;
+	const spritePackExists = await getSpriteList(`${spritePack}`).then(
+		(data) => data.length > 0,
+	);
+	return spritePackExists;
+}

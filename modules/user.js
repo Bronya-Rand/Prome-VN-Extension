@@ -6,19 +6,11 @@ import {
 	eventSource,
 	event_types,
 } from "../../../../../script.js";
-import { getGroupIndex, getSpriteList } from "../utils.js";
+import { getGroupIndex, spritePackExists } from "../utils.js";
 import { loadMovingUIState } from "../../../../power-user.js";
 import { dragElement } from "../../../../RossAscends-mods.js";
 import { sendExpressionCall } from "../../../expressions/index.js";
 import { emulateSpritesDebounce } from "../listeners.js";
-
-async function spritePackExists(spritePack) {
-	if (spritePack.length === 0) return false;
-	const spritePackExists = await getSpriteList(`${spritePack}`).then(
-		(data) => data.length > 0,
-	);
-	return spritePackExists;
-}
 
 function setSpritePack(spritePack) {
 	if (spritePack.length === 0) return;

@@ -8,6 +8,7 @@ import {
 	getSpriteList,
 	isUserSpriteEnabled,
 	isGroupChat,
+	spritePackExists,
 } from "./utils.js";
 import { textgenerationwebui_settings as textgen_settings } from "../../../textgen-settings.js";
 import { applyScale } from "./modules/scale.js";
@@ -241,35 +242,35 @@ async function emulateGroupSprites() {
 }
 
 async function emulateSoloSprites() {
-	// Solo chats don't need emulation as clicking the char
-	// icon will show the character card image
-	if (!isUserSpriteEnabled()) {
-		$("#expression-holder").children("img").attr("src", "");
-		$("#expression-holder").css("display", "none");
-		return Promise.resolve();
-	}
-
 	const context = getContext();
 	if (context.characterId === undefined || context.characterId === "prome-user")
 		return Promise.resolve();
 
 	const character = context.characters[context.characterId];
-	const sprites = await getSpriteList(character.name);
-	if (sprites.length > 0) return Promise.resolve();
 
-	console.debug(
-		`[${extensionName}] Sprites not found for character: ${character.name}. Emulating via character card image.`,
-	);
-
-	waitForElement("#expression-holder", (sprite) => {
-		if (!extension_settings[extensionName].emulateSprites) {
-			sprite.children("img").attr("src", "");
-			sprite.css("display", "none");
-		} else {
-			sprite.children("img").attr("src", `/characters/${character.avatar}`);
-			sprite.css("display", "inherit");
+	if (!spritePackExists(character.name)) {
+		// Solo chats don't need emulation as clicking the char
+		// icon will show the character card image
+		if (!isUserSpriteEnabled()) {
+			$("#expression-holder").children("img").attr("src", "");
+			$("#expression-holder").css("display", "none");
+			return Promise.resolve();
 		}
-	});
+
+		console.debug(
+			`[${extensionName}] Sprites not found for character: ${character.name}. Emulating via character card image.`,
+		);
+
+		waitForElement("#expression-holder", (sprite) => {
+			if (!extension_settings[extensionName].emulateSprites) {
+				sprite.children("img").attr("src", "");
+				sprite.css("display", "none");
+			} else {
+				sprite.children("img").attr("src", `/characters/${character.avatar}`);
+				sprite.css("display", "inherit");
+			}
+		});
+	}
 }
 
 async function emulateSprites() {
