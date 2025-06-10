@@ -24,6 +24,7 @@ import { applySpriteShadow } from "./shadows.js";
 import { applyTint } from "./tint.js";
 import { getSpriteList } from "../utils.js";
 import { applyUserSprite, handleUserSprite } from "./user.js";
+import { visualNovelUpdateLayers } from "../../expressions/index.js";
 
 export function prepareSlashCommands() {
 	SlashCommandParser.addCommandObject(
