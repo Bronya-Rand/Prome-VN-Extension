@@ -382,6 +382,20 @@ export function prepareSlashCommands() {
 				"(Prome Visual Novel Extension) Toggles the user sprite on the VN UI.",
 		}),
 	);
+
+	SlashCommandParser.addCommandObject(
+		SlashCommand.fromProps({
+			name: "update-layers",
+			callback: async () => {
+				const vnWrapper = $("#visual-novel-wrapper");
+				await visualNovelUpdateLayers(vnWrapper);
+				toastr.success("Visual Novel layers updated.", "Update Layers");
+				return true;
+			},
+			helpString:
+				"(Prome Visual Novel Extension) Updates the layers of the visual novel UI (In case of any issues).",
+		}),
+	);
 }
 
 function switchLetterboxMode(mode) {
