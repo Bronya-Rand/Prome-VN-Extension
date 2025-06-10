@@ -53,6 +53,7 @@ export function applyUserSprite() {
  *
  */
 export async function handleUserSprite() {
+	if (!extension_settings[extensionName].enableUserSprite) return;
 	const context = getContext();
 	const groupIndex = getGroupIndex();
 
@@ -111,6 +112,7 @@ export async function handleUserSprite() {
 }
 
 export async function applyUserSpriteAttributes() {
+	if (!extension_settings[extensionName].enableUserSprite) return;
 	if (!spritePackExists(extension_settings[extensionName].userSprite)) {
 		return;
 	}

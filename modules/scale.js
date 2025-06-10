@@ -61,7 +61,7 @@ export function applyScale() {
 
 	let sprites;
 	if (isGroupChat()) {
-		sprites = $("#visual-novel-wrapper").find("div");
+		sprites = $("#visual-novel-wrapper").children("div");
 	} else {
 		sprites = $("#expression-wrapper").find("div");
 	}
