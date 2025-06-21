@@ -124,7 +124,7 @@ Prome tiene dos ramas para elegir:
 2. `dev` - Básicamente una versión beta de Prome donde las cosas que planeo agregar/arreglar van antes de pasar a `main` o despues de un actualización de SillyTavern. Puede que no funcione completamente y las cosas pueden cambiar en cualquier momento.
 
 > [!NOTE]
-> Si estás instalando Prome a través de SillyTavern's *Download Extensions & Assets* o *Installar Extensión*, solo podrás usar la rama `main` de Prome. Si deseas usar la rama `dev` de Prome, consulta el método [Git](#via-git).
+> Si estás instalando Prome a través de SillyTavern's *Download Extensions & Assets*, solo podrás usar la rama `main` de Prome. Si deseas usar la rama `dev` de Prome, instala Prome a través de los métodos [Instalar Extensión](#via-instalar-extensión) o [Git](#via-git).
 
 #### Via Download Extensions & Assets (Easiest)
 
@@ -144,6 +144,12 @@ Prome tiene dos ramas para elegir:
    ```
    https://github.com/Bronya-Rand/Prome-VN-Extension
    ```
+
+> [!NOTE]
+> Si deseas usar la rama `dev` de Prome, copie o escriba el siguiente texto en el campo de texto *Branch or tag name*:
+> ```sh
+> dev
+> ```
 
 3. Actualiza la página de SillyTavern.
 4. Haz clic en _Extensiones_ nuevamente y haz clic en la flecha hacia abajo en el menú desplegable `Prome (Extensión de Novela Visual)` y activa _Iniciar Prome_.
