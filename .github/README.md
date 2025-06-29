@@ -121,7 +121,7 @@ Prome has two branches to choose from:
 2. `dev` - Basically a beta version of Prome where stuff I plan to add/fix go before moving to main or after a SillyTavern update. May not work fully and stuff in it may change at any time.
 
 > [!NOTE]
-> If you are installing Prome via ST's *Download Extensions & Assets* or *Install Extension* methods, you will only be able to use the `main` branch of Prome. If you desire to use the `dev` branch of Prome, see the [Git](#via-git) install method.
+> If you are installing Prome via ST's *Download Extensions & Assets*, you will only be able to use the `main` branch of Prome. If you desire to use the `dev` branch of Prome, install Prome via the [Install Extension](#via-install-extension) or [Git](#via-git) methods.
 
 #### Via Download Extensions & Assets (Easiest)
 
@@ -141,7 +141,13 @@ Prome has two branches to choose from:
    ```
    https://github.com/Bronya-Rand/Prome-VN-Extension
    ```
-   
+
+> [!NOTE]
+> If you want to use the `dev` branch of Prome, copy/type the following text into the *Branch or tag name* field: 
+> ```
+> dev
+> ```
+
 3. Refresh the SillyTavern page.
 4. Click on _Extensions_ again and click down on the `Prome (Visual Novel Extension)` dropdown and toggle _Enable Prome_.
    > If you already have Visual Novel Mode on, you can skip this step.

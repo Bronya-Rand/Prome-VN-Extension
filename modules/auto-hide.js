@@ -67,7 +67,7 @@ export async function handleAutoHideSprites() {
 	const groupIndex = getGroupIndex();
 	// Get all characters within the '#visual-novel-wrapper' div
 	const vnWrapper = $("#visual-novel-wrapper");
-	const allSprites = vnWrapper.find("div");
+	const allSprites = vnWrapper.children('div');
 
 	// If the user is not in a group or auto-hide is disabled, exit
 	if (groupIndex === -1 || !isAutoHideSpritesEnabled()) {

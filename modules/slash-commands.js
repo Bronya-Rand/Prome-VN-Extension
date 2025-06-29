@@ -22,8 +22,9 @@ import {
 import { applySpriteShake } from "./shake.js";
 import { applySpriteShadow } from "./shadows.js";
 import { applyTint } from "./tint.js";
-import { getSpriteList } from "../utils.js";
+import { getSpriteList, isGroupChat } from "../utils.js";
 import { applyUserSprite, handleUserSprite } from "./user.js";
+import { visualNovelUpdateLayers } from "../../../expressions/index.js";
 
 export function prepareSlashCommands() {
 	SlashCommandParser.addCommandObject(
@@ -87,10 +88,9 @@ export function prepareSlashCommands() {
 			callback: async () => {
 				switchFocusMode(!extension_settings[extensionName].spriteZoom);
 				toastr.success(
-					`Focus Mode is now ${
-						extension_settings[extensionName].spriteZoom
-							? "enabled"
-							: "disabled"
+					`Focus Mode is now ${extension_settings[extensionName].spriteZoom
+						? "enabled"
+						: "disabled"
 					}.`,
 					"Focus Mode Status",
 				);
@@ -172,10 +172,9 @@ export function prepareSlashCommands() {
 			callback: async () => {
 				switchUnfocusMode();
 				toastr.success(
-					`Defocus tint is now ${
-						extension_settings[extensionName].spriteDefocusTint
-							? "enabled"
-							: "disabled"
+					`Defocus tint is now ${extension_settings[extensionName].spriteDefocusTint
+						? "enabled"
+						: "disabled"
 					}.`,
 					"Defocus Tint Status",
 				);
@@ -192,10 +191,9 @@ export function prepareSlashCommands() {
 			callback: async () => {
 				switchSpriteShake();
 				toastr.success(
-					`Sprite shake is now ${
-						extension_settings[extensionName].spriteShake
-							? "enabled"
-							: "disabled"
+					`Sprite shake is now ${extension_settings[extensionName].spriteShake
+						? "enabled"
+						: "disabled"
 					}.`,
 					"Sprite Shake Status",
 				);
@@ -212,10 +210,9 @@ export function prepareSlashCommands() {
 			callback: async () => {
 				switchSpriteShadow();
 				toastr.success(
-					`Sprite shadow is now ${
-						extension_settings[extensionName].spriteShadow
-							? "enabled"
-							: "disabled"
+					`Sprite shadow is now ${extension_settings[extensionName].spriteShadow
+						? "enabled"
+						: "disabled"
 					}.`,
 					"Sprite Shadow Status",
 				);
@@ -232,8 +229,7 @@ export function prepareSlashCommands() {
 			callback: async () => {
 				switchTintMode();
 				toastr.success(
-					`World tint is now ${
-						extension_settings[extensionName].worldTint ? "enabled" : "disabled"
+					`World tint is now ${extension_settings[extensionName].worldTint ? "enabled" : "disabled"
 					}.`,
 					"World Tint Status",
 				);
@@ -250,10 +246,9 @@ export function prepareSlashCommands() {
 			callback: async () => {
 				switchTintWorldMode();
 				toastr.success(
-					`World tint is now ${
-						extension_settings[extensionName].currentTintValues.world.enabled
-							? "enabled"
-							: "disabled"
+					`World tint is now ${extension_settings[extensionName].currentTintValues.world.enabled
+						? "enabled"
+						: "disabled"
 					}.`,
 					"World Tint Status",
 				);
@@ -271,11 +266,10 @@ export function prepareSlashCommands() {
 			callback: async () => {
 				switchTintCharacterMode();
 				toastr.success(
-					`Character tint is now ${
-						extension_settings[extensionName].currentTintValues.character
-							.enabled
-							? "enabled"
-							: "disabled"
+					`Character tint is now ${extension_settings[extensionName].currentTintValues.character
+						.enabled
+						? "enabled"
+						: "disabled"
 					}.`,
 					"Character Tint Status",
 				);
@@ -293,10 +287,9 @@ export function prepareSlashCommands() {
 			callback: async () => {
 				switchTintSharedMode();
 				toastr.success(
-					`Shared tint is now ${
-						extension_settings[extensionName].currentTintValues.shared
-							? "enabled"
-							: "disabled"
+					`Shared tint is now ${extension_settings[extensionName].currentTintValues.shared
+						? "enabled"
+						: "disabled"
 					}.`,
 					"Shared Tint Status",
 				);
@@ -369,10 +362,9 @@ export function prepareSlashCommands() {
 			callback: async () => {
 				switchUserSpriteMode();
 				toastr.success(
-					`User sprite is now ${
-						extension_settings[extensionName].enableUserSprite
-							? "enabled"
-							: "disabled"
+					`User sprite is now ${extension_settings[extensionName].enableUserSprite
+						? "enabled"
+						: "disabled"
 					}.`,
 					"User Sprite Status",
 				);
@@ -380,6 +372,35 @@ export function prepareSlashCommands() {
 			},
 			helpString:
 				"(Prome Visual Novel Extension) Toggles the user sprite on the VN UI.",
+		}),
+	);
+
+	SlashCommandParser.addCommandObject(
+		SlashCommand.fromProps({
+			name: "update-layers",
+			callback: async () => {
+				if (!extension_settings[extensionName].enableVN_UI) {
+					toastr.error(
+						"VN Mode/Prome is not enabled. Enable it in the settings.",
+						"Visual Novel UI Disabled",
+					);
+					return false;
+				}
+				if (!isGroupChat()) {
+					toastr.error(
+						"This command can only be used in group chats.",
+						"Group Chat Only",
+					);
+					return false;
+				}
+
+				const vnWrapper = $("#visual-novel-wrapper");
+				await visualNovelUpdateLayers(vnWrapper);
+				toastr.success("Visual Novel layers updated.", "Update Layers");
+				return true;
+			},
+			helpString:
+				"(Prome Visual Novel Extension) Updates the layers of the visual novel UI in case of any issues [Group Chat Only].",
 		}),
 	);
 }
