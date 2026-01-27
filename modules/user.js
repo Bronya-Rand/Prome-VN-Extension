@@ -155,6 +155,13 @@ export async function applyUserSpriteAttributes() {
 
 export function onUserSprite_Click(event) {
 	const value = Boolean($(event.target).prop("checked"));
+	if (value && !spritePackExists(extension_settings[extensionName].userSprite)) {
+		toastr.error(
+			`Sprite Pack "${extension_settings[extensionName].userSprite}" could not be found. Please select a valid sprite pack before enabling the user sprite.`,
+			`User Sprite Pack Not Found`,
+		);
+		return false;
+	}
 	extension_settings[extensionName].enableUserSprite = value;
 	saveSettingsDebounced();
 	applyUserSprite();

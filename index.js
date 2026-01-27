@@ -123,11 +123,27 @@ async function loadSettings() {
 	}
 	else
 	{
-		// Remove the expression override if the sprite pack doesn't exist
-		extension_settings.expressionOverrides = extension_settings.expressionOverrides.filter(
-			(e) => e.name !== "prome-user",
+		toastr.error(
+			`Sprite Pack "${extension_settings[extensionName].userSprite}" could not be found. Resetting user sprite settings.`,
+			`[${extensionName}] User Sprite Pack Not Found`,
 		);
-		saveSettingsDebounced();
+		// Remove the expression override if the sprite pack doesn't exist
+		// and disable the user sprite setting
+		var updateSettings = false;
+		if (extension_settings.expressionOverrides.find((e) => e.name === "prome-user"))
+		{
+			extension_settings.expressionOverrides = extension_settings.expressionOverrides.filter(
+				(e) => e.name !== "prome-user",
+			);
+			updateSettings = true;
+		}
+		if (extension_settings[extensionName].enableUserSprite)
+		{
+			extension_settings[extensionName].enableUserSprite = false;
+			updateSettings = true;
+		}
+		if (updateSettings)
+			saveSettingsDebounced();
 	}
 
 	// Prome Updates

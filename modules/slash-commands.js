@@ -22,7 +22,7 @@ import {
 import { applySpriteShake } from "./shake.js";
 import { applySpriteShadow } from "./shadows.js";
 import { applyTint } from "./tint.js";
-import { getSpriteList, isGroupChat } from "../utils.js";
+import { isGroupChat, spritePackExists } from "../utils.js";
 import { applyUserSprite, handleUserSprite } from "./user.js";
 import { visualNovelUpdateLayers } from "../../../expressions/index.js";
 
@@ -306,6 +306,20 @@ export function prepareSlashCommands() {
 			/** @type {(args: { expression: string | undefined }) => void} */
 			callback: async (args, _) => {
 				if (args.expression) {
+					if (!extension_settings[extensionName].enableUserSprite) {
+						toastr.error(
+							"User sprite is not enabled. Enable it in the settings.",
+							"User Sprite Disabled",
+						);
+						return;
+					}
+					if (!spritePackExists(extension_settings[extensionName].userSprite)) {
+						toastr.error(
+							`The sprite set "${extension_settings[extensionName].userSprite}" does not exist.`,
+							"Invalid Sprite Set",
+						);
+						return;
+					}
 					setUserExpression(args.expression);
 					return args.expression;
 				}
@@ -330,8 +344,7 @@ export function prepareSlashCommands() {
 			/** @type {(args: { name: string | undefined }) => void} */
 			callback: async (args, _) => {
 				if (args.name) {
-					const spriteSetExists = await getSpriteList(args.name);
-					if (!spriteSetExists.length === 0) {
+					if (!spritePackExists(args.name)) {
 						toastr.error(
 							`The sprite set "${args.name}" does not exist.`,
 							"Invalid Sprite Set",
@@ -360,6 +373,13 @@ export function prepareSlashCommands() {
 		SlashCommand.fromProps({
 			name: "user-sprite",
 			callback: async () => {
+				if (!spritePackExists(extension_settings[extensionName].userSprite)) {
+					toastr.error(
+						`Sprite Pack "${extension_settings[extensionName].userSprite}" could not be found.`,
+						`User Sprite Pack Not Found`,
+					);
+					return;
+				}
 				switchUserSpriteMode();
 				toastr.success(
 					`User sprite is now ${extension_settings[extensionName].enableUserSprite
