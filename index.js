@@ -110,7 +110,7 @@ async function loadSettings() {
 	}
 
 	// Add a expression override for the user sprite
-	if (extension_settings[extensionName].userSprite.length > 0) {
+	if (extension_settings[extensionName].enableUserSprite && extension_settings[extensionName].userSprite.length > 0) {
 		const userSpritePack = extension_settings[extensionName].userSprite;
 		const exists = await spritePackExists(userSpritePack);
 

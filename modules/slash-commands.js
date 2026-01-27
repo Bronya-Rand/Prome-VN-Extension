@@ -383,7 +383,7 @@ export function prepareSlashCommands() {
 				const exists = await spritePackExists(
 					extension_settings[extensionName].userSprite,
 				);
-				
+
 				if (!exists) {
 					toastr.error(
 						`Sprite Pack "${extension_settings[extensionName].userSprite}" could not be found.`,

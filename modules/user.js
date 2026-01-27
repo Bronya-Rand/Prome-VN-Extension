@@ -38,7 +38,7 @@ export function applyUserSprite() {
 			`[${extensionName}] enableUserSprite returned null or undefined.`,
 		);
 	}
-	
+
 	console.debug(
 		`[${extensionName}] Enable User Sprite?: ${extension_settings[extensionName].enableUserSprite}`,
 	);
@@ -54,7 +54,7 @@ export function applyUserSprite() {
  */
 export async function handleUserSprite() {
 	if (!extension_settings[extensionName].enableUserSprite) return;
-	
+
 	const exists = await spritePackExists(
 		extension_settings[extensionName].userSprite,
 	);
@@ -166,7 +166,7 @@ export function onUserSprite_Click(event) {
 				toastr.error(
 					`Sprite Pack "${extension_settings[extensionName].userSprite}" could not be found.`,
 					`User Sprite Pack Not Found`,
-				);	
+				);
 				$(event.target).prop("checked", false);
 				return;
 			}

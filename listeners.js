@@ -218,7 +218,7 @@ async function emulateGroupSprites() {
 			if (!character || isDisabledMember(character.avatar))
 				return Promise.resolve();
 
-			const {sprites, err} = await getSpriteList(character.name);
+			const { sprites, err } = await getSpriteList(character.name);
 			if (err) {
 				console.error(
 					`[${extensionName}] Error fetching sprite pack for character: ${character.name}: ${err}`,
