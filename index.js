@@ -110,40 +110,51 @@ async function loadSettings() {
 	}
 
 	// Add a expression override for the user sprite
-	if (spritePackExists(extension_settings[extensionName].userSprite))
-	{
-		if (
-			!extension_settings.expressionOverrides.find((e) => e.name === "prome-user")
-		)
-			extension_settings.expressionOverrides.push({
-				name: "prome-user",
-				path: `${extension_settings[extensionName].userSprite}`,
-			});
-			saveSettingsDebounced();
-	}
-	else
-	{
-		toastr.error(
-			`Sprite Pack "${extension_settings[extensionName].userSprite}" could not be found. Resetting user sprite settings.`,
-			`[${extensionName}] User Sprite Pack Not Found`,
-		);
-		// Remove the expression override if the sprite pack doesn't exist
-		// and disable the user sprite setting
-		var updateSettings = false;
-		if (extension_settings.expressionOverrides.find((e) => e.name === "prome-user"))
-		{
-			extension_settings.expressionOverrides = extension_settings.expressionOverrides.filter(
-				(e) => e.name !== "prome-user",
+	if (extension_settings[extensionName].userSprite.length > 0) {
+		const userSpritePack = extension_settings[extensionName].userSprite;
+		const exists = await spritePackExists(userSpritePack);
+
+		if (exists) {
+			// Ensure the override exists
+			const overrideExists = extension_settings.expressionOverrides.find(
+				(e) => e.name === "prome-user",
 			);
-			updateSettings = true;
+
+			if (!overrideExists) {
+				extension_settings.expressionOverrides.push({
+					name: "prome-user",
+					path: userSpritePack,
+				});
+				saveSettingsDebounced();
+			}
+		} else {
+			toastr.error(
+				`Sprite Pack "${userSpritePack}" could not be found. Resetting user sprite settings.`,
+				`User Sprite Pack Not Found`,
+			);
+
+			// Remove the expression override and disable user sprites
+			let updateSettings = false;
+
+			const overrideIndex = extension_settings.expressionOverrides.findIndex(
+				(e) => e.name === "prome-user",
+			);
+
+			if (overrideIndex !== -1) {
+				extension_settings.expressionOverrides = extension_settings.expressionOverrides.filter(
+					(e) => e.name !== "prome-user",
+				);
+				updateSettings = true;
+			}
+
+			if (extension_settings[extensionName].enableUserSprite) {
+				extension_settings[extensionName].enableUserSprite = false;
+				updateSettings = true;
+			}
+
+			if (updateSettings)
+				saveSettingsDebounced();
 		}
-		if (extension_settings[extensionName].enableUserSprite)
-		{
-			extension_settings[extensionName].enableUserSprite = false;
-			updateSettings = true;
-		}
-		if (updateSettings)
-			saveSettingsDebounced();
 	}
 
 	// Prome Updates

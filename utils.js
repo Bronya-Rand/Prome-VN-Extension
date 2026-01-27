@@ -86,16 +86,20 @@ export function isAutoHideSpritesEnabled() {
 	return Boolean(extension_settings[extensionName].autoHideSprites);
 }
 
+/**
+ * Fetches the sprite list for a given sprite pack
+ * @param {string} name - The name of the sprite pack
+ * @returns {Promise<{sprites: object[], err: Error|null}>} - The list of sprites and any error encountered
+ */
 export async function getSpriteList(name) {
 	try {
 		const result = await fetch(
 			`/api/sprites/get?name=${encodeURIComponent(name)}`,
 		);
 		const sprites = result.ok ? await result.json() : [];
-		return sprites;
+		return { sprites, err: null };
 	} catch (err) {
-		console.log(err);
-		return [];
+		return { sprites: [], err };
 	}
 }
 
@@ -132,10 +136,19 @@ export function isDisabledMember(name) {
 	return group.disabled_members.includes(name);
 }
 
+/**
+ * Checks if a sprite pack exists
+ * @param {string} spritePack - The name of the sprite pack
+ * @returns {Promise<boolean>} - Whether the sprite pack exists
+ */
 export async function spritePackExists(spritePack) {
 	if (spritePack.length === 0) return false;
-	const spritePackExists = await getSpriteList(`${spritePack}`).then(
-		(data) => data.length > 0,
-	);
-	return spritePackExists;
+	const { sprites, err } = await getSpriteList(spritePack);
+	if (err) {
+		console.error(
+			`[${extensionName}] Error checking sprite pack "${spritePack}": ${err}`,
+		);
+		return false;
+	}
+	return sprites.length > 0;
 }

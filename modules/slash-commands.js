@@ -313,10 +313,15 @@ export function prepareSlashCommands() {
 						);
 						return;
 					}
-					if (!spritePackExists(extension_settings[extensionName].userSprite)) {
+
+					const exists = await spritePackExists(
+						extension_settings[extensionName].userSprite,
+					);
+
+					if (!exists) {
 						toastr.error(
-							`The sprite set "${extension_settings[extensionName].userSprite}" does not exist.`,
-							"Invalid Sprite Set",
+							`Sprite Pack "${extension_settings[extensionName].userSprite}" could not be found.`,
+							`User Sprite Pack Not Found`,
 						);
 						return;
 					}
@@ -344,10 +349,12 @@ export function prepareSlashCommands() {
 			/** @type {(args: { name: string | undefined }) => void} */
 			callback: async (args, _) => {
 				if (args.name) {
-					if (!spritePackExists(args.name)) {
+					const exists = await spritePackExists(args.name);
+
+					if (!exists) {
 						toastr.error(
-							`The sprite set "${args.name}" does not exist.`,
-							"Invalid Sprite Set",
+							`Sprite Pack "${args.name}" could not be found.`,
+							`User Sprite Pack Not Found`,
 						);
 						return;
 					}
@@ -373,7 +380,11 @@ export function prepareSlashCommands() {
 		SlashCommand.fromProps({
 			name: "user-sprite",
 			callback: async () => {
-				if (!spritePackExists(extension_settings[extensionName].userSprite)) {
+				const exists = await spritePackExists(
+					extension_settings[extensionName].userSprite,
+				);
+				
+				if (!exists) {
 					toastr.error(
 						`Sprite Pack "${extension_settings[extensionName].userSprite}" could not be found.`,
 						`User Sprite Pack Not Found`,
