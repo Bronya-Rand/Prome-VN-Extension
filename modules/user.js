@@ -38,6 +38,12 @@ export function applyUserSprite() {
 			`[${extensionName}] enableUserSprite returned null or undefined.`,
 		);
 	}
+	if (!spritePackExists(extension_settings[extensionName].userSprite)) {
+		console.error(
+			`[${extensionName}] Sprite Pack "${extension_settings[extensionName].userSprite}" does not exist.`,
+		);
+		return;
+	}
 
 	console.debug(
 		`[${extensionName}] Enable User Sprite?: ${extension_settings[extensionName].enableUserSprite}`,
@@ -54,6 +60,7 @@ export function applyUserSprite() {
  */
 export async function handleUserSprite() {
 	if (!extension_settings[extensionName].enableUserSprite) return;
+	if (!spritePackExists(extension_settings[extensionName].userSprite)) return;
 	const context = getContext();
 	const groupIndex = getGroupIndex();
 
@@ -113,9 +120,7 @@ export async function handleUserSprite() {
 
 export async function applyUserSpriteAttributes() {
 	if (!extension_settings[extensionName].enableUserSprite) return;
-	if (!spritePackExists(extension_settings[extensionName].userSprite)) {
-		return;
-	}
+	if (!spritePackExists(extension_settings[extensionName].userSprite)) return;
 
 	const groupIndex = getGroupIndex();
 	let originalExpression = "";
