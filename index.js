@@ -46,7 +46,7 @@ import {
 import {
 	getGroupIndex,
 	isSheldVisible,
-	getSpriteList,
+	spritePackExists,
 	isGroupChat,
 } from "./utils.js";
 import {
