@@ -110,14 +110,25 @@ async function loadSettings() {
 	}
 
 	// Add a expression override for the user sprite
-	if (
-		!extension_settings.expressionOverrides.find((e) => e.name === "prome-user")
-	)
-		extension_settings.expressionOverrides.push({
-			name: "prome-user",
-			path: `${extension_settings[extensionName].userSprite}`,
-		});
-	saveSettingsDebounced();
+	if (spritePackExists(extension_settings[extensionName].userSprite))
+	{
+		if (
+			!extension_settings.expressionOverrides.find((e) => e.name === "prome-user")
+		)
+			extension_settings.expressionOverrides.push({
+				name: "prome-user",
+				path: `${extension_settings[extensionName].userSprite}`,
+			});
+			saveSettingsDebounced();
+	}
+	else
+	{
+		// Remove the expression override if the sprite pack doesn't exist
+		extension_settings.expressionOverrides = extension_settings.expressionOverrides.filter(
+			(e) => e.name !== "prome-user",
+		);
+		saveSettingsDebounced();
+	}
 
 	// Prome Updates
 	$("#prome-enable-vn").prop(
