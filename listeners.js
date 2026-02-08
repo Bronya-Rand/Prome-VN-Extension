@@ -218,7 +218,13 @@ async function emulateGroupSprites() {
 			if (!character || isDisabledMember(character.avatar))
 				return Promise.resolve();
 
-			const sprites = await getSpriteList(character.name);
+			const { sprites, err } = await getSpriteList(character.name);
+			if (err) {
+				console.error(
+					`[${extensionName}] Error fetching sprite pack for character: ${character.name}: ${err}`,
+				);
+				return Promise.resolve();
+			}
 			if (sprites.length > 0) return Promise.resolve();
 
 			console.debug(
@@ -243,18 +249,19 @@ async function emulateGroupSprites() {
 
 async function emulateSoloSprites() {
 	const context = getContext();
-	if (context.characterId === undefined || context.characterId === "prome-user")
-		return Promise.resolve();
+	if (context.characterId === undefined || context.characterId === "prome-user") return;
 
 	const character = context.characters[context.characterId];
+	const exists = await spritePackExists(character.name);
 
-	if (!spritePackExists(character.name)) {
-		// Solo chats don't need emulation as clicking the char
-		// icon will show the character card image
+	if (!exists) {
+		// Solo chats don't need card emulation as clicking the char
+		// icon will show the character card image. Only proceed
+		// with emulation if User Sprite is enabled.
 		if (!isUserSpriteEnabled()) {
 			$("#expression-holder").children("img").attr("src", "");
 			$("#expression-holder").css("display", "none");
-			return Promise.resolve();
+			return;
 		}
 
 		console.debug(

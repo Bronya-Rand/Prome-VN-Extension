@@ -46,7 +46,7 @@ import {
 import {
 	getGroupIndex,
 	isSheldVisible,
-	getSpriteList,
+	spritePackExists,
 	isGroupChat,
 } from "./utils.js";
 import {
@@ -110,14 +110,52 @@ async function loadSettings() {
 	}
 
 	// Add a expression override for the user sprite
-	if (
-		!extension_settings.expressionOverrides.find((e) => e.name === "prome-user")
-	)
-		extension_settings.expressionOverrides.push({
-			name: "prome-user",
-			path: `${extension_settings[extensionName].userSprite}`,
-		});
-	saveSettingsDebounced();
+	if (extension_settings[extensionName].enableUserSprite && extension_settings[extensionName].userSprite.length > 0) {
+		const userSpritePack = extension_settings[extensionName].userSprite;
+		const exists = await spritePackExists(userSpritePack);
+
+		if (exists) {
+			// Ensure the override exists
+			const overrideExists = extension_settings.expressionOverrides.find(
+				(e) => e.name === "prome-user",
+			);
+
+			if (!overrideExists) {
+				extension_settings.expressionOverrides.push({
+					name: "prome-user",
+					path: userSpritePack,
+				});
+				saveSettingsDebounced();
+			}
+		} else {
+			toastr.error(
+				`Sprite Pack "${userSpritePack}" could not be found. Resetting user sprite settings.`,
+				`User Sprite Pack Not Found`,
+			);
+
+			// Remove the expression override and disable user sprites
+			let updateSettings = false;
+
+			const overrideIndex = extension_settings.expressionOverrides.findIndex(
+				(e) => e.name === "prome-user",
+			);
+
+			if (overrideIndex !== -1) {
+				extension_settings.expressionOverrides = extension_settings.expressionOverrides.filter(
+					(e) => e.name !== "prome-user",
+				);
+				updateSettings = true;
+			}
+
+			if (extension_settings[extensionName].enableUserSprite) {
+				extension_settings[extensionName].enableUserSprite = false;
+				updateSettings = true;
+			}
+
+			if (updateSettings)
+				saveSettingsDebounced();
+		}
+	}
 
 	// Prome Updates
 	$("#prome-enable-vn").prop(

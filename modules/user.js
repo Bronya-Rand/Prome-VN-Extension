@@ -54,6 +54,12 @@ export function applyUserSprite() {
  */
 export async function handleUserSprite() {
 	if (!extension_settings[extensionName].enableUserSprite) return;
+
+	const exists = await spritePackExists(
+		extension_settings[extensionName].userSprite,
+	);
+	if (!exists) return;
+
 	const context = getContext();
 	const groupIndex = getGroupIndex();
 
@@ -113,9 +119,11 @@ export async function handleUserSprite() {
 
 export async function applyUserSpriteAttributes() {
 	if (!extension_settings[extensionName].enableUserSprite) return;
-	if (!spritePackExists(extension_settings[extensionName].userSprite)) {
-		return;
-	}
+
+	const exists = await spritePackExists(
+		extension_settings[extensionName].userSprite,
+	);
+	if (!exists) return;
 
 	const groupIndex = getGroupIndex();
 	let originalExpression = "";
@@ -150,20 +158,38 @@ export async function applyUserSpriteAttributes() {
 
 export function onUserSprite_Click(event) {
 	const value = Boolean($(event.target).prop("checked"));
-	extension_settings[extensionName].enableUserSprite = value;
-	saveSettingsDebounced();
-	applyUserSprite();
-	handleUserSprite();
-	applyUserSpriteAttributes();
+	if (value) {
+		spritePackExists(
+			extension_settings[extensionName].userSprite,
+		).then((exists) => {
+			if (!exists) {
+				toastr.error(
+					`Sprite Pack "${extension_settings[extensionName].userSprite}" could not be found.`,
+					`User Sprite Pack Not Found`,
+				);
+				$(event.target).prop("checked", false);
+				return;
+			}
+			updateUserSpriteSetting(value);
+		});
+	}
 
-	if (extension_settings[extensionName].emulateSprites) {
-		emulateSpritesDebounce();
+	function updateUserSpriteSetting(isEnabled) {
+		extension_settings[extensionName].enableUserSprite = isEnabled;
+		saveSettingsDebounced();
+		applyUserSprite();
+		handleUserSprite();
+		applyUserSpriteAttributes();
+
+		if (isEnabled && extension_settings[extensionName].emulateSprites) {
+			emulateSpritesDebounce();
+		}
 	}
 }
 
 export async function onUserSprite_Input() {
-	const packExists = await spritePackExists(this.value);
-	if (!packExists) return false;
+	const exists = await spritePackExists(this.value);
+	if (!exists) return false;
 	const value = this.value;
 	console.debug(`[${extensionName}] User Sprite: ${value}`);
 	extension_settings[extensionName].userSprite = value;
