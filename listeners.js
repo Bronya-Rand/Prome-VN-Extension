@@ -1,35 +1,20 @@
 import { debounce_timeout } from "../../../constants.js";
+import { extension_settings, getContext } from "../../../extensions.js";
 import { debounce } from "../../../utils.js";
-import { getContext, extension_settings } from "../../../extensions.js";
+import { visualNovelUpdateLayers } from "../../expressions/index.js";
 import { extensionName } from "./constants.js";
 import { applyUserSpriteAttributes } from "./modules/user.js";
 import {
-	getLastChatMessage,
 	getSpriteList,
-	isUserSpriteEnabled,
+	isDisabledMember,
 	isGroupChat,
+	isUserSpriteEnabled,
 	spritePackExists,
 } from "./utils.js";
-import { textgenerationwebui_settings as textgen_settings } from "../../../textgen-settings.js";
-import { applyScale } from "./modules/scale.js";
-import { isDisabledMember } from "./utils.js";
-import { visualNovelUpdateLayers } from "../../expressions/index.js";
 
 /* Debouncers */
-export const applyZoomDebounce = debounce(() => {
-	applyZoom();
-}, debounce_timeout.short);
-export const applyScaleDebounce = debounce(() => {
-	applyScale();
-}, debounce_timeout.relaxed);
-export const applyDefocusDebounce = debounce(() => {
-	applyDefocus();
-}, debounce_timeout.short);
 export const emulateSpritesDebounce = debounce(async () => {
 	await emulateSprites();
-}, debounce_timeout.short);
-export const applyShakeDebounce = debounce(async () => {
-	await applyShake();
 }, debounce_timeout.short);
 export const applyUserAttributesDebounce = debounce(async () => {
 	await applyUserSpriteAttributes();
@@ -38,38 +23,6 @@ export const applyUserAttributesDebounce = debounce(async () => {
 //
 // Helper Functions
 //
-
-/**
- * Check if the preconditions are met for the zoom listener
- * @param {boolean} allowSolo - Allow zoom listener to work in a 1:1 chat
- * @returns {boolean} - Whether the preconditions are met
- */
-function zoomListenerPreconditions(allowSolo = false) {
-	const context = getContext();
-	const group = context.groups.find((x) => x.id === context.groupId);
-	if (allowSolo && group === undefined) {
-		if (!isUserSpriteEnabled()) return false;
-	} else {
-		if (!group) return false;
-		const filteredMembers = group.members.filter(
-			(x) => !group.disabled_members.includes(x),
-		);
-		if (filteredMembers.length < 1) return false;
-	}
-	return true;
-}
-
-/**
- * Check if the preconditions are met for the shake listener
- * @returns {boolean} - Whether the preconditions are met
- */
-function shakeListenerPreconditions() {
-	if (!textgen_settings.streaming) return false;
-
-	const context = getContext();
-	const streamingProcessor = context.streamingProcessor;
-	return streamingProcessor && !streamingProcessor.isStopped;
-}
 
 /**
  * Wait for an element to exist before running a callback
@@ -96,113 +49,6 @@ function waitForElement(selector, callback, maxAttempts = 50) {
 			if (element.length > 0) callback(element);
 		}
 	}, 100);
-}
-
-// Apply focus class to the sprite
-function applyZoom() {
-	if (!zoomListenerPreconditions(true)) return;
-
-	// Cache selectors
-	const visualNovelWrapperSprites = $("#visual-novel-wrapper > div");
-	const promeUserSprite = $("#expression-prome-user");
-	const expressionHolder = $("#expression-holder");
-
-	// Check if there are any messages
-	const lastMessagesWithoutSystem = getLastChatMessage();
-	if (lastMessagesWithoutSystem.length === 0) {
-		visualNovelWrapperSprites.removeClass("prome-sprite-focus");
-		return;
-	}
-
-	const lastMessage = lastMessagesWithoutSystem[0];
-	const isUserMessage = lastMessage.is_user;
-	const groupChat = isGroupChat();
-	const userSpriteEnabled = isUserSpriteEnabled();
-
-	// Handle User Messages
-	if (isUserMessage) {
-		visualNovelWrapperSprites.removeClass("prome-sprite-focus");
-
-		if (userSpriteEnabled) {
-			promeUserSprite.addClass("prome-sprite-focus");
-			if (!groupChat) expressionHolder.removeClass("prome-sprite-focus");
-		}
-		return;
-	}
-
-	if (groupChat) {
-		if (isDisabledMember(lastMessage.original_avatar)) {
-			visualNovelWrapperSprites.removeClass("prome-sprite-focus");
-			return;
-		}
-
-		const spriteDivSelector = `#visual-novel-wrapper [id='expression-${lastMessage.original_avatar}']`;
-
-		return waitForElement(spriteDivSelector, (sprite) => {
-			// Focus the sprite and defocus the rest
-			sprite.addClass("prome-sprite-focus");
-			visualNovelWrapperSprites.not(sprite).removeClass("prome-sprite-focus");
-		});
-	}
-
-	return waitForElement("#expression-holder", (sprite) => {
-		sprite.addClass("prome-sprite-focus");
-		promeUserSprite.removeClass("prome-sprite-focus");
-	});
-}
-
-// Apply defocus class to the sprites
-function applyDefocus() {
-	if (!zoomListenerPreconditions(true)) return;
-
-	// Cache selectors
-	const visualNovelWrapperSprites = $("#visual-novel-wrapper > div");
-	const promeUserSprite = $("#expression-prome-user");
-	const expressionHolder = $("#expression-holder");
-
-	// Check if there are any messages
-	const lastMessagesWithoutSystem = getLastChatMessage();
-	if (lastMessagesWithoutSystem.length === 0) {
-		visualNovelWrapperSprites.removeClass("prome-sprite-focus");
-		return;
-	}
-
-	const lastMessage = lastMessagesWithoutSystem[0];
-	const isUserMessage = lastMessage.is_user;
-	const groupChat = isGroupChat();
-	const userSpriteEnabled = isUserSpriteEnabled();
-
-	if (isUserMessage) {
-		visualNovelWrapperSprites.addClass("prome-sprite-defocus");
-
-		if (userSpriteEnabled) {
-			promeUserSprite.removeClass("prome-sprite-defocus");
-			if (!groupChat) expressionHolder.removeClass("prome-sprite-defocus");
-		}
-		return;
-	}
-
-	if (groupChat) {
-		// check if last message is from a disabled group member
-		// if so, defocus all sprites
-		if (isDisabledMember(lastMessage.original_avatar)) {
-			visualNovelWrapperSprites.addClass("prome-sprite-defocus");
-			return;
-		}
-
-		const spriteDivSelector = `#visual-novel-wrapper [id='expression-${lastMessage.original_avatar}']`;
-
-		return waitForElement(spriteDivSelector, (sprite) => {
-			// Defocus the sprite and focus the rest
-			sprite.removeClass("prome-sprite-defocus");
-			visualNovelWrapperSprites.not(sprite).addClass("prome-sprite-defocus");
-		});
-	}
-
-	return waitForElement("#expression-holder", (sprite) => {
-		sprite.removeClass("prome-sprite-defocus");
-		promeUserSprite.addClass("prome-sprite-defocus");
-	});
 }
 
 async function emulateGroupSprites() {
@@ -249,7 +95,8 @@ async function emulateGroupSprites() {
 
 async function emulateSoloSprites() {
 	const context = getContext();
-	if (context.characterId === undefined || context.characterId === "prome-user") return;
+	if (context.characterId === undefined || context.characterId === "prome-user")
+		return;
 
 	const character = context.characters[context.characterId];
 	const exists = await spritePackExists(character.name);
@@ -298,120 +145,4 @@ async function emulateSprites() {
 	}
 
 	return Promise.resolve();
-}
-
-function getShakeTargets(group, characterAvatar = null) {
-	const allSprites = $("#visual-novel-wrapper > div");
-
-	if (group) {
-		if (characterAvatar) {
-			const sprite = `#visual-novel-wrapper [id='expression-${characterAvatar}']`;
-			return { target: sprite, allSprites };
-		}
-		return { target: null, allSprites };
-	}
-
-	return { target: "#expression-holder" };
-}
-
-// Apply shake class to the speaking sprite
-async function applyShake() {
-	if (!shakeListenerPreconditions()) return Promise.resolve();
-
-	const context = getContext();
-	const group = context.groups.find((x) => x.id === context.groupId);
-
-	// Get selectors
-	const { target: targetSelector, allSprites } = getShakeTargets(
-		group,
-		context.characterId,
-	);
-
-	// Group Chat Logic
-	if (group) {
-		const filteredMembers = group.members.filter(
-			(x) => !group.disabled_members.includes(x),
-		);
-		if (filteredMembers.length < 1) return Promise.resolve();
-
-		if (!context.characterId) return Promise.resolve(); // ST bug or something else
-
-		const speakingCharacter = context.characters[context.characterId];
-		if (!speakingCharacter || isDisabledMember(speakingCharacter.avatar))
-			return Promise.resolve();
-
-		return new Promise((resolve) => {
-			waitForElement(targetSelector, (sprite) => {
-				sprite.addClass("prome-sprite-shake");
-				allSprites.not(sprite).removeClass("prome-sprite-shake");
-				resolve();
-			});
-		});
-	}
-
-	// Solo Chat Logic
-	return new Promise((resolve) => {
-		waitForElement(targetSelector, (sprite) => {
-			sprite.addClass("prome-sprite-shake");
-			resolve();
-		});
-	});
-}
-
-export function stopShake() {
-	const context = getContext();
-	const groupChat = isGroupChat();
-	const streamingProcessor = context.streamingProcessor;
-
-	// Get selectors
-	const { target: targetSelector, allSprites } = getShakeTargets(
-		groupChat,
-		context.characterId,
-	);
-
-	const applyStopShake = () => {
-		if (groupChat) {
-			// Group Chat Logic
-			allSprites.removeClass("prome-sprite-shake");
-
-			if (targetSelector) {
-				waitForElement(targetSelector, (sprite) => {
-					sprite.removeClass("prome-sprite-shake");
-				});
-			}
-		} else {
-			// Solo Chat Logic
-			waitForElement(targetSelector, (sprite) => {
-				sprite.removeClass("prome-sprite-shake");
-			});
-		}
-	};
-
-	const isStreamingDone =
-		streamingProcessor &&
-		!streamingProcessor.isStopped &&
-		streamingProcessor.isFinished;
-
-	if (isStreamingDone) {
-		applyStopShake();
-		return;
-	}
-
-	const checkInterval = setInterval(() => {
-		const nowDone =
-			streamingProcessor &&
-			!streamingProcessor.isStopped &&
-			streamingProcessor.isFinished;
-
-		if (nowDone) {
-			clearInterval(checkInterval);
-			applyStopShake();
-		}
-	}, 100);
-
-	// cleanup JIC
-	setTimeout(() => {
-		clearInterval(checkInterval);
-		applyStopShake();
-	}, 10000);
 }

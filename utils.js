@@ -1,4 +1,4 @@
-import { getContext, extension_settings } from "../../../extensions.js";
+import { extension_settings, getContext } from "../../../extensions.js";
 import { extensionName, VN_MODES } from "./constants.js";
 
 /**
@@ -138,11 +138,13 @@ export function isDisabledMember(name) {
 
 /**
  * Checks if a sprite pack exists
- * @param {string} spritePack - The name of the sprite pack
+ * @param {string?} spritePack - The name of the sprite pack
  * @returns {Promise<boolean>} - Whether the sprite pack exists
  */
 export async function spritePackExists(spritePack) {
-	if (spritePack.length === 0) return false;
+	if (!spritePack) return false;
+	if (spritePack.trim().length === 0) return false;
+
 	const { sprites, err } = await getSpriteList(spritePack);
 	if (err) {
 		console.error(

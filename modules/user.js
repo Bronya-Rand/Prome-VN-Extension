@@ -1,199 +1,185 @@
-import { extensionName } from "../constants.js";
+import { saveSettingsDebounced } from "../../../../../script.js";
 import { extension_settings } from "../../../../extensions.js";
-import { getContext } from "../../../../extensions.js";
+import { user_avatar } from "../../../../personas.js";
+import { SlashCommand } from "../../../../slash-commands/SlashCommand.js";
 import {
-	saveSettingsDebounced,
-	eventSource,
-	event_types,
-} from "../../../../../script.js";
-import { getGroupIndex, spritePackExists } from "../utils.js";
-import { loadMovingUIState } from "../../../../power-user.js";
-import { dragElement } from "../../../../RossAscends-mods.js";
-import { sendExpressionCall } from "../../../expressions/index.js";
-import { emulateSpritesDebounce } from "../listeners.js";
+	ARGUMENT_TYPE,
+	SlashCommandNamedArgument,
+} from "../../../../slash-commands/SlashCommandArgument.js";
+import { SlashCommandParser } from "../../../../slash-commands/SlashCommandParser.js";
+import { extensionFolderPath, extensionName } from "../constants.js";
+import { emitPromeEvent } from "../core/bus.js";
+import { spritePackExists } from "../utils.js";
 
-function setSpritePack(spritePack) {
-	if (spritePack.length === 0) return;
-
-	const existingOverrideIndex =
-		extension_settings.expressionOverrides.findIndex(
-			(e) => e.name === "prome-user",
-		);
-	if (existingOverrideIndex === -1) {
-		extension_settings.expressionOverrides.push({
-			name: "prome-user",
-			path: spritePack,
-		});
-	} else {
-		extension_settings.expressionOverrides[existingOverrideIndex].path =
-			spritePack;
-	}
-}
-
-export function applyUserSprite() {
-	if (
-		extension_settings[extensionName].enableUserSprite === (null || undefined)
-	) {
-		console.debug(
-			`[${extensionName}] enableUserSprite returned null or undefined.`,
+// --- Module Lifecycle ---
+export async function initUserModule() {
+	try {
+		const html = await $.get(`${extensionFolderPath}/html/modules/user.html`);
+		$("#prome-module-settings").append(html);
+	} catch (error) {
+		console.error(
+			`[${extensionName}] Failed to load user module settings:`,
+			error,
 		);
 	}
 
-	console.debug(
-		`[${extensionName}] Enable User Sprite?: ${extension_settings[extensionName].enableUserSprite}`,
-	);
+	const settings = extension_settings[extensionName];
 
-	$("body").toggleClass(
-		"userSprite",
-		extension_settings[extensionName].enableUserSprite,
-	);
-}
+	// Sync UI state with settings
+	$("#prome-user-sprite").prop("checked", Boolean(settings.enableUserSprite));
+	$("#prome-user-sprite-input").val(settings.userSprite ?? "");
 
-/*
- *
- */
-export async function handleUserSprite() {
-	if (!extension_settings[extensionName].enableUserSprite) return;
-
-	const exists = await spritePackExists(
-		extension_settings[extensionName].userSprite,
-	);
-	if (!exists) return;
-
-	const context = getContext();
-	const groupIndex = getGroupIndex();
-
-	if (groupIndex !== -1) {
-		// Group Chat
-		const group = context.groups[groupIndex];
-		if (group.disabled_members.includes("prome-user")) {
-			group.disabled_members = group.disabled_members.filter(
-				(x) => x !== "prome-user",
-			);
-		}
-
-		if (!context.characters.find((x) => x.avatar === "prome-user")) {
-			context.characters.push({
-				name: "Prome User Sprite (Do Not Click)",
-				avatar: "prome-user",
-				data: {
-					creator_notes:
-						"This is a dummy card made for Prome. Don't click this entry.",
-				},
-			});
-		}
-
-		if (extension_settings[extensionName].enableUserSprite) {
-			if (!group.members.includes("prome-user"))
-				group.members.push("prome-user");
-		} else {
-			if (group.members.includes("prome-user"))
-				group.members = group.members.filter((x) => x !== "prome-user");
-		}
-	} else {
-		// One-on-One Chat
-		if (context.characterId === undefined) return;
-
-		// Check if Prome's Expression Image IMG is in the Expression Holder Div
-		const expressionHolder = $("#expression-wrapper");
-		let promeExpression = expressionHolder.children("#expression-prome-user");
-		if (promeExpression.length === 0) {
-			const html = `<div id="expression-prome-user" class="expression-holder displayNone">
-					<div id="expression-prome-userheader" class="fa-solid fa-grip drag-grabber"></div>
-					<img id="expression-image" class="" src=""/>
-				</div>`;
-
-			expressionHolder.append(html);
-
-			promeExpression = $("#expression-prome-user");
-			loadMovingUIState();
-			dragElement(promeExpression);
-		}
-		if (extension_settings[extensionName].enableUserSprite) {
-			$("#expression-prome-user").removeClass("displayNone");
-		} else {
-			$("#expression-prome-user").addClass("displayNone");
-		}
-	}
-}
-
-export async function applyUserSpriteAttributes() {
-	if (!extension_settings[extensionName].enableUserSprite) return;
-
-	const exists = await spritePackExists(
-		extension_settings[extensionName].userSprite,
-	);
-	if (!exists) return;
-
-	const groupIndex = getGroupIndex();
-	let originalExpression = "";
-
-	if (extension_settings[extensionName].enableUserSprite) {
-		// Update the User Sprite
-		const originalSrc = $("#expression-prome-user").children("img").attr("src");
-
-		originalExpression = "neutral";
-		if (originalSrc !== undefined) {
-			const srcData = originalSrc.split("/").pop();
-			if (srcData.length > 0) originalExpression = srcData.split(".")[0];
-		}
-
-		$("#expression-prome-user")
-			.children("img")
-			.attr(
-				"src",
-				`/characters/${extension_settings[extensionName].userSprite}/${originalExpression}.png`,
-			);
-	}
-
-	console.log(originalExpression);
-	if (groupIndex !== -1) {
-		// Group Chat
-		await sendExpressionCall(
-			extension_settings[extensionName].userSprite,
-			originalExpression,
-		);
-	}
-}
-
-export function onUserSprite_Click(event) {
-	const value = Boolean($(event.target).prop("checked"));
-	if (value) {
-		spritePackExists(
-			extension_settings[extensionName].userSprite,
-		).then((exists) => {
-			if (!exists) {
-				toastr.error(
-					`Sprite Pack "${extension_settings[extensionName].userSprite}" could not be found.`,
-					`User Sprite Pack Not Found`,
-				);
-				$(event.target).prop("checked", false);
-				return;
+	// Bind event handlers
+	$("#prome-user-sprite").on("change", async (event) => {
+		const isEnabled = Boolean($(event.target).prop("checked"));
+		if (isEnabled) {
+			const pack = settings.userSprite?.trim();
+			if (pack) {
+				const exists = await spritePackExists(pack);
+				if (!exists) {
+					toastr.warning(
+						`Sprite pack "${pack}" could not be found in characters folder.`,
+						"User Sprite",
+					);
+				}
 			}
-			updateUserSpriteSetting(value);
-		});
-	}
-
-	function updateUserSpriteSetting(isEnabled) {
-		extension_settings[extensionName].enableUserSprite = isEnabled;
-		saveSettingsDebounced();
-		applyUserSprite();
-		handleUserSprite();
-		applyUserSpriteAttributes();
-
-		if (isEnabled && extension_settings[extensionName].emulateSprites) {
-			emulateSpritesDebounce();
 		}
-	}
+		settings.enableUserSprite = isEnabled;
+		saveSettingsDebounced();
+
+		emitPromeEvent("PROME_STAGE_REFRESH_REQUESTED");
+		emitPromeEvent("PROME_USER_SPRITE_TOGGLED");
+	});
+
+	$("#prome-user-sprite-input").on("change", async function () {
+		const pack = this.value.trim();
+		settings.userSprite = pack;
+		saveSettingsDebounced();
+		if (pack && settings.enableUserSprite) {
+			const exists = await spritePackExists(pack);
+			if (!exists) {
+				toastr.warning(
+					`Sprite pack "${pack}" could not be found in characters folder.`,
+					"User Sprite",
+				);
+			}
+		}
+		emitPromeEvent("PROME_STAGE_REFRESH_REQUESTED");
+	});
+
+	registerUserCommands();
 }
 
-export async function onUserSprite_Input() {
-	const exists = await spritePackExists(this.value);
-	if (!exists) return false;
-	const value = this.value;
-	console.debug(`[${extensionName}] User Sprite: ${value}`);
-	extension_settings[extensionName].userSprite = value;
-	setSpritePack(value);
-	saveSettingsDebounced();
-	eventSource.emit(event_types.GROUP_UPDATED);
+// --- Module Commands ---
+function registerUserCommands() {
+	const settings = extension_settings[extensionName];
+
+	SlashCommandParser.addCommandObject(
+		SlashCommand.fromProps({
+			name: "user-sprite",
+			callback: async () => {
+				settings.enableUserSprite = !settings.enableUserSprite;
+				saveSettingsDebounced();
+
+				$("#prome-user-sprite").prop("checked", settings.enableUserSprite);
+				emitPromeEvent("PROME_STAGE_REFRESH_REQUESTED");
+				emitPromeEvent("PROME_USER_SPRITE_TOGGLED");
+
+				toastr.success(
+					`User sprite is now ${settings.enableUserSprite ? "enabled" : "disabled"}.`,
+					"User Sprite Status",
+				);
+				return settings.enableUserSprite;
+			},
+			helpString:
+				"(Prome Visual Novel Extension) Toggles the user persona sprite on the stage.",
+		}),
+	);
+
+	SlashCommandParser.addCommandObject(
+		SlashCommand.fromProps({
+			name: "set-user-set",
+			callback: async (args) => {
+				const pack = args.name?.trim();
+				if (!pack) {
+					toastr.error("Please provide a sprite pack name.", "User Sprite");
+					return null;
+				}
+
+				const exists = await spritePackExists(pack);
+				if (!exists) {
+					toastr.warning(
+						`Sprite pack "${pack}" not found in characters folder.`,
+						"User Sprite",
+					);
+				}
+
+				settings.userSprite = pack;
+				saveSettingsDebounced();
+
+				$("#prome-user-sprite-input").val(pack);
+				emitPromeEvent("PROME_STAGE_REFRESH_REQUESTED");
+
+				toastr.success(`User sprite pack set to "${pack}".`, "User Sprite");
+				return pack;
+			},
+			namedArgumentList: [
+				SlashCommandNamedArgument.fromProps({
+					name: "name",
+					description:
+						"The sprite folder name in characters/ for the user persona.",
+					isRequired: true,
+					typeList: [ARGUMENT_TYPE.STRING],
+				}),
+			],
+			helpString:
+				"(Prome Visual Novel Extension) Sets the sprite pack folder for the user persona.",
+		}),
+	);
+
+	SlashCommandParser.addCommandObject(
+		SlashCommand.fromProps({
+			name: "express",
+			callback: async (args) => {
+				const expr = args.expression?.trim();
+				if (!expr) {
+					toastr.error(
+						"Please provide an expression (e.g. /express joy).",
+						"User Sprite",
+					);
+					return null;
+				}
+
+				if (!settings.enableUserSprite) {
+					toastr.warning(
+						"User sprite is disabled. Enable it in settings.",
+						"User Sprite",
+					);
+					return null;
+				}
+				if (!user_avatar) {
+					toastr.warning("No active persona avatar found.", "User Sprite");
+					return null;
+				}
+
+				// Emit event to update stage expression
+				emitPromeEvent("PROME_SET_EXPRESSION", {
+					actorId: `persona:${user_avatar}`,
+					expression: expr,
+				});
+				toastr.success(`User expression set to "${expr}".`, "User Expression");
+				return expr;
+			},
+			namedArgumentList: [
+				SlashCommandNamedArgument.fromProps({
+					name: "expression",
+					description: "The expression label (e.g. joy, neutral, sad).",
+					isRequired: true,
+					typeList: [ARGUMENT_TYPE.STRING],
+				}),
+			],
+			helpString:
+				"(Prome Visual Novel Extension) Manually sets the expression of the user persona sprite.",
+		}),
+	);
 }

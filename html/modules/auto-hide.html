@@ -1,0 +1,26 @@
+<!-- html/modules/auto-hide.html -->
+<details class="prome-module-auto-hide">
+    <summary data-i18n="Auto-Hide Sprite Settings">Auto-Hide Sprite Settings</summary>
+
+    <div class="prome_vn_block flex-container flexFlowColumn prome_details_padding">
+        <label class="checkbox_label" for="prome-auto-hide-sprites"
+            title="Auto-hides characters from the screen that haven't been in the conversation for a while up to X characters. (Requires Prome to be enabled)."
+            data-i18n="[title]Auto-hides characters from the screen that haven't been in the conversation for a while up to X characters. (Requires Prome to be enabled).">
+            <input id="prome-auto-hide-sprites" type="checkbox" />
+            <span data-i18n="Auto-Hide Sprites">Auto-Hide Sprites</span>
+        </label>
+
+        <div class="flex-container flexFlowColumn">
+            <label for="prome-sprite-max-visible" class="title_restorable">
+                <span data-i18n="Max Visible Sprites">Max Visible Sprites</span>
+                <div id="prome-sprite-max-visible-restore" title="Restore default value" class="right_menu_button">
+                    <i class="fa-solid fa-clock-rotate-left fa-sm"></i>
+                </div>
+            </label>
+            <small data-i18n="Set the maximum number of visible sprites that appears in the VN screen.">
+                Set the maximum number of visible sprites that appears in the VN screen.
+            </small>
+            <input class="neo-range-input" id="prome-sprite-max-visible" type="number" min="1" max="8" step="1" />
+        </div>
+    </div>
+</details>

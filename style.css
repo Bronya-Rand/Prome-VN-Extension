@@ -20,47 +20,66 @@
 		var(--prome-sprite-shadow-offsetx) var(--prome-sprite-shadow-offsety)
 			var(--prome-sprite-shadow-blur) var(--prome-shadow-color)
 	);
-	--prome-shadow-filter-defocus: var(--prome-shadow-filter)
-		brightness(var(--prome-defocus-brightness));
+}
 
-	/* Prome World/Character Tint */
-	--prome-character-tint-with-shadow: var(--prome-character-tint-filter)
-		var(--prome-shadow-filter);
-	--prome-character-tint-with-defocus: var(--prome-character-tint-filter)
-		var(--prome-shadow-filter-defocus);
-	--prome-character-tint-with-shadow-defocus: var(--prome-character-tint-filter)
-		var(--prome-shadow-filter-defocus) var(--prome-shadow-filter);
+#prome-stage {
+	position: fixed;
+	inset: var(--topBarBlockSize, 0px) 0 0 0;
+	z-index: 1;
+	display: flex;
+	justify-content: center;
+	align-items: flex-end;
+    overflow: hidden;
+	pointer-events: none;
+}
 
-	--prome-background-tint-with-shadow: var(--prome-background-tint-filter)
-		var(--prome-shadow-filter);
-	--prome-background-tint-with-defocus: var(--prome-background-tint-filter)
-		var(--prome-shadow-filter-defocus);
-	--prome-background-tint-with-shadow-defocus: var(
-			--prome-background-tint-filter
-		)
-		var(--prome-shadow-filter-defocus) var(--prome-shadow-filter);
+#prome-stage .prome-actor-slot {
+	flex: 0 1 auto;
+	min-width: 0;
+	transform-origin: center bottom;
+}
 
-	--prome-combined-filter-character: var(--prome-character-tint-filter);
-	--prome-combined-filter-character-shadow: var(
-		--prome-character-tint-with-shadow
-	);
-	--prome-combined-filter-character-defocus: var(
-		--prome-character-tint-with-defocus
-	);
-	--prome-combined-filter-character-shadow-defocus: var(
-		--prome-character-tint-with-shadow-defocus
-	);
+#prome-stage .prome-actor-motion {
+	display: flex;
+	justify-content: center;
+}
 
-	--prome-combined-filter-background: var(--prome-background-tint-filter);
-	--prome-combined-filter-background-shadow: var(
-		--prome-background-tint-with-shadow
-	);
-	--prome-combined-filter-background-defocus: var(
-		--prome-background-tint-with-defocus
-	);
-	--prome-combined-filter-background-shadow-defocus: var(
-		--prome-background-tint-with-shadow-defocus
-	);
+#prome-stage .prome-actor-sprite {
+    min-width: 100px;
+    min-height: 100px;
+    max-height: 90vh;
+    max-width: 90vh;
+    object-fit: contain;
+}
+
+body.prome-vn-active #sheld {
+	top: auto;
+	bottom: 0;
+	height: 35dvh;
+}
+
+@media screen and (max-width: 1000px) {
+	#prome-stage {
+		height: calc(100dvh - var(--topBarBlockSize));
+	}
+	#prome-stage:has(> .prome-sprite-focus) > .prome-actor-slot:not(.prome-sprite-focus),
+	#prome-stage:not(:has(> .prome-sprite-focus)) > .prome-actor-slot:not(:first-child) {
+		display: none;
+	}
+
+	#prome-stage .prome-actor-sprite {
+		max-width: 100dvw;
+		max-height: min(90dvh, calc(100dvh - var(--topBarBlockSize, 0px)));
+	}
+
+	body.prome-vn-active #sheld {
+		height: 40dvh;
+	}
+
+	body.prome-vn-active #chat {
+		border-top: 1px solid var(--SmartThemeBorderColor);
+		border-radius: 20px 20px 0 0;
+	}
 }
 
 .prome-drawer-content {
@@ -77,94 +96,80 @@
 	padding: 5px 5px;
 }
 
-/* Prome Letterbox Settings */
-body.waifuMode.hLetterBox #visual-novel-letterbox-one {
-	width: 100vw;
-	height: var(--prome-letterbox-size);
-	top: 0;
-	position: fixed;
-	background-color: var(--prome-letterbox-color);
-	z-index: var(--prome-letterbox-zindex);
+/* Prome Letterbox */
+#prome-letterbox-wrapper {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: var(--prome-letterbox-zindex);
+    display: none;
 }
-body.waifuMode.hLetterBox #visual-novel-letterbox-two {
-	width: 100vw;
-	height: var(--prome-letterbox-size);
-	bottom: 0;
-	position: fixed;
-	background-color: var(--prome-letterbox-color);
-	z-index: var(--prome-letterbox-zindex);
+
+/* Horizontal Letterbox (Top & Bottom bars) */
+body.prome-vn-active.hLetterBox #prome-letterbox-wrapper {
+    display: block;
 }
-body.waifuMode.vLetterBox #visual-novel-letterbox-one {
-	width: var(--prome-letterbox-size);
-	height: 100vh;
-	top: 0;
-	left: 0;
-	position: fixed;
-	background-color: var(--prome-letterbox-color);
-	z-index: var(--prome-letterbox-zindex);
+body.prome-vn-active.hLetterBox .prome-letterbox-bar-1 {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: var(--prome-letterbox-size);
+    background-color: var(--prome-letterbox-color);
 }
-body.waifuMode.vLetterBox #visual-novel-letterbox-two {
-	width: var(--prome-letterbox-size);
-	height: 100vh;
-	top: 0;
-	right: 0;
-	position: fixed;
-	background-color: var(--prome-letterbox-color);
-	z-index: var(--prome-letterbox-zindex);
+body.prome-vn-active.hLetterBox .prome-letterbox-bar-2 {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100vw;
+    height: var(--prome-letterbox-size);
+    background-color: var(--prome-letterbox-color);
+}
+
+/* Vertical Letterbox (Left & Right bars) */
+body.prome-vn-active.vLetterBox #prome-letterbox-wrapper {
+    display: block;
+}
+body.prome-vn-active.vLetterBox .prome-letterbox-bar-1 {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: var(--prome-letterbox-size);
+    height: 100vh;
+    background-color: var(--prome-letterbox-color);
+}
+body.prome-vn-active.vLetterBox .prome-letterbox-bar-2 {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: var(--prome-letterbox-size);
+    height: 100vh;
+    background-color: var(--prome-letterbox-color);
 }
 
 /* 
- * Prome Sprite Focus (Multiple Characters) 
- * For shake + focus, see Prome Sprite Shake
+ * Sprite Focus/Defocus
  */
-#visual-novel-wrapper [id*="expression-"] {
-	will-change: transform, filter;
-	transition: transform var(--prome-sprite-zoom-speed)
-		var(--prome-sprite-zoom-animation), filter
-		var(--prome-focus-filter-transition);
+#prome-stage .prome-actor-slot {
+    transition:
+        transform var(--prome-sprite-zoom-speed) var(--prome-sprite-zoom-animation),
+        filter var(--prome-focus-filter-transition);
 }
 
-#expression-wrapper > div {
-	will-change: transform, filter;
-	transition: transform var(--prome-sprite-zoom-speed)
-		var(--prome-sprite-zoom-animation), filter
-		var(--prome-focus-filter-transition);
+body.prome-vn-active.spriteZoom #prome-stage .prome-sprite-focus {
+    transform: scale(var(--prome-focus-scale));
 }
 
-/* Sprite Focus to Last Message Character on 'expression-holder' */
-body.waifuMode.spriteZoom .prome-sprite-focus {
-	transform: scale(var(--prome-focus-scale));
-}
-
-/*
- * Prome Sprite Defocus
- */
-
-/* Sprites not in chat are lower contrast to differentiate focused sprite */
-body.waifuMode.spriteDefocusTint .prome-sprite-defocus {
-	filter: brightness(var(--prome-defocus-brightness));
+body.prome-vn-active.spriteDefocusTint #prome-stage .prome-sprite-defocus {
+    filter: brightness(var(--prome-defocus-brightness));
 }
 
 /*
  * Prome Sprite Scale
  */
-body.waifuMode.spriteScale .prome-sprite-scale {
-	transform: scale(var(--prome-sprite-scale));
-	transform-origin: bottom;
-}
-
-body.waifuMode.spriteScale.spriteZoom .prome-sprite-scale.prome-sprite-focus {
-	--prome-combined-scale: calc(var(--prome-sprite-scale) * var(--prome-focus-scale));
-	transform: scale(var(--prome-combined-scale));
-}
-
-body.waifuMode.spriteZoom:not(.spriteScale) .prome-sprite-focus {
-	transform: scale(var(--prome-focus-scale));
-}
-
-body.waifuMode.emulateSprites #visual-novel-wrapper .hidden:not(.displayNone) {
-	display: inherit !important;
-	visibility: visible !important;
+body.prome-vn-active.spriteScale #prome-stage .prome-actor-sprite {
+    transform: scale(var(--prome-sprite-scale));
+    transform-origin: center bottom;
 }
 
 /* 
@@ -195,117 +200,17 @@ body.waifuMode.emulateSprites #visual-novel-wrapper .hidden:not(.displayNone) {
 	}
 }
 
-@keyframes shakeAndScale {
-	0% {
-		transform: translate(0px, 0px) rotate(0deg) scale(var(--prome-sprite-scale));
-	}
-	25% {
-		transform: translate(1px, 0px) rotate(0.1deg)
-			scale(var(--prome-sprite-scale));
-	}
-	50% {
-		transform: translate(0px, 0px) rotate(0.2deg)
-			scale(var(--prome-sprite-scale));
-	}
-	75% {
-		transform: translate(-1px, 0px) rotate(0.1deg)
-			scale(var(--prome-sprite-scale));
-	}
-	100% {
-		transform: translate(0px, 0px) rotate(0deg) scale(var(--prome-sprite-scale));
-	}
-}
-
-@keyframes shakeAndFocus {
-	0% {
-		transform: translate(0px, 0px) rotate(0deg) scale(var(--prome-focus-scale));
-	}
-	25% {
-		transform: translate(1px, 0px) rotate(0.1deg)
-			scale(var(--prome-focus-scale));
-	}
-	50% {
-		transform: translate(0px, 0px) rotate(0.2deg)
-			scale(var(--prome-focus-scale));
-	}
-	75% {
-		transform: translate(-1px, 0px) rotate(0.1deg)
-			scale(var(--prome-focus-scale));
-	}
-	100% {
-		transform: translate(0px, 0px) rotate(0deg) scale(var(--prome-focus-scale));
-	}
-}
-
-@keyframes shakeFocusAndScale {
-	0% {
-		transform: translate(0px, 0px) rotate(0deg)
-			scale(calc(var(--prome-sprite-scale) * var(--prome-focus-scale)));
-	}
-	25% {
-		transform: translate(1px, 0px) rotate(0.1deg)
-			scale(calc(var(--prome-sprite-scale) * var(--prome-focus-scale)));
-	}
-	50% {
-		transform: translate(0px, 0px) rotate(0.2deg)
-			scale(calc(var(--prome-sprite-scale) * var(--prome-focus-scale)));
-	}
-	75% {
-		transform: translate(-1px, 0px) rotate(0.1deg)
-			scale(calc(var(--prome-sprite-scale) * var(--prome-focus-scale)));
-	}
-	100% {
-		transform: translate(0px, 0px) rotate(0deg)
-			scale(calc(var(--prome-sprite-scale) * var(--prome-focus-scale)));
-	}
-}
-
-body.waifuMode.spriteShake .prome-sprite-shake {
-	transform: translateZ(0);
+body.prome-vn-active.spriteShake #prome-stage .prome-sprite-shake > .prome-actor-motion {
 	animation: shake var(--prome-active-shake-duration) var(--prome-shake-timing)
 		infinite;
-}
-
-body.waifuMode.spriteShake.spriteZoom .prome-sprite-shake {
-	transform: translateZ(0);
-	animation: shakeAndFocus var(--prome-active-shake-duration) var(--prome-shake-timing)
-		infinite;
-}
-
-body.waifuMode.spriteShake.spriteScale .prome-sprite-shake {
-	transform: translateZ(0);
-	animation: shakeAndScale var(--prome-active-shake-duration) var(--prome-shake-timing)
-		infinite;
-}
-
-body.waifuMode.spriteShake.spriteZoom.spriteScale .prome-sprite-shake {
-	transform: translateZ(0);
-	animation: shakeFocusAndScale var(--prome-active-shake-duration)
-		var(--prome-shake-timing) infinite;
 }
 
 /* 
  * Prome Sprite Shadows
  */
 
-body.waifuMode.spriteShadow #visual-novel-wrapper [id*="expression-"] {
-	filter: var(--prome-shadow-filter);
-}
-
-body.waifuMode.spriteShadow #expression-wrapper .expression-holder {
-	filter: var(--prome-shadow-filter);
-}
-
-body.waifuMode.spriteDefocusTint.spriteShadow
-	#visual-novel-wrapper
-	[id*="expression-"].prome-sprite-defocus {
-	filter: var(--prome-shadow-filter-defocus);
-}
-
-body.waifuMode.spriteDefocusTint.spriteShadow
-	#expression-wrapper
-	.expression-holder.prome-sprite-defocus {
-	filter: var(--prome-shadow-filter-defocus);
+body.prome-vn-active.spriteShadow #prome-stage .prome-actor-slot > .prome-actor-motion {
+    filter: var(--prome-shadow-filter);
 }
 
 /* 
@@ -316,75 +221,10 @@ body.worldTint.tintWorld #bg1 {
 	filter: var(--prome-background-tint-filter);
 }
 
-body.worldTint.tintCharacter #expression-wrapper .expression-holder {
-	filter: var(--current-char-tint-filter);
+body.prome-vn-active.worldTint.tintCharacter #prome-stage .prome-actor-sprite {
+    filter: var(--prome-character-tint-filter);
 }
 
-body.worldTint.tintCharacter #visual-novel-wrapper [id*="expression-"] {
-	filter: var(--current-char-tint-filter);
-}
-
-body.worldTint.tintCharacter {
-	--current-char-tint-filter: var(--prome-combined-filter-character);
-}
-
-body.worldTint.tintCharacter.spriteShadow {
-	--current-char-tint-filter: var(--prome-combined-filter-character-shadow);
-}
-
-body.worldTint.tintCharacter.spriteDefocusTint {
-	--current-char-tint-filter: var(--prome-combined-filter-character-defocus);
-}
-
-body.worldTint.tintCharacter.spriteDefocusTint.spriteShadow {
-	--current-char-tint-filter: var(
-		--prome-combined-filter-character-shadow-defocus
-	);
-}
-
-body.worldTint.tintShared {
-	--current-char-tint-filter: var(--prome-combined-filter-background);
-}
-
-body.worldTint.tintShared.spriteShadow {
-	--current-char-tint-filter: var(--prome-combined-filter-background-shadow);
-}
-
-body.worldTint.tintShared.spriteDefocusTint {
-	--current-char-tint-filter: var(--prome-combined-filter-background-defocus);
-}
-
-body.worldTint.tintShared.spriteDefocusTint.spriteShadow {
-	--current-char-tint-filter: var(
-		--prome-combined-filter-background-shadow-defocus
-	);
-}
-
-/* 
- * Prome User Sprite Overrides
- * (For ST)
- */
-body.waifuMode.userSprite:not(.movingUI) #expression-wrapper {
-	position: absolute;
-	height: max-content;
-	bottom: 0;
-}
-
-body.waifuMode.userSprite:not(.movingUI)
-	#expression-wrapper
-	.expression-holder {
-	position: unset;
-}
-
-body #expression-prome-user {
-	display: none;
-}
-
-body.waifuMode.userSprite #expression-prome-user {
-	display: flex;
-	visibility: visible;
-}
-
-#visual-novel-wrapper {
-	contain: layout style;
+body.prome-vn-active.worldTint.tintCharacter.tintShared #prome-stage .prome-actor-sprite {
+    filter: var(--prome-background-tint-filter);
 }

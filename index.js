@@ -1,98 +1,46 @@
 /* ST Core Imports */
 import {
-	extension_settings,
-	renderExtensionTemplateAsync,
-	getContext,
-} from "../../../extensions.js";
-import {
-	saveSettingsDebounced,
-	eventSource,
 	event_types,
+	eventSource,
+	saveSettingsDebounced,
 } from "../../../../script.js";
+import { extension_settings, getContext } from "../../../extensions.js";
+import { user_avatar } from "../../../personas.js";
 import { power_user } from "../../../power-user.js";
-import { POPUP_TYPE, callGenericPopup } from "../../../popup.js";
 
 /* Prome Core Imports */
 import {
-	extensionName,
-	extensionFolderPath,
 	defaultSettings,
+	extensionFolderPath,
+	extensionName,
 } from "./constants.js";
 import {
-	applyZoomDebounce,
-	applyDefocusDebounce,
-	emulateSpritesDebounce,
-	applyShakeDebounce,
-	stopShake,
-	applyUserAttributesDebounce,
-	applyScaleDebounce,
-} from "./listeners.js";
-
-/* Prome Feature Imports */
-import { prepareSlashCommands } from "./modules/slash-commands.js";
+	emitPromeEvent,
+	PROME_SPEAKER_CHANGED,
+	PROME_STREAM_BYTE,
+	promeBus,
+} from "./core/bus.js";
+import { classifyLocal } from "./core/classifier.js";
+import { mountStage, renderActors, unmountStage } from "./core/stage.js";
 import {
-	applyLetterboxMode,
-	applyLetterboxColor,
-	applyLetterboxSize,
-	setupLetterboxModeJQuery,
-	setupLetterboxModeHTML,
-} from "./modules/letterbox.js";
-import {
-	applySheldMode,
-	applySheldVisibility,
-	onSheld_Click,
-	onSheldMode_Click,
-} from "./modules/sheld.js";
-import {
-	getGroupIndex,
-	isSheldVisible,
-	spritePackExists,
-	isGroupChat,
-} from "./utils.js";
-import {
-	applySpriteZoomTimer,
-	applySpriteZoomAnimation,
-	applySpriteZoom,
-	applySpriteDefocusTint,
-	onSpriteDefocusTint_Click,
-	setupFocusModeJQuery,
-	setupFocusModeHTML,
-} from "./modules/focus.js";
-import { applySpriteShake, onSpriteShake_Click } from "./modules/shake.js";
-import { getChatHistory } from "./modules/chat-history.js";
-import {
-	applySpriteEmulation,
-	onSpriteEmulation_Click,
-} from "./modules/emulate.js";
-import {
-	applySpriteShadow,
-	applySpriteShadowBlur,
-	applySpriteShadowOffsetX,
-	applySpriteShadowOffsetY,
-	setupSpriteShadowHTML,
-	setupSpriteShadowJQuery,
-} from "./modules/shadows.js";
-import { setupTintHTML, setupTintJQuery } from "./modules/tint.js";
-import {
-	applyUserSprite,
-	handleUserSprite,
-	onUserSprite_Click,
-	onUserSprite_Input,
-} from "./modules/user.js";
-import {
-	applyAutoHideSprites,
-	handleAutoHideSprites,
-	setupAutoHideHTML,
-	setupAutoHideJQuery,
+	filterActiveGroupCharacters,
+	initAutoHideModule,
 } from "./modules/auto-hide.js";
-import {
-	applySpriteScale,
-	setupScaleHTML,
-	setupScaleJQuery,
-} from "./modules/scale.js";
-import { visualNovelUpdateLayers } from "../../expressions/index.js";
+import { initEmulateModule } from "./modules/emulate.js";
+import { initFocusModule } from "./modules/focus.js";
+import { initLetterboxModule } from "./modules/letterbox.js";
+import { initScaleModule } from "./modules/scale.js";
+import { initShadowModule } from "./modules/shadows.js";
+import { initShakeModule, stopShakeAnimation } from "./modules/shake.js";
+import { initTintModule } from "./modules/tint.js";
+import { initUserModule } from "./modules/user.js";
+import { getSpriteList, isGroupChat, spritePackExists } from "./utils.js";
 
-async function loadSettings() {
+let stageRevision = 0;
+const labelsByAvatar = new Map();
+const pendingByAvatar = new Map();
+
+function loadSettings() {
 	extension_settings[extensionName] = extension_settings[extensionName] || {};
 	if (Object.keys(extension_settings[extensionName]).length === 0) {
 		Object.assign(extension_settings[extensionName], defaultSettings);
@@ -109,379 +57,404 @@ async function loadSettings() {
 		}
 	}
 
-	// Add a expression override for the user sprite
-	if (extension_settings[extensionName].enableUserSprite && extension_settings[extensionName].userSprite.length > 0) {
-		const userSpritePack = extension_settings[extensionName].userSprite;
-		const exists = await spritePackExists(userSpritePack);
+	$("#prome-enable-vn").prop(
+		"checked",
+		extension_settings[extensionName].enableVN_UI,
+	);
+}
 
-		if (exists) {
-			// Ensure the override exists
-			const overrideExists = extension_settings.expressionOverrides.find(
-				(e) => e.name === "prome-user",
-			);
+async function classifyActor(avatar, message, spritePackName) {
+	const request = Symbol();
+	pendingByAvatar.set(avatar, request);
 
-			if (!overrideExists) {
-				extension_settings.expressionOverrides.push({
-					name: "prome-user",
-					path: userSpritePack,
-				});
-				saveSettingsDebounced();
-			}
-		} else {
-			toastr.error(
-				`Sprite Pack "${userSpritePack}" could not be found. Resetting user sprite settings.`,
-				`User Sprite Pack Not Found`,
-			);
+	const packExists = await spritePackExists(spritePackName);
+	if (pendingByAvatar.get(avatar) !== request) return false; // A newer request has been made for this avatar
 
-			// Remove the expression override and disable user sprites
-			let updateSettings = false;
+	if (!packExists) {
+		pendingByAvatar.delete(avatar);
+		return false;
+	}
 
-			const overrideIndex = extension_settings.expressionOverrides.findIndex(
-				(e) => e.name === "prome-user",
-			);
+	const label = await classifyLocal(message);
+	if (pendingByAvatar.get(avatar) !== request) return false; // A newer request has been made for this avatar
 
-			if (overrideIndex !== -1) {
-				extension_settings.expressionOverrides = extension_settings.expressionOverrides.filter(
-					(e) => e.name !== "prome-user",
-				);
-				updateSettings = true;
-			}
+	pendingByAvatar.delete(avatar);
+	if (!label) return false;
 
-			if (extension_settings[extensionName].enableUserSprite) {
-				extension_settings[extensionName].enableUserSprite = false;
-				updateSettings = true;
-			}
+	labelsByAvatar.set(avatar, label);
+	return true;
+}
 
-			if (updateSettings)
-				saveSettingsDebounced();
+/**
+ * Updates the expression of the speaker based on their message.
+ * @param {*} messageId The ID of the message that was rendered.
+ * @returns
+ */
+async function updateSpeakerExpression(messageId) {
+	const settings = extension_settings[extensionName];
+	if (!settings.enableVN_UI) return;
+
+	const context = getContext();
+	const message = context.chat[messageId];
+	if (message?.is_system || !message?.mes?.trim()) return;
+
+	let actorId;
+	let spritePackName;
+
+	if (message.is_user) {
+		if (!settings.enableUserSprite || !settings.userSprite || !user_avatar)
+			return;
+
+		actorId = `persona:${user_avatar}`;
+		spritePackName = settings.userSprite;
+	} else {
+		const char =
+			context.groupId != null
+				? context.characters.find((c) => c.avatar === message.original_avatar)
+				: context.characters[context.characterId];
+		if (!char?.avatar) return;
+
+		actorId = `character:${char.avatar}`;
+		spritePackName = char.name;
+	}
+
+	emitPromeEvent(PROME_SPEAKER_CHANGED, { actorId });
+
+	// Classify and update expression for the actor
+	if (await classifyActor(actorId, message.mes, spritePackName)) {
+		await refreshStage();
+	}
+}
+
+/**
+ * Loads a character actor with the specified character and preferred label.
+ * @param {*} character The character object containing name and avatar.
+ * @param {*} preferredLabel The preferred label for the sprite to load (default is "neutral").
+ * @returns
+ */
+async function loadCharacterActor(character, preferredLabel = "neutral") {
+	const { sprites, err } = await getSpriteList(character.name);
+	if (!err && sprites?.length > 0) {
+		// Sprites found
+		const target = preferredLabel.toLowerCase().trim();
+		const sprite =
+			sprites.find((s) => s.label.toLowerCase() === target) ??
+			sprites.find((s) => s.label.toLowerCase() === "neutral");
+		if (sprite) {
+			return {
+				id: `character:${character.avatar}`,
+				name: character.name,
+				expression: sprite.label,
+				spriteUrl: sprite.path,
+			};
 		}
 	}
 
-	// Prome Updates
-	$("#prome-enable-vn").prop(
-		"checked",
-		extension_settings[extensionName].enableVN_UI || power_user.waifuMode,
-	);
-
-	// Letterbox Updates
-	setupLetterboxModeHTML();
-	// Sheld Updates
-	$("#prome-hide-sheld").prop(
-		"checked",
-		extension_settings[extensionName].hideSheld,
-	);
-
-	// Sprite Updates
-	/// Focus Mode
-	setupFocusModeHTML();
-	/// Defocus Tint
-	$("#prome-sprite-defocus-tint").prop(
-		"checked",
-		extension_settings[extensionName].spriteDefocusTint,
-	);
-	/// Shake
-	$("#prome-sprite-shake").prop(
-		"checked",
-		extension_settings[extensionName].spriteShake,
-	);
-	/// Sprite Emulation
-	$("#prome-emulate-sprites").prop(
-		"checked",
-		extension_settings[extensionName].emulateSprites,
-	);
-	/// Sprite Shadow
-	setupSpriteShadowHTML();
-
-	/// User Sprite Updates
-	$("#prome-user-sprite").prop(
-		"checked",
-		extension_settings[extensionName].enableUserSprite,
-	);
-	$("#prome-user-sprite-input").val(
-		extension_settings[extensionName].userSprite,
-	);
-
-	/// Auto Hide Sprites
-	setupAutoHideHTML();
-
-	/// Sprite Scale
-	setupScaleHTML();
-
-	// Traditional VN Mode Updates
-	$("#prome-sheld-last_mes").prop(
-		"checked",
-		extension_settings[extensionName].showOnlyLastMessage,
-	);
-
-	// ST Main Updates
-	$("#waifuMode")
-		.prop("checked", extension_settings[extensionName].enableVN_UI)
-		.trigger("input");
-
-	// Apply Tint Settings
-	setupTintHTML();
-
-	// Apply Letterbox Settings
-	applyLetterboxMode();
-	applyLetterboxColor();
-	applyLetterboxSize();
-
-	// Apply Sheld Settings
-	applySheldVisibility();
-	applySheldMode();
-
-	// Apply Sprite Settings
-	/// Sprite Emulation
-	applySpriteEmulation();
-	/// Focus Mode
-	applySpriteZoomTimer();
-	applySpriteZoomAnimation();
-	applySpriteZoom();
-	/// Defocus Tint
-	applySpriteDefocusTint();
-	/// Sprite Shake
-	applySpriteShake();
-	/// Sprite Shadow
-	applySpriteShadow();
-	applySpriteShadowOffsetX();
-	applySpriteShadowOffsetY();
-	applySpriteShadowBlur();
-	/// User Sprite
-	applyUserSprite();
-	/// Auto Hide Sprites
-	applyAutoHideSprites();
-	/// Sprite Scale
-	applySpriteScale();
+	// Fallback: If character has no sprite pack, emulate card as sprite
+	const settings = extension_settings[extensionName];
+	if (settings.emulateSprites && character.avatar) {
+		return {
+			id: `character:${character.avatar}`,
+			name: character.name,
+			expression: "card",
+			spriteUrl: `/characters/${encodeURIComponent(character.avatar)}`,
+		};
+	}
+	return null;
 }
 
-/* Prome Core Listeners */
+/**
+ * Refreshes the Prome VN stage by re-rendering the actors based on the current context and settings.
+ * @returns A promise that resolves when the stage has been refreshed.
+ */
+async function refreshStage() {
+	const revision = ++stageRevision;
+	const context = getContext();
+	const settings = extension_settings[extensionName];
+	const userObj = {
+		id: `persona:${user_avatar}`,
+		name: context.name1,
+	};
+
+	if (!context.getCurrentChatId()) {
+		renderActors([]);
+		return;
+	}
+
+	const group = context.groups.find((group) => group.id === context.groupId);
+	let characters = isGroupChat()
+		? (group?.members ?? [])
+				.map((avatar) =>
+					context.characters.find((char) => char.avatar === avatar),
+				)
+				.filter(Boolean)
+		: [context.characters[context.characterId]].filter(Boolean);
+
+	// Filter down to the most recent talking characters if auto-hide is enabled:
+	characters = filterActiveGroupCharacters(characters);
+	const actorsToRender = await Promise.all(
+		characters.map((character) =>
+			loadCharacterActor(
+				character,
+				labelsByAvatar.get(`character:${character.avatar}`) ?? "neutral",
+			),
+		),
+	);
+	if (revision !== stageRevision) return;
+
+	if (settings.enableUserSprite && settings.userSprite && user_avatar) {
+		const { sprites: userSprites, err } = await getSpriteList(
+			settings.userSprite,
+		);
+
+		if (err) {
+			console.error(`[${extensionName}] Could not load persona sprites`, err);
+		}
+
+		const userLabel = labelsByAvatar.get(userObj.id) ?? "neutral";
+		const userSprite =
+			userSprites.find((sprite) => sprite.label === userLabel) ??
+			userSprites.find((sprite) => sprite.label === "neutral");
+
+		if (userSprite) {
+			actorsToRender.push({
+				...userObj,
+				expression: userSprite.label,
+				spriteUrl: userSprite.path,
+			});
+		}
+	}
+
+	if (revision !== stageRevision) return;
+	renderActors(actorsToRender);
+}
+
+async function restoreStageExpressions() {
+	const context = getContext();
+	const chat = context.chat;
+	const chatId = context.getCurrentChatId();
+	if (!chatId || !Array.isArray(chat) || chat.length === 0) return;
+
+	const settings = extension_settings[extensionName];
+
+	const packByActorId = new Map();
+
+	if (isGroupChat()) {
+		const group = context.groups.find((group) => group.id === context.groupId);
+		(group?.members ?? []).forEach((avatar) => {
+			const character = context.characters.find(
+				(char) => char.avatar === avatar,
+			);
+			packByActorId.set(`character:${avatar}`, character?.name ?? null);
+		});
+	} else {
+		const character = context.characters[context.characterId];
+		packByActorId.set(`character:${character.avatar}`, character?.name ?? null);
+	}
+
+	// Add user avatar if user sprite is enabled
+	const trackUser =
+		settings.enableUserSprite && settings.userSprite && user_avatar;
+	if (trackUser) {
+		packByActorId.set(`persona:${user_avatar}`, settings.userSprite);
+	}
+
+	if (packByActorId.size === 0) return;
+
+	// Scan backwards to grab latest messages for each avatar
+	const latestMessagesByAvatar = new Map();
+
+	for (let i = chat.length - 1; i >= 0; i--) {
+		const message = chat[i];
+		if (message.is_system || !message.mes?.trim()) continue;
+
+		let avatar = null;
+
+		if (message.is_user) {
+			if (trackUser) avatar = `persona:${user_avatar}`;
+		} else {
+			avatar = isGroupChat()
+				? `character:${message.original_avatar}`
+				: `character:${context.characters[context.characterId]?.avatar}`;
+		}
+
+		if (
+			avatar &&
+			packByActorId.has(avatar) &&
+			!latestMessagesByAvatar.has(avatar)
+		) {
+			latestMessagesByAvatar.set(avatar, message.mes);
+		}
+
+		// Stop if we have found messages for all target avatars
+		if (latestMessagesByAvatar.size === packByActorId.size) break;
+	}
+
+	if (latestMessagesByAvatar.size === 0) return;
+
+	const latestSpeaker = [...latestMessagesByAvatar.keys()][0];
+	emitPromeEvent(PROME_SPEAKER_CHANGED, { actorId: latestSpeaker ?? null });
+
+	// Classify and update expressions for each avatar
+	const updated = await Promise.all(
+		Array.from(latestMessagesByAvatar, ([actorId, text]) =>
+			classifyActor(actorId, text, packByActorId.get(actorId)),
+		),
+	);
+
+	if (getContext().getCurrentChatId() === chatId && updated.some(Boolean)) {
+		await refreshStage();
+	}
+}
+
+function syncVNMode() {
+	const settings = extension_settings[extensionName];
+	const active =
+		settings.enableVN_UI && Boolean(getContext().getCurrentChatId());
+
+	$("body").toggleClass("prome-vn-active", active);
+
+	if (active) {
+		mountStage(document.body);
+	} else {
+		++stageRevision;
+		pendingByAvatar.clear();
+		stopShakeAnimation();
+		unmountStage();
+	}
+
+	return active;
+}
+
+function rebuildStageFromHistory() {
+	labelsByAvatar.clear();
+	pendingByAvatar.clear();
+
+	emitPromeEvent(PROME_SPEAKER_CHANGED, { actorId: null });
+
+	if (syncVNMode()) {
+		void refreshStage();
+		void restoreStageExpressions();
+	}
+}
+
 function onVNUI_Click(event) {
 	const value = Boolean($(event.target).prop("checked"));
 	extension_settings[extensionName].enableVN_UI = value;
-	power_user.waifuMode = value;
 	saveSettingsDebounced();
 
-	// Hijack ST Main's Waifu Mode
-	$("body").toggleClass("waifuMode", power_user.waifuMode);
-	$("#waifuMode").prop("checked", power_user.waifuMode);
-	applySheldMode();
-}
-
-async function onKeybindListClick() {
-	const template = await renderExtensionTemplateAsync(
-		`third-party/${extensionName}/html`,
-		"keybinds",
-	);
-	await callGenericPopup(template, POPUP_TYPE.TEXT, "", {});
-}
-
-async function onCommandsListClick() {
-	const template = await renderExtensionTemplateAsync(
-		`third-party/${extensionName}/html`,
-		"commands",
-	);
-	await callGenericPopup(template, POPUP_TYPE.TEXT, "", {});
-}
-
-async function onChatHistoryClick() {
-	getChatHistory();
+	if (syncVNMode()) {
+		void refreshStage();
+		void restoreStageExpressions();
+	}
 }
 
 jQuery(async () => {
-	function addLetterbox() {
-		const letterboxHtml = `
-      <div id="visual-novel-letterbox-one"></div>
-      <div id="visual-novel-letterbox-two"></div>
-    `;
-
-		$("body").append(letterboxHtml);
-	}
-
 	const settingsHtml = await $.get(`${extensionFolderPath}/html/settings.html`);
 	$("#extensions_settings").append(settingsHtml);
 
-	/* Prome Core Actions */
-	$("#prome-enable-vn").on("click", onVNUI_Click);
-	$("#prome-keybinds").on("click", onKeybindListClick);
-	$("#prome-commands").on("click", onCommandsListClick);
-
-	const wandButtonHtml = await renderExtensionTemplateAsync(
-		`third-party/${extensionName}/html`,
-		"wand_buttons",
-	);
-	$("#extensionsMenu").append(wandButtonHtml);
-	$("#prome-wand-chat-history").on("click", onChatHistoryClick);
-
-	/* Prome Feature Actions */
-	// Letterbox
-	setupLetterboxModeJQuery();
-	// Sheld
-	$("#prome-hide-sheld").on("click", onSheld_Click);
-	$("#prome-sheld-last_mes").on("click", onSheldMode_Click);
-
-	// Sprite Emulation
-	$("#prome-emulate-sprites").on("click", onSpriteEmulation_Click);
-	// Focus
-	setupFocusModeJQuery();
-	// Sprite Defocus Tint
-	$("#prome-sprite-defocus-tint").on("click", onSpriteDefocusTint_Click);
-	// Sprite Shake
-	$("#prome-sprite-shake").on("click", onSpriteShake_Click);
-	// Sprite Shadow
-	setupSpriteShadowJQuery();
-	// Sprite Scale
-	setupScaleJQuery();
-
-	// User Sprite
-	$("#prome-user-sprite").on("click", onUserSprite_Click);
-	$("#prome-user-sprite-input").on("input", onUserSprite_Input);
-
-	/* Prome Feature Initialization */
-	const vnWrapper = $("#visual-novel-wrapper");
-
-	addLetterbox();
-	setupTintJQuery();
-	setupAutoHideJQuery();
 	loadSettings();
-	prepareSlashCommands();
 
-	eventSource.on(event_types.MESSAGE_SWIPED, applyShakeDebounce);
-	eventSource.on(event_types.CHARACTER_MESSAGE_RENDERED, stopShake);
-	eventSource.on(event_types.CHAT_CHANGED, async () => {
-		await applyZoomDebounce();
-		await applyDefocusDebounce();
-		await applyScaleDebounce();
-		await emulateSpritesDebounce();
-		await handleUserSprite();
-		await applyUserAttributesDebounce();
-		handleAutoHideSprites();
+	// Init modules
+	await initLetterboxModule();
+	await initAutoHideModule();
+	await initUserModule();
+	await initEmulateModule();
+	await initScaleModule();
+	await initShadowModule();
+	await initFocusModule();
+	await initShakeModule();
+	await initTintModule();
+
+	$("#prome-enable-vn").on("click", onVNUI_Click);
+
+	// Register ST event listeners
+	eventSource.on(event_types.CHAT_CHANGED, () => {
+		stopShakeAnimation();
+		rebuildStageFromHistory();
 	});
-	eventSource.on(event_types.MESSAGE_DELETED, async () => {
-		await applyZoomDebounce();
-		await applyDefocusDebounce();
-		handleAutoHideSprites();
+	eventSource.on(event_types.MESSAGE_DELETED, rebuildStageFromHistory);
+	eventSource.on(event_types.MESSAGE_EDITED, rebuildStageFromHistory);
+	eventSource.on(event_types.MESSAGE_SWIPED, (messageId) => {
+		const message = getContext().chat[messageId];
+		if (!message || message.swipes?.[message.swipe_id] == null) return;
+
+		void updateSpeakerExpression(messageId);
+	});
+
+	eventSource.on(event_types.PERSONA_CHANGED, async () => {
+		if (syncVNMode()) {
+			void refreshStage();
+		}
 	});
 	eventSource.on(event_types.GROUP_UPDATED, async () => {
-		await emulateSpritesDebounce();
-		await applyUserAttributesDebounce();
-		await applyScaleDebounce();
-		handleAutoHideSprites();
-
-		if (isGroupChat()) {
-			await visualNovelUpdateLayers(vnWrapper);
+		if (syncVNMode()) {
+			void refreshStage();
 		}
 	});
-
-	// Prevents the User Sprite from Genning Content
-	eventSource.on(event_types.GENERATION_AFTER_COMMANDS, () => {
-		if (!extension_settings[extensionName].enableUserSprite) return;
+	eventSource.on(event_types.CHARACTER_MESSAGE_RENDERED, async (messageId) => {
+		void updateSpeakerExpression(messageId);
+		stopShakeAnimation();
+	});
+	eventSource.on(event_types.USER_MESSAGE_RENDERED, async (messageId) => {
+		void updateSpeakerExpression(messageId);
+	});
+	eventSource.on(event_types.STREAM_TOKEN_RECEIVED, () => {
+		if (!document.body.classList.contains("prome-vn-active")) return;
 
 		const context = getContext();
-		const groupIndex = getGroupIndex();
-		if (groupIndex !== -1) {
-			const group = context.groups[groupIndex];
-			if (group.members.includes("prome-user")) {
-				group.members = group.members.filter((x) => x !== "prome-user");
-			}
+		if (context.streamingProcessor?.type === "impersonate") return;
+
+		const avatar = context.characters[context.characterId]?.avatar;
+		if (!avatar) return;
+
+		emitPromeEvent(PROME_STREAM_BYTE, { actorId: `character:${avatar}` });
+	});
+	eventSource.on(event_types.GENERATION_STOPPED, () => {
+		stopShakeAnimation();
+	});
+	eventSource.on(event_types.GENERATION_ENDED, () => {
+		stopShakeAnimation();
+	});
+
+	// Register PromeBus event listeners
+	promeBus.addEventListener("PROME_STAGE_REFRESH_REQUESTED", () => {
+		if (syncVNMode()) {
+			void refreshStage();
 		}
 	});
-	eventSource.on(event_types.GENERATE_AFTER_COMBINE_PROMPTS, () => {
-		if (!extension_settings[extensionName].enableUserSprite) return;
+	promeBus.addEventListener("PROME_USER_SPRITE_TOGGLED", async () => {
+		const settings = extension_settings[extensionName];
+		if (!syncVNMode() || !settings.enableUserSprite) return;
+		if (!user_avatar || !settings.userSprite) return;
 
-		const context = getContext();
-		const groupIndex = getGroupIndex();
-		if (groupIndex !== -1) {
-			const group = context.groups[groupIndex];
-			if (!group.members.includes("prome-user")) {
-				group.members.push("prome-user");
-			}
-		}
-	});
+		const chat = getContext().chat;
+		if (!Array.isArray(chat) || chat.length === 0) return;
 
-	$(window).on("resize", async () => {
-		await emulateSpritesDebounce();
-		await applyUserAttributesDebounce();
-	});
-
-	// Show info message if Sheld is hidden
-	if (!isSheldVisible()) {
-		toastr.info(
-			"Head to Extensions > Prome (Visual Novel Extension) > Sheld Configuration and uncheck 'Hide Sheld (Message Box)' to show it again.",
-			"Sheld is currently hidden by the Prome Visual Novel Extension.",
+		// Find the latest valid user message
+		const lastUserMessage = chat.findLast(
+			(message) => message.is_user && !message.is_system && message.mes?.trim(),
 		);
-	}
-});
+		if (!lastUserMessage) return;
 
-$(document).ready(() => {
-	/* Mutation Observer for Chat and VN Wrapper */
-	/* Listen for changes in the chat and image expressions */
-	const promeChatObserver = new MutationObserver((mutations) => {
-		emulateSpritesDebounce();
-
-		const handleNode = (node) => {
-			if (node.classList) {
-				if (node.classList.contains("mes")) {
-					handleAutoHideSprites();
-					applyZoomDebounce();
-					applyDefocusDebounce();
-					applyShakeDebounce();
-
-					if (isGroupChat()) {
-						visualNovelUpdateLayers($("#visual-novel-wrapper"));
-					}
-				}
-				if (
-					node.tagName === "DIV" &&
-					node.classList.contains("expression-holder")
-				) {
-					handleAutoHideSprites();
-					applyZoomDebounce();
-					applyDefocusDebounce();
-
-					if (isGroupChat()) {
-						visualNovelUpdateLayers($("#visual-novel-wrapper"));
-					}
-				}
-			}
-		};
-
-		for (const mutation of mutations) {
-			if (mutation.type !== "childList") continue;
-
-			for (const node of mutation.addedNodes) {
-				handleNode(node);
-			}
-
-			for (const node of mutation.removedNodes) {
-				handleNode(node);
-			}
+		const actorId = `persona:${user_avatar}`;
+		if (
+			await classifyActor(actorId, lastUserMessage.mes, settings.userSprite)
+		) {
+			await refreshStage();
 		}
-
-		// Apply Sheld Mode on new messages
-		applySheldMode();
+	});
+	promeBus.addEventListener("PROME_SET_EXPRESSION", (event) => {
+		const { actorId, expression } = event.detail || {};
+		if (actorId && expression) {
+			labelsByAvatar.set(actorId, expression);
+			void refreshStage();
+		}
 	});
 
-	const chatDiv = document.getElementById("chat");
-	promeChatObserver.observe(chatDiv, { childList: true });
-
-	// Since the VN Wrapper is loaded by ST, we need to wait for it to load
-	const vnWrapperInterval = setInterval(() => {
-		const vnWrapperDiv = document.getElementById("visual-novel-wrapper");
-		if (vnWrapperDiv) {
-			promeChatObserver.observe(vnWrapperDiv, {
-				childList: true,
-				subtree: true,
-			});
-			clearInterval(vnWrapperInterval);
-		}
-	}, 100);
-});
-
-/* Keybinds */
-// Hide Sheld via Ctrl+F1
-$(document).keydown((event) => {
-	if (event.which === 112 && event.ctrlKey) {
-		event.preventDefault();
-		$("#prome-hide-sheld").click();
+	// Initial load
+	if (syncVNMode()) {
+		void refreshStage();
+		void restoreStageExpressions();
 	}
 });

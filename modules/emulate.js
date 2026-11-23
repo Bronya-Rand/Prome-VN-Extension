@@ -1,32 +1,31 @@
-import { extensionName } from "../constants.js";
-import { extension_settings } from "../../../../extensions.js";
 import { saveSettingsDebounced } from "../../../../../script.js";
-import { emulateSpritesDebounce } from "../listeners.js";
+import { extension_settings } from "../../../../extensions.js";
+import { extensionFolderPath, extensionName } from "../constants.js";
+import { emitPromeEvent } from "../core/bus.js";
 
-export async function applySpriteEmulation() {
-	if (
-		extension_settings[extensionName].emulateSprites === (null || undefined)
-	) {
-		console.debug(
-			`[${extensionName}] emulateSprites returned null or undefined.`,
+// --- Module Lifecycle ---
+export async function initEmulateModule() {
+	try {
+		const html = await $.get(
+			`${extensionFolderPath}/html/modules/emulate.html`,
+		);
+		$("#prome-module-settings").append(html);
+	} catch (error) {
+		console.error(
+			`[${extensionName}] Failed to load sprite emulation module settings:`,
+			error,
 		);
 	}
 
-	console.debug(
-		`[${extensionName}] Sprite Emulation?: ${extension_settings[extensionName].emulateSprites}`,
-	);
+	const settings = extension_settings[extensionName];
 
-	$("body").toggleClass(
-		"emulateSprites",
-		extension_settings[extensionName].emulateSprites,
-	);
+	// Sync UI state with settings
+	$("#prome-emulate-sprites").prop("checked", settings.emulateSprites);
 
-	emulateSpritesDebounce();
-}
-
-export function onSpriteEmulation_Click(event) {
-	const value = Boolean($(event.target).prop("checked"));
-	extension_settings[extensionName].emulateSprites = value;
-	saveSettingsDebounced();
-	applySpriteEmulation();
+	// Bind event handlers
+	$("#prome-emulate-sprites").on("click", (e) => {
+		settings.emulateSprites = Boolean($(e.target).prop("checked"));
+		saveSettingsDebounced();
+		emitPromeEvent("PROME_STAGE_REFRESH_REQUESTED");
+	});
 }
