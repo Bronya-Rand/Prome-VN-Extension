@@ -1,74 +1,42 @@
-import { extension_settings } from "../../../../extensions.js";
-import { extensionName } from "../constants.js";
 import { saveSettingsDebounced } from "../../../../../script.js";
-import { getChatId } from "../utils.js";
+import { extension_settings } from "../../../../extensions.js";
+import { extensionFolderPath, extensionName } from "../constants.js";
 
-/* Sheld Functions */
-export function applySheldVisibility() {
-	if (extension_settings[extensionName].hideSheld === (null || undefined)) {
-		console.debug(`[${extensionName}] hideSheld returned null or undefined.`);
-	}
-
-	console.debug(
-		`[${extensionName}] Hide Sheld?: ${extension_settings[extensionName].hideSheld}`,
-	);
-
-	$("#sheld").toggleClass(
-		"displayNone",
-		extension_settings[extensionName].hideSheld,
-	);
+function applySheldSettings() {
+	const settings = extension_settings[extensionName];
+	$("#sheld").toggleClass("displayNone", settings.hideSheld);
 }
 
-export function applySheldMode() {
-	if (
-		extension_settings[extensionName].showOnlyLastMessage ===
-		(null || undefined)
-	) {
-		console.debug(
-			`[${extensionName}] showOnlyLastMessage returned null or undefined`,
+// --- Module Lifecycle ---
+export async function initSheldModule() {
+	try {
+		const html = await $.get(`${extensionFolderPath}/html/modules/sheld.html`);
+		$("#prome-module-settings").append(html);
+	} catch (error) {
+		console.error(
+			`[${extensionName}] Failed to load sheld module settings:`,
+			error,
 		);
 	}
 
-	console.debug(
-		`[${extensionName}] Show Only Last Message?: ${extension_settings[extensionName].showOnlyLastMessage}`,
-	);
+	const settings = extension_settings[extensionName];
 
-	const currentChatId = getChatId();
-	if (!currentChatId) return;
+	// Sync UI state with settings
+	$("#prome-hide-sheld").prop("checked", settings.hideSheld);
 
-	if (!extension_settings[extensionName].enableVN_UI) {
-		// revert all changes if VN mode is disabled
-		$("#chat [id='show_more_messages']").removeClass("displayNone");
-		$("#chat .mes").removeClass("displayNone");
-	} else {
-		// hide "Show more messages" as it's obsolete for single message mode
-		// show it if the mode is disabled
-		$("#chat [id='show_more_messages']").toggleClass(
-			"displayNone",
-			extension_settings[extensionName].showOnlyLastMessage,
+	// Bind event handlers
+	$("#prome-hide-sheld").on("click", (e) => {
+		settings.hideSheld = Boolean($(e.target).prop("checked"));
+		saveSettingsDebounced();
+		applySheldSettings();
+	});
+
+	applySheldSettings();
+
+	if (settings.hideSheld) {
+		toastr.info(
+			"Head to Extensions > Prome (Visual Novel Extension) > Sheld Settings and uncheck 'Hide Sheld' to show it again.",
+			"Sheld is currently hidden by the Prome Visual Novel Extension.",
 		);
-
-		// remove previous messages that were hidden in the chat div
-		$("#chat .mes").removeClass("displayNone");
-
-		// now hide all messages except the last one ("mes last_mes")
-		if (extension_settings[extensionName].showOnlyLastMessage) {
-			$("#chat .mes:not(.last_mes)").addClass("displayNone"); // hide all messages except the last one
-		}
 	}
-}
-
-/* Event Handlers */
-export function onSheld_Click(event) {
-	const value = Boolean($(event.target).prop("checked"));
-	extension_settings[extensionName].hideSheld = value;
-	saveSettingsDebounced();
-	applySheldVisibility();
-}
-
-export function onSheldMode_Click(event) {
-	const value = Boolean($(event.target).prop("checked"));
-	extension_settings[extensionName].showOnlyLastMessage = value;
-	saveSettingsDebounced();
-	applySheldMode();
 }

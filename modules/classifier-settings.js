@@ -72,6 +72,7 @@ export async function initClassifierSettings({ onClassifierChange, onSpriteSetti
 		$("#prome-classifier-prompt-settings").toggle(mainApi || webLlm);
 		$("#prome-classifier-webllm-help").toggle(webLlm);
 		$("#prome-filter-available-expressions-setting").toggle(mode !== CLASSIFIER_MODES.NONE);
+		$("#prome-local-sampling-setting").toggle(mode !== CLASSIFIER_MODES.NONE);
 	}
 
 	modeSelect.val(settings.classifierMode).on("change", function () {
@@ -89,6 +90,13 @@ export async function initClassifierSettings({ onClassifierChange, onSpriteSetti
 		.prop("checked", settings.filterAvailableExpressions)
 		.on("change", function () {
 			settings.filterAvailableExpressions = this.checked;
+			saveSettingsDebounced();
+			onClassifierChange();
+		});
+	$("#prome-sample-local-messages")
+		.prop("checked", settings.sampleLocalMessages)
+		.on("change", function () {
+			settings.sampleLocalMessages = this.checked;
 			saveSettingsDebounced();
 			onClassifierChange();
 		});

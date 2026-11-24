@@ -38,6 +38,21 @@
 	min-width: 0;
 	display: flex;
 	transform-origin: center bottom;
+	opacity: 0;
+	transition:
+		opacity 0.25s ease,
+		margin-left 0.35s ease,
+		z-index 0.2s ease,
+		transform var(--prome-sprite-zoom-speed) var(--prome-sprite-zoom-animation),
+		filter var(--prome-focus-filter-transition);
+}
+
+#prome-stage .prome-actor-slot.prome-actor-ready {
+	opacity: 1;
+}
+
+#prome-stage .prome-actor-slot:not(:first-child) {
+	margin-left: calc(-1 * var(--prome-slot-overlap, 0px));
 }
 
 #prome-stage .prome-actor-motion {
@@ -64,7 +79,7 @@
 body.prome-vn-active #sheld {
 	top: auto;
 	bottom: 0;
-	height: 35dvh;
+	height: 40dvh;
 }
 
 @media screen and (max-width: 1000px) {
@@ -81,10 +96,6 @@ body.prome-vn-active #sheld {
 		max-height: min(90dvh, calc(100dvh - var(--topBarBlockSize, 0px)));
 	}
 
-	body.prome-vn-active #sheld {
-		height: 40dvh;
-	}
-
 	body.prome-vn-active #chat {
 		border-top: 1px solid var(--SmartThemeBorderColor);
 		border-radius: 20px 20px 0 0;
@@ -95,6 +106,18 @@ body.prome-vn-active #sheld {
 	gap: 8px;
 	display: flex;
 	flex-direction: column;
+}
+
+.prome-vn-toggle-row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 4px 8px;
+}
+
+#prome-open-settings-shortcut {
+	margin: 0;
+	white-space: nowrap;
 }
 
 .prome_vn_block {
@@ -159,11 +182,6 @@ body.prome-vn-active.vLetterBox .prome-letterbox-bar-2 {
 /* 
  * Sprite Focus/Defocus
  */
-#prome-stage .prome-actor-slot {
-    transition:
-        transform var(--prome-sprite-zoom-speed) var(--prome-sprite-zoom-animation),
-        filter var(--prome-focus-filter-transition);
-}
 
 body.prome-vn-active.spriteZoom #prome-stage .prome-sprite-focus {
     transform: scale(var(--prome-focus-scale));

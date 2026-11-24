@@ -117,6 +117,7 @@ export const defaultSettings = {
 	classifierProfile: "",
 	classifierPrompt: DEFAULT_CLASSIFIER_PROMPT,
 	filterAvailableExpressions: true,
+	sampleLocalMessages: false,
 	fallbackExpression: "neutral",
 	customExpressions: [],
 	removedCustomExpressions: [],

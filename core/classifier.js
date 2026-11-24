@@ -19,6 +19,7 @@ import {
 	DEFAULT_EXPRESSIONS,
 	extensionName,
 } from "../constants.js";
+import { sampleLocalClassificationText } from "./classification-text.js";
 
 const MAX_RESPONSE_TOKENS = 96;
 
@@ -35,7 +36,10 @@ export async function classifyExpression(text, spriteLabels, settings) {
 	);
 	const filterAvailable = settings.filterAvailableExpressions;
 	const localLabels = filterAvailable ? packLabels : null;
-	const runLocal = () => classifyLocal(text, localLabels, removedLabels);
+	const runLocal = () => {
+		const input = settings.sampleLocalMessages ? sampleLocalClassificationText(text) : text;
+		return classifyLocal(input || text, localLabels, removedLabels);
+	};
 	const webLlm = mode === CLASSIFIER_MODES.WEBLLM;
 	if (
 		!webLlm &&

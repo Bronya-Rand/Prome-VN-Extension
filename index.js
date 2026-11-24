@@ -1,5 +1,6 @@
 /* ST Core Imports */
 import {
+	doNavbarIconClick,
 	event_types,
 	eventSource,
 	saveSettingsDebounced,
@@ -31,13 +32,14 @@ import {
 	initAutoHideModule,
 } from "./modules/auto-hide.js";
 import { initClassifierSettings } from "./modules/classifier-settings.js";
-import { registerExpressionCommands } from "./modules/expression-commands.js";
 import { initEmulateModule } from "./modules/emulate.js";
+import { registerExpressionCommands } from "./modules/expression-commands.js";
 import { initFocusModule } from "./modules/focus.js";
 import { initLetterboxModule } from "./modules/letterbox.js";
 import { initScaleModule } from "./modules/scale.js";
 import { initShadowModule } from "./modules/shadows.js";
 import { initShakeModule, stopShakeAnimation } from "./modules/shake.js";
+import { initSheldModule } from "./modules/sheld.js";
 import { initTintModule } from "./modules/tint.js";
 import { initUserModule } from "./modules/user.js";
 import { getSpriteList, isGroupChat } from "./utils.js";
@@ -71,7 +73,10 @@ function loadSettings() {
 }
 
 async function classifyActor(avatar, message, spritePackName) {
-	if (extension_settings[extensionName].classifierMode === CLASSIFIER_MODES.NONE) return false;
+	if (
+		extension_settings[extensionName].classifierMode === CLASSIFIER_MODES.NONE
+	)
+		return false;
 	const request = Symbol();
 	pendingByAvatar.set(avatar, request);
 
@@ -117,7 +122,11 @@ async function updateSpeakerExpression(messageId) {
 		if (!settings.enableUserSprite || !user_avatar) return;
 
 		actorId = `persona:${user_avatar}`;
-		spritePackName = resolveSpriteFolder(actorId, settings.userSprite, settings);
+		spritePackName = resolveSpriteFolder(
+			actorId,
+			settings.userSprite,
+			settings,
+		);
 		if (!spritePackName) return;
 	} else {
 		const char =
@@ -135,7 +144,7 @@ async function updateSpeakerExpression(messageId) {
 	// Classify and update expression for the actor
 	if (
 		settings.classifierMode === CLASSIFIER_MODES.NONE ||
-		await classifyActor(actorId, message.mes, spritePackName)
+		(await classifyActor(actorId, message.mes, spritePackName))
 	) {
 		await refreshStage();
 	}
@@ -227,7 +236,12 @@ async function refreshStage() {
 		}
 		const expression = expressionsByActor.get(actor.id);
 		const previous = spriteSelectionsByActor.get(actor.id);
-		const sprite = chooseExpressionSprite(sprites, expression, previous, settings);
+		const sprite = chooseExpressionSprite(
+			sprites,
+			expression,
+			previous,
+			settings,
+		);
 		if (!sprite) {
 			spriteSelectionsByActor.delete(actor.id);
 			return null;
@@ -352,7 +366,9 @@ function syncVNMode() {
 }
 
 function rebuildStageFromHistory() {
-	if (extension_settings[extensionName].classifierMode !== CLASSIFIER_MODES.NONE) {
+	if (
+		extension_settings[extensionName].classifierMode !== CLASSIFIER_MODES.NONE
+	) {
 		expressionsByActor.clear();
 	}
 	pendingByAvatar.clear();
@@ -376,6 +392,58 @@ function onVNUI_Click(event) {
 	}
 }
 
+/**
+ * Injects a direct shortcut button next to the native Visual Novel Mode
+ * toggle to open Prome's extension settings drawer.
+ */
+function injectUserSettingsShortcut() {
+	const waifuLabel = document.querySelector('label[for="waifuMode"]');
+	if (!waifuLabel || document.getElementById("prome-open-settings-shortcut"))
+		return;
+
+	const row = document.createElement("div");
+	row.className = "prome-vn-toggle-row";
+	const shortcut = document.createElement("button");
+	shortcut.id = "prome-open-settings-shortcut";
+	shortcut.type = "button";
+	shortcut.className = "menu_button menu_button_icon";
+	shortcut.innerHTML =
+		'<i class="fa-solid fa-gear" aria-hidden="true"></i><span data-i18n="Prome Settings">Prome Settings</span>';
+
+	shortcut.addEventListener("click", async (event) => {
+		event.stopPropagation();
+		const extDrawer = document.getElementById("extensions-settings-button");
+		const drawerToggle = extDrawer?.querySelector(".drawer-toggle");
+		const drawerContent = extDrawer?.querySelector(".drawer-content");
+		const promeSettings = drawerContent?.querySelector(".prome-vn-settings");
+		if (!drawerToggle || !promeSettings) return;
+
+		shortcut.disabled = true;
+		try {
+			if (!drawerContent.classList.contains("openDrawer")) {
+				await doNavbarIconClick.call(drawerToggle);
+			}
+
+			const inlineContent = $(
+				promeSettings.querySelector(".inline-drawer-content"),
+			);
+			if (inlineContent.css("display") === "none") {
+				promeSettings.querySelector(".inline-drawer-toggle")?.click();
+			}
+			await inlineContent.promise();
+			promeSettings.scrollIntoView({ block: "start" });
+			promeSettings
+				.querySelector("#prome-enable-vn")
+				?.focus({ preventScroll: true });
+		} finally {
+			shortcut.disabled = false;
+		}
+	});
+
+	waifuLabel.before(row);
+	row.append(waifuLabel, shortcut);
+}
+
 jQuery(async () => {
 	const settingsHtml = await $.get(`${extensionFolderPath}/html/settings.html`);
 	$("#extensions_settings").append(settingsHtml);
@@ -386,7 +454,9 @@ jQuery(async () => {
 	await initClassifierSettings({
 		onClassifierChange: () => {
 			pendingByAvatar.clear();
-			const manualMode = extension_settings[extensionName].classifierMode === CLASSIFIER_MODES.NONE;
+			const manualMode =
+				extension_settings[extensionName].classifierMode ===
+				CLASSIFIER_MODES.NONE;
 			if (manualMode) {
 				for (const [actorId, expression] of expressionsByActor) {
 					if (!expression.manual) expressionsByActor.delete(actorId);
@@ -398,7 +468,8 @@ jQuery(async () => {
 			}
 		},
 		onSpriteSettingsChange: () => {
-			if (document.body.classList.contains("prome-vn-active")) void refreshStage();
+			if (document.body.classList.contains("prome-vn-active"))
+				void refreshStage();
 		},
 	});
 	await initLetterboxModule();
@@ -411,8 +482,13 @@ jQuery(async () => {
 	await initFocusModule();
 	await initShakeModule();
 	await initTintModule();
+	await initSheldModule();
 
 	$("#prome-enable-vn").on("click", onVNUI_Click);
+
+	// Inject shortcut in ST User Settings
+	injectUserSettingsShortcut();
+	eventSource.on(event_types.APP_READY, injectUserSettingsShortcut);
 
 	// Register ST event listeners
 	eventSource.on(event_types.CHAT_CHANGED, () => {
@@ -508,7 +584,12 @@ jQuery(async () => {
 		if (actorId && (expression || expression === null)) {
 			pendingByAvatar.delete(actorId);
 			if (expression === null) expressionsByActor.delete(actorId);
-			else expressionsByActor.set(actorId, { label: expression, spritePath, manual: true });
+			else
+				expressionsByActor.set(actorId, {
+					label: expression,
+					spritePath,
+					manual: true,
+				});
 			void refreshStage();
 		}
 	});
