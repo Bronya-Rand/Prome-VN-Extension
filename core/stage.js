@@ -1,6 +1,57 @@
 let stage = null;
 let currentSpeakerId = null;
 let shakingActorId = null;
+const pendingSprites = new WeakMap();
+
+async function updateSprite(slot, image, spriteUrl) {
+	const currentUrl = image.getAttribute("src");
+	if (!spriteUrl || currentUrl === spriteUrl) {
+		pendingSprites.delete(slot);
+		return;
+	}
+	if (!currentUrl) {
+		image.src = spriteUrl;
+		return;
+	}
+	if (pendingSprites.get(slot)?.getAttribute("src") === spriteUrl) return;
+
+	const nextImage = image.cloneNode(false);
+	nextImage.src = spriteUrl;
+	pendingSprites.set(slot, nextImage);
+	try {
+		await nextImage.decode();
+	} catch {
+		if (pendingSprites.get(slot) === nextImage) pendingSprites.delete(slot);
+		return;
+	}
+	if (pendingSprites.get(slot) !== nextImage) return;
+	pendingSprites.delete(slot);
+	if (!slot.isConnected) return;
+
+	const wrapper = image.parentElement;
+	wrapper.querySelector(".prome-sprite-outgoing")?.remove();
+	const width = image.offsetWidth;
+	const height = image.offsetHeight;
+	nextImage.alt = image.alt;
+	image.replaceWith(nextImage);
+
+	if (
+		!image.naturalWidth || !width || !height ||
+		matchMedia("(prefers-reduced-motion: reduce)").matches
+	) return;
+
+	image.classList.add("prome-sprite-outgoing");
+	image.setAttribute("aria-hidden", "true");
+	image.style.width = `${width}px`;
+	image.style.height = `${height}px`;
+	wrapper.appendChild(image);
+
+	const fade = { duration: 200, easing: "ease-in-out" };
+	nextImage.animate([{ opacity: 0 }, { opacity: 1 }], fade);
+	const outgoing = image.animate([{ opacity: 1 }, { opacity: 0 }], fade);
+	const removeOutgoing = () => image.remove();
+	void outgoing.finished.then(removeOutgoing, removeOutgoing);
+}
 
 /**
  * Mounts the Prome VN 'stage' to the specified parent element.
@@ -62,7 +113,7 @@ export function renderActors(actors = []) {
 			stage.appendChild(slot);
 		} else {
 			// Re-use existing actor slot
-			img = slot.querySelector(".prome-actor-sprite");
+			img = slot.querySelector(".prome-actor-sprite:not(.prome-sprite-outgoing)");
 		}
 
 		// Update actor sprite and attributes
@@ -76,10 +127,7 @@ export function renderActors(actors = []) {
 			slot.dataset.actorExpression = actor.expression;
 		}
 
-		// Only update `src` if it has changed to avoid unnecessary reloads
-		if (actor.spriteUrl && img.getAttribute("src") !== actor.spriteUrl) {
-			img.src = actor.spriteUrl;
-		}
+		void updateSprite(slot, img, actor.spriteUrl);
 
 		// Ensure DOM order matches actors array order
 		stage.appendChild(slot);

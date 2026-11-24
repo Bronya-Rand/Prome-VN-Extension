@@ -19,8 +19,10 @@ export function filterActiveGroupCharacters(characters) {
 		return characters;
 	}
 
-	// Get the most recent speaking avatar filenames from chat history
-	const recentAvatars = getRecentTalkingCharacters(maxVisible);
+	const eligibleAvatars = new Set(characters.map((character) => character.avatar));
+	const recentAvatars = getRecentTalkingCharacters()
+		.filter((avatar) => eligibleAvatars.has(avatar))
+		.slice(0, maxVisible);
 	const recentSet = new Set(recentAvatars);
 
 	// Keep the recent speakers

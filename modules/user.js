@@ -9,6 +9,7 @@ import {
 import { SlashCommandParser } from "../../../../slash-commands/SlashCommandParser.js";
 import { extensionFolderPath, extensionName } from "../constants.js";
 import { emitPromeEvent } from "../core/bus.js";
+import { resolveSpriteFolder } from "../core/sprites.js";
 import { spritePackExists } from "../utils.js";
 
 // --- Module Lifecycle ---
@@ -33,7 +34,13 @@ export async function initUserModule() {
 	$("#prome-user-sprite").on("change", async (event) => {
 		const isEnabled = Boolean($(event.target).prop("checked"));
 		if (isEnabled) {
-			const pack = settings.userSprite?.trim();
+			const pack = user_avatar
+				? resolveSpriteFolder(
+						`persona:${user_avatar}`,
+						settings.userSprite,
+						settings,
+					)
+				: settings.userSprite;
 			if (pack) {
 				const exists = await spritePackExists(pack);
 				if (!exists) {
@@ -120,20 +127,20 @@ function registerUserCommands() {
 				$("#prome-user-sprite-input").val(pack);
 				emitPromeEvent("PROME_STAGE_REFRESH_REQUESTED");
 
-				toastr.success(`User sprite pack set to "${pack}".`, "User Sprite");
+				toastr.success(`Default user sprite pack set to "${pack}".`, "User Sprite");
 				return pack;
 			},
 			namedArgumentList: [
 				SlashCommandNamedArgument.fromProps({
 					name: "name",
 					description:
-						"The sprite folder name in characters/ for the user persona.",
+						"The default sprite folder name in characters/ for personas.",
 					isRequired: true,
 					typeList: [ARGUMENT_TYPE.STRING],
 				}),
 			],
 			helpString:
-				"(Prome Visual Novel Extension) Sets the sprite pack folder for the user persona.",
+				"(Prome Visual Novel Extension) Sets the default persona sprite pack folder.",
 		}),
 	);
 

@@ -10,6 +10,7 @@ import { power_user } from "../../../power-user.js";
 
 /* Prome Core Imports */
 import {
+	CLASSIFIER_MODES,
 	defaultSettings,
 	extensionFolderPath,
 	extensionName,
@@ -17,15 +18,20 @@ import {
 import {
 	emitPromeEvent,
 	PROME_SPEAKER_CHANGED,
+	PROME_SPRITE_FOLDER_CHANGED,
 	PROME_STREAM_BYTE,
 	promeBus,
 } from "./core/bus.js";
-import { classifyLocal } from "./core/classifier.js";
+import { classifyExpression } from "./core/classifier.js";
+import { chooseExpressionSprite } from "./core/sprite-variants.js";
+import { resolveSpriteFolder } from "./core/sprites.js";
 import { mountStage, renderActors, unmountStage } from "./core/stage.js";
 import {
 	filterActiveGroupCharacters,
 	initAutoHideModule,
 } from "./modules/auto-hide.js";
+import { initClassifierSettings } from "./modules/classifier-settings.js";
+import { registerExpressionCommands } from "./modules/expression-commands.js";
 import { initEmulateModule } from "./modules/emulate.js";
 import { initFocusModule } from "./modules/focus.js";
 import { initLetterboxModule } from "./modules/letterbox.js";
@@ -34,10 +40,11 @@ import { initShadowModule } from "./modules/shadows.js";
 import { initShakeModule, stopShakeAnimation } from "./modules/shake.js";
 import { initTintModule } from "./modules/tint.js";
 import { initUserModule } from "./modules/user.js";
-import { getSpriteList, isGroupChat, spritePackExists } from "./utils.js";
+import { getSpriteList, isGroupChat } from "./utils.js";
 
 let stageRevision = 0;
-const labelsByAvatar = new Map();
+const expressionsByActor = new Map();
+const spriteSelectionsByActor = new Map();
 const pendingByAvatar = new Map();
 
 function loadSettings() {
@@ -64,24 +71,29 @@ function loadSettings() {
 }
 
 async function classifyActor(avatar, message, spritePackName) {
+	if (extension_settings[extensionName].classifierMode === CLASSIFIER_MODES.NONE) return false;
 	const request = Symbol();
 	pendingByAvatar.set(avatar, request);
 
-	const packExists = await spritePackExists(spritePackName);
+	const { sprites, err } = spritePackName?.trim()
+		? await getSpriteList(spritePackName)
+		: { sprites: [], err: null };
 	if (pendingByAvatar.get(avatar) !== request) return false; // A newer request has been made for this avatar
 
-	if (!packExists) {
+	if (err || !sprites.length) {
 		pendingByAvatar.delete(avatar);
 		return false;
 	}
 
-	const label = await classifyLocal(message);
+	const label = await classifyExpression(
+		message,
+		sprites.map((sprite) => sprite.label),
+		extension_settings[extensionName],
+	);
 	if (pendingByAvatar.get(avatar) !== request) return false; // A newer request has been made for this avatar
 
 	pendingByAvatar.delete(avatar);
-	if (!label) return false;
-
-	labelsByAvatar.set(avatar, label);
+	expressionsByActor.set(avatar, { label });
 	return true;
 }
 
@@ -102,11 +114,11 @@ async function updateSpeakerExpression(messageId) {
 	let spritePackName;
 
 	if (message.is_user) {
-		if (!settings.enableUserSprite || !settings.userSprite || !user_avatar)
-			return;
+		if (!settings.enableUserSprite || !user_avatar) return;
 
 		actorId = `persona:${user_avatar}`;
-		spritePackName = settings.userSprite;
+		spritePackName = resolveSpriteFolder(actorId, settings.userSprite, settings);
+		if (!spritePackName) return;
 	} else {
 		const char =
 			context.groupId != null
@@ -115,46 +127,41 @@ async function updateSpeakerExpression(messageId) {
 		if (!char?.avatar) return;
 
 		actorId = `character:${char.avatar}`;
-		spritePackName = char.name;
+		spritePackName = resolveSpriteFolder(actorId, char.name, settings);
 	}
 
 	emitPromeEvent(PROME_SPEAKER_CHANGED, { actorId });
 
 	// Classify and update expression for the actor
-	if (await classifyActor(actorId, message.mes, spritePackName)) {
+	if (
+		settings.classifierMode === CLASSIFIER_MODES.NONE ||
+		await classifyActor(actorId, message.mes, spritePackName)
+	) {
 		await refreshStage();
 	}
 }
 
 /**
- * Loads a character actor with the specified character and preferred label.
+ * Loads the sprite pack or emulated portrait for a character.
  * @param {*} character The character object containing name and avatar.
- * @param {*} preferredLabel The preferred label for the sprite to load (default is "neutral").
- * @returns
  */
-async function loadCharacterActor(character, preferredLabel = "neutral") {
-	const { sprites, err } = await getSpriteList(character.name);
+async function loadCharacterActor(character) {
+	const settings = extension_settings[extensionName];
+	const id = `character:${character.avatar}`;
+	const folder = resolveSpriteFolder(id, character.name, settings);
+	const { sprites, err } = await getSpriteList(folder);
 	if (!err && sprites?.length > 0) {
-		// Sprites found
-		const target = preferredLabel.toLowerCase().trim();
-		const sprite =
-			sprites.find((s) => s.label.toLowerCase() === target) ??
-			sprites.find((s) => s.label.toLowerCase() === "neutral");
-		if (sprite) {
-			return {
-				id: `character:${character.avatar}`,
-				name: character.name,
-				expression: sprite.label,
-				spriteUrl: sprite.path,
-			};
-		}
+		return {
+			id,
+			name: character.name,
+			sprites,
+		};
 	}
 
 	// Fallback: If character has no sprite pack, emulate card as sprite
-	const settings = extension_settings[extensionName];
 	if (settings.emulateSprites && character.avatar) {
 		return {
-			id: `character:${character.avatar}`,
+			id,
 			name: character.name,
 			expression: "card",
 			spriteUrl: `/characters/${encodeURIComponent(character.avatar)}`,
@@ -175,6 +182,10 @@ async function refreshStage() {
 		id: `persona:${user_avatar}`,
 		name: context.name1,
 	};
+	const personaFolder =
+		settings.enableUserSprite && user_avatar
+			? resolveSpriteFolder(userObj.id, settings.userSprite, settings)
+			: "";
 
 	if (!context.getCurrentChatId()) {
 		renderActors([]);
@@ -182,54 +193,59 @@ async function refreshStage() {
 	}
 
 	const group = context.groups.find((group) => group.id === context.groupId);
-	let characters = isGroupChat()
+	const hiddenAvatars = new Set(
+		group?.hideMutedSprites ? group.disabled_members : [],
+	);
+	const characters = isGroupChat()
 		? (group?.members ?? [])
+				.filter((avatar) => !hiddenAvatars.has(avatar))
 				.map((avatar) =>
 					context.characters.find((char) => char.avatar === avatar),
 				)
 				.filter(Boolean)
 		: [context.characters[context.characterId]].filter(Boolean);
 
-	// Filter down to the most recent talking characters if auto-hide is enabled:
-	characters = filterActiveGroupCharacters(characters);
-	const actorsToRender = await Promise.all(
-		characters.map((character) =>
-			loadCharacterActor(
-				character,
-				labelsByAvatar.get(`character:${character.avatar}`) ?? "neutral",
-			),
-		),
-	);
+	const stageCharacters = filterActiveGroupCharacters(characters);
+	const actors = await Promise.all(stageCharacters.map(loadCharacterActor));
 	if (revision !== stageRevision) return;
 
-	if (settings.enableUserSprite && settings.userSprite && user_avatar) {
-		const { sprites: userSprites, err } = await getSpriteList(
-			settings.userSprite,
-		);
+	if (personaFolder) {
+		const { sprites: userSprites, err } = await getSpriteList(personaFolder);
 
 		if (err) {
 			console.error(`[${extensionName}] Could not load persona sprites`, err);
 		}
 
-		const userLabel = labelsByAvatar.get(userObj.id) ?? "neutral";
-		const userSprite =
-			userSprites.find((sprite) => sprite.label === userLabel) ??
-			userSprites.find((sprite) => sprite.label === "neutral");
-
-		if (userSprite) {
-			actorsToRender.push({
-				...userObj,
-				expression: userSprite.label,
-				spriteUrl: userSprite.path,
-			});
-		}
+		if (userSprites.length) actors.push({ ...userObj, sprites: userSprites });
 	}
 
 	if (revision !== stageRevision) return;
+	const actorsToRender = actors.filter(Boolean).map(({ sprites, ...actor }) => {
+		if (!sprites) {
+			spriteSelectionsByActor.delete(actor.id);
+			return actor;
+		}
+		const expression = expressionsByActor.get(actor.id);
+		const previous = spriteSelectionsByActor.get(actor.id);
+		const sprite = chooseExpressionSprite(sprites, expression, previous, settings);
+		if (!sprite) {
+			spriteSelectionsByActor.delete(actor.id);
+			return null;
+		}
+		spriteSelectionsByActor.set(actor.id, {
+			expression,
+			spriteUrl: sprite.path,
+			allowMultipleSprites: settings.allowMultipleSprites,
+		});
+		return { ...actor, expression: sprite.label, spriteUrl: sprite.path };
+	});
 	renderActors(actorsToRender);
 }
 
-async function restoreStageExpressions() {
+async function restoreStageExpressions({
+	restoreSpeaker = true,
+	onlyActorId,
+} = {}) {
 	const context = getContext();
 	const chat = context.chat;
 	const chatId = context.getCurrentChatId();
@@ -238,6 +254,11 @@ async function restoreStageExpressions() {
 	const settings = extension_settings[extensionName];
 
 	const packByActorId = new Map();
+	const trackActor = (actorId, defaultFolder) => {
+		if (onlyActorId && actorId !== onlyActorId) return;
+		const folder = resolveSpriteFolder(actorId, defaultFolder, settings);
+		if (folder) packByActorId.set(actorId, folder);
+	};
 
 	if (isGroupChat()) {
 		const group = context.groups.find((group) => group.id === context.groupId);
@@ -245,18 +266,19 @@ async function restoreStageExpressions() {
 			const character = context.characters.find(
 				(char) => char.avatar === avatar,
 			);
-			packByActorId.set(`character:${avatar}`, character?.name ?? null);
+			if (character) trackActor(`character:${avatar}`, character.name);
 		});
 	} else {
 		const character = context.characters[context.characterId];
-		packByActorId.set(`character:${character.avatar}`, character?.name ?? null);
+		if (character?.avatar) {
+			trackActor(`character:${character.avatar}`, character.name);
+		}
 	}
 
 	// Add user avatar if user sprite is enabled
-	const trackUser =
-		settings.enableUserSprite && settings.userSprite && user_avatar;
-	if (trackUser) {
-		packByActorId.set(`persona:${user_avatar}`, settings.userSprite);
+	const personaId = `persona:${user_avatar}`;
+	if (settings.enableUserSprite && user_avatar) {
+		trackActor(personaId, settings.userSprite);
 	}
 
 	if (packByActorId.size === 0) return;
@@ -271,7 +293,7 @@ async function restoreStageExpressions() {
 		let avatar = null;
 
 		if (message.is_user) {
-			if (trackUser) avatar = `persona:${user_avatar}`;
+			avatar = personaId;
 		} else {
 			avatar = isGroupChat()
 				? `character:${message.original_avatar}`
@@ -292,8 +314,11 @@ async function restoreStageExpressions() {
 
 	if (latestMessagesByAvatar.size === 0) return;
 
-	const latestSpeaker = [...latestMessagesByAvatar.keys()][0];
-	emitPromeEvent(PROME_SPEAKER_CHANGED, { actorId: latestSpeaker ?? null });
+	if (restoreSpeaker) {
+		const latestSpeaker = latestMessagesByAvatar.keys().next().value;
+		emitPromeEvent(PROME_SPEAKER_CHANGED, { actorId: latestSpeaker });
+	}
+	if (settings.classifierMode === CLASSIFIER_MODES.NONE) return;
 
 	// Classify and update expressions for each avatar
 	const updated = await Promise.all(
@@ -327,7 +352,9 @@ function syncVNMode() {
 }
 
 function rebuildStageFromHistory() {
-	labelsByAvatar.clear();
+	if (extension_settings[extensionName].classifierMode !== CLASSIFIER_MODES.NONE) {
+		expressionsByActor.clear();
+	}
 	pendingByAvatar.clear();
 
 	emitPromeEvent(PROME_SPEAKER_CHANGED, { actorId: null });
@@ -356,9 +383,28 @@ jQuery(async () => {
 	loadSettings();
 
 	// Init modules
+	await initClassifierSettings({
+		onClassifierChange: () => {
+			pendingByAvatar.clear();
+			const manualMode = extension_settings[extensionName].classifierMode === CLASSIFIER_MODES.NONE;
+			if (manualMode) {
+				for (const [actorId, expression] of expressionsByActor) {
+					if (!expression.manual) expressionsByActor.delete(actorId);
+				}
+			}
+			if (document.body.classList.contains("prome-vn-active")) {
+				if (manualMode) void refreshStage();
+				else void restoreStageExpressions({ restoreSpeaker: false });
+			}
+		},
+		onSpriteSettingsChange: () => {
+			if (document.body.classList.contains("prome-vn-active")) void refreshStage();
+		},
+	});
 	await initLetterboxModule();
 	await initAutoHideModule();
 	await initUserModule();
+	registerExpressionCommands();
 	await initEmulateModule();
 	await initScaleModule();
 	await initShadowModule();
@@ -371,6 +417,8 @@ jQuery(async () => {
 	// Register ST event listeners
 	eventSource.on(event_types.CHAT_CHANGED, () => {
 		stopShakeAnimation();
+		expressionsByActor.clear();
+		spriteSelectionsByActor.clear();
 		rebuildStageFromHistory();
 	});
 	eventSource.on(event_types.MESSAGE_DELETED, rebuildStageFromHistory);
@@ -423,10 +471,24 @@ jQuery(async () => {
 			void refreshStage();
 		}
 	});
+	promeBus.addEventListener(PROME_SPRITE_FOLDER_CHANGED, (event) => {
+		const { actorId } = event.detail;
+		pendingByAvatar.delete(actorId);
+		if (syncVNMode()) {
+			void refreshStage();
+			void restoreStageExpressions({
+				restoreSpeaker: false,
+				onlyActorId: actorId,
+			});
+		}
+	});
 	promeBus.addEventListener("PROME_USER_SPRITE_TOGGLED", async () => {
 		const settings = extension_settings[extensionName];
 		if (!syncVNMode() || !settings.enableUserSprite) return;
-		if (!user_avatar || !settings.userSprite) return;
+		if (!user_avatar) return;
+		const actorId = `persona:${user_avatar}`;
+		const folder = resolveSpriteFolder(actorId, settings.userSprite, settings);
+		if (!folder) return;
 
 		const chat = getContext().chat;
 		if (!Array.isArray(chat) || chat.length === 0) return;
@@ -437,17 +499,16 @@ jQuery(async () => {
 		);
 		if (!lastUserMessage) return;
 
-		const actorId = `persona:${user_avatar}`;
-		if (
-			await classifyActor(actorId, lastUserMessage.mes, settings.userSprite)
-		) {
+		if (await classifyActor(actorId, lastUserMessage.mes, folder)) {
 			await refreshStage();
 		}
 	});
 	promeBus.addEventListener("PROME_SET_EXPRESSION", (event) => {
-		const { actorId, expression } = event.detail || {};
-		if (actorId && expression) {
-			labelsByAvatar.set(actorId, expression);
+		const { actorId, expression, spritePath } = event.detail || {};
+		if (actorId && (expression || expression === null)) {
+			pendingByAvatar.delete(actorId);
+			if (expression === null) expressionsByActor.delete(actorId);
+			else expressionsByActor.set(actorId, { label: expression, spritePath, manual: true });
 			void refreshStage();
 		}
 	});

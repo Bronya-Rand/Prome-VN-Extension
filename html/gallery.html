@@ -1,0 +1,70 @@
+<div id="prome-gallery-modal" class="flex-container flexFlowColumn gap-1">
+    <!-- Top Control Bar -->
+    <div class="prome-gallery-toolbar">
+        <!-- Target Actor Selector -->
+        <div class="prome-gallery-target">
+            <label for="prome-gallery-character" class="font-bold" data-i18n="Sprite Set:">Sprite Set:</label>
+            <select id="prome-gallery-character" class="text_pole"></select>
+            <button type="button" id="prome-gallery-pin-btn" class="menu_button menu_button_icon"
+                aria-label="Pin sprite set" aria-pressed="false" title="Pin selected sprite set"
+                data-i18n="[aria-label]Pin sprite set;[title]Pin selected sprite set">
+                <i class="fa-solid fa-thumbtack" aria-hidden="true"></i>
+            </button>
+        </div>
+
+        <!-- Top Actions -->
+        <div class="prome-gallery-actions">
+            <button type="button" id="prome-gallery-zip-btn" class="menu_button menu_button_icon"
+                title="Upload zipped sprite pack" data-i18n="[title]Upload zipped sprite pack">
+                <i class="fa-solid fa-file-zipper" aria-hidden="true"></i>
+                <span data-i18n="Upload Pack (.zip)">Upload Pack (.zip)</span>
+            </button>
+            <button type="button" id="prome-gallery-add-emotion-btn" class="menu_button menu_button_icon"
+                title="Add custom emotion label" data-i18n="[title]Add custom expression label">
+                <i class="fa-solid fa-plus" aria-hidden="true"></i>
+                <span data-i18n="Add Expression">Add Expression</span>
+            </button>
+        </div>
+    </div>
+
+    <details class="prome-gallery-override">
+        <summary data-i18n="Sprite Folder Override">Sprite Folder Override</summary>
+        <label for="prome-gallery-folder-override" class="sr-only" data-i18n="Override folder">Override folder</label>
+        <div class="prome-gallery-override-controls">
+            <input id="prome-gallery-folder-override" type="text" class="text_pole" aria-describedby="prome-gallery-override-help" />
+            <button id="prome-gallery-apply-override" type="button" class="menu_button" data-i18n="Apply">Apply</button>
+            <button id="prome-gallery-reset-override" type="button" class="menu_button" data-i18n="Reset">Reset</button>
+        </div>
+        <small id="prome-gallery-override-help" data-i18n="Enter a folder or Folder/Subfolder under characters. Use /Subfolder to select a subfolder of the default pack. Reset restores the default folder.">Enter a folder or Folder/Subfolder under characters. Use /Subfolder to select a subfolder of the default pack. Reset restores the default folder.</small>
+    </details>
+
+    <!-- Filter & Search Bar -->
+    <div class="flex-container flexFlowRow alignitemscenter gap-1 m-t-0-5">
+        <input id="prome-gallery-search" class="text_pole flex1" type="search"
+            placeholder="Search emotions (e.g. joy, smile)..."
+            data-i18n="[placeholder]Search emotions (e.g. joy, smile)..." />
+        <span id="prome-gallery-count" class="text-muted small">0 / 0</span>
+    </div>
+
+    <hr class="m-0" />
+
+    <!-- Gallery Grid -->
+    <div id="prome-gallery-grid" class="prome-gallery-grid-container">
+        <div id="prome-gallery-status" class="prome-gallery-loading" role="status"></div>
+        <section class="prome-gallery-section" aria-labelledby="prome-gallery-core-heading" hidden>
+            <h3 id="prome-gallery-core-heading" data-i18n="Core Expressions">Core Expressions</h3>
+            <p data-i18n="Covers all six labels in SillyTavern's smaller Local model.">Covers all six labels in SillyTavern's smaller Local model.</p>
+            <div id="prome-gallery-core-grid" class="prome-gallery-cards"></div>
+        </section>
+        <hr />
+        <section class="prome-gallery-section" aria-labelledby="prome-gallery-extra-heading" hidden>
+            <h3 id="prome-gallery-extra-heading" data-i18n="Additional Expressions">Additional Expressions</h3>
+            <p data-i18n="Includes the remaining labels for the 28-label model and any custom expressions.">Includes the remaining labels for the 28-label model and any custom expressions.</p>
+            <div id="prome-gallery-extra-grid" class="prome-gallery-cards"></div>
+        </section>
+    </div>
+
+    <!-- Hidden File Inputs -->
+    <input type="file" id="prome-gallery-file-input" accept="image/*" hidden />
+    <input type="file" id="prome-gallery-zip-input" accept=".zip" hidden />
+</div>

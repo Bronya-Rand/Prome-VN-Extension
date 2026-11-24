@@ -1,0 +1,74 @@
+<details class="prome-module-classifier">
+    <summary data-i18n="Expression Classifier">Expression Classifier</summary>
+    <div class="prome_vn_block flex-container flexFlowColumn prome_details_padding">
+
+        <!-- API Selection -->
+        <label for="prome-classifier-mode" data-i18n="Classifier API">Classifier API</label>
+        <small data-i18n="Select None to set expressions manually.">Select None to set expressions manually.</small>
+        <select id="prome-classifier-mode">
+            <option value="none" data-i18n="None (Manual)">None (Manual)</option>
+            <option value="local" data-i18n="Local (ONNX)">Local (ONNX)</option>
+            <option value="raw" data-i18n="Main API (Raw)">Main API (Raw)</option>
+            <option value="structured" data-i18n="Main API (Structured)">Main API (Structured)</option>
+            <option value="webllm" data-i18n="WebLLM Extension">WebLLM Extension</option>
+        </select>
+        <small id="prome-classifier-webllm-help" style="display: none" data-i18n="Uses SillyTavern's WebLLM extension and its selected model. Falls back to Local if WebLLM is unavailable or returns no matching label.">Uses SillyTavern's WebLLM extension and its selected model. Falls back to Local if WebLLM is unavailable or returns no matching label.</small>
+
+        <!-- Filter expressions for available sprites -->
+        <label id="prome-filter-available-expressions-setting" class="checkbox_label" for="prome-filter-available-expressions">
+            <input id="prome-filter-available-expressions" type="checkbox" />
+            <span data-i18n="Filter expressions for available sprites">Filter expressions for available sprites</span>
+        </label>
+        
+        <!-- Main API connection -->
+        <div id="prome-classifier-main-api-settings" class="flex-container flexFlowColumn">
+            <label for="prome-classifier-profile" data-i18n="Classification connection">Classification connection</label>
+            <select id="prome-classifier-profile"></select>
+            <small data-i18n="Uses Local API if the connection fails or returns no matching expression.">Uses Local API if the connection fails or returns no matching expression.</small>
+
+            <hr />
+        </div>
+            
+        <!-- Shared prompt for Main API and WebLLM -->
+        <div id="prome-classifier-prompt-settings" class="flex-container flexFlowColumn">
+            <label for="prome-classifier-prompt" class="title_restorable">
+                <span data-i18n="Classifier Prompt">Classifier Prompt</span>
+                <div id="prome-classifier-prompt-restore" title="Restore default prompt"
+                    data-i18n="[title]Restore default prompt" class="right_menu_button">
+                    <i class="fa-solid fa-clock-rotate-left fa-sm"></i>
+                </div>
+            </label>
+            <textarea id="prome-classifier-prompt" class="text_pole" rows="4"></textarea>
+            <small data-i18n="<code>{{labels}}</code> inserts the label list. <code>{{outputFormat}}</code> inserts the reply format."><code>{{labels}}</code> inserts the label list. <code>{{outputFormat}}</code> inserts the reply format.</small>
+            
+        </div>
+
+        <!-- Expression Fallback -->
+        <label for="prome-fallback-expression" data-i18n="Default / Fallback Expression">Default / Fallback Expression</label>
+        <small data-i18n="Set the default and fallback expression being used when no matching expression is found.">Set the default and fallback expression being used when no matching expression is found.</small>
+        <select id="prome-fallback-expression">
+            <option value="" data-i18n="No fallback">No fallback</option>
+        </select>
+        
+        <!-- Sprite Settings -->
+        <label class="checkbox_label" for="prome-allow-multiple-sprites">
+            <input id="prome-allow-multiple-sprites" type="checkbox" />
+            <span data-i18n="Allow multiple sprites per expression">Allow multiple sprites per expression</span>
+        </label>
+        <label class="checkbox_label" for="prome-reroll-same-sprite">
+            <input id="prome-reroll-same-sprite" type="checkbox" />
+            <span data-i18n="Re-roll if same sprite is used again">Re-roll if same sprite is used again</span>
+        </label>
+        
+        <hr />
+        
+        <!-- Sprite Gallery -->
+        <div class="prome_vn_block flex-container flexFlowColumn m-t-1">
+            <div id="prome-open-gallery" class="menu_button menu_button_icon interactable flex-container justifyCenter">
+                <i class="fa-solid fa-images"></i>
+                <span data-i18n="Open Sprite Gallery">Open Sprite Gallery</span>
+            </div>
+            <small class="justifyCenter" data-i18n="Browse, manage, and upload sprites for characters and your persona.">Browse, manage, and upload sprites for characters and your persona.</small>
+        </div>
+    </div>
+</details>
