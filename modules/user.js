@@ -33,6 +33,11 @@ export async function initUserModule() {
 	// Bind event handlers
 	$("#prome-user-sprite").on("change", async (event) => {
 		const isEnabled = Boolean($(event.target).prop("checked"));
+		settings.enableUserSprite = isEnabled;
+		saveSettingsDebounced();
+		emitPromeEvent("PROME_STAGE_REFRESH_REQUESTED");
+		emitPromeEvent("PROME_USER_SPRITE_TOGGLED");
+
 		if (isEnabled) {
 			const pack = user_avatar
 				? resolveSpriteFolder(
@@ -43,7 +48,7 @@ export async function initUserModule() {
 				: settings.userSprite;
 			if (pack) {
 				const exists = await spritePackExists(pack);
-				if (!exists) {
+				if (!exists && settings.enableUserSprite) {
 					toastr.warning(
 						`Sprite pack "${pack}" could not be found in characters folder.`,
 						"User Sprite",
@@ -51,11 +56,6 @@ export async function initUserModule() {
 				}
 			}
 		}
-		settings.enableUserSprite = isEnabled;
-		saveSettingsDebounced();
-
-		emitPromeEvent("PROME_STAGE_REFRESH_REQUESTED");
-		emitPromeEvent("PROME_USER_SPRITE_TOGGLED");
 	});
 
 	$("#prome-user-sprite-input").on("change", async function () {
@@ -151,7 +151,7 @@ function registerUserCommands() {
 				const expr = args.expression?.trim();
 				if (!expr) {
 					toastr.error(
-						"Please provide an expression (e.g. /express joy).",
+						"Please provide an expression (e.g. /express expression=joy).",
 						"User Sprite",
 					);
 					return null;

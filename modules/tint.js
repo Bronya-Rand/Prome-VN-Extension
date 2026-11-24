@@ -184,7 +184,7 @@ async function onTintPreset_Delete() {
 	if (!presetObject) return;
 
 	const confirm = await callGenericPopup(
-		`Are you sure you want to delete the tint preset: ${selectedStyle}?`,
+		$("<p>").text(`Delete tint preset "${selectedStyle}"?`),
 		POPUP_TYPE.CONFIRM,
 		"",
 		{ okButton: "Delete", cancelButton: "Cancel" },
@@ -196,7 +196,7 @@ async function onTintPreset_Delete() {
 	if (index === -1) return;
 
 	extension_settings[extensionName].tintPresets.splice(index, 1);
-	$("#prome-tint-preset").find(`option[value="${selectedStyle}"]`).remove();
+	$("#prome-tint-preset option").filter((_, option) => option.value === selectedStyle).remove();
 
 	if (extension_settings[extensionName].tintPresets.length > 0) {
 		extension_settings[extensionName].selectedTint =
@@ -292,7 +292,7 @@ async function onTintPreset_Save() {
 
 	// Mark the new preset as selected
 	settings.selectedTint = name;
-	settings.currentTintValues = newPreset;
+	settings.currentTintValues = structuredClone(newPreset);
 	$("#prome-tint-preset").val(name);
 
 	saveSettingsDebounced();

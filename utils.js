@@ -1,4 +1,5 @@
 import { extension_settings, getContext } from "../../../extensions.js";
+import { fetchSprites } from "./core/sprites.js";
 import { extensionName, VN_MODES } from "./constants.js";
 
 /**
@@ -93,11 +94,7 @@ export function isAutoHideSpritesEnabled() {
  */
 export async function getSpriteList(name) {
 	try {
-		const result = await fetch(
-			`/api/sprites/get?name=${encodeURIComponent(name)}`,
-		);
-		const sprites = result.ok ? await result.json() : [];
-		return { sprites, err: null };
+		return { sprites: await fetchSprites(name), err: null };
 	} catch (err) {
 		return { sprites: [], err };
 	}

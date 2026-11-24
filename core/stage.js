@@ -51,6 +51,7 @@ async function updateSprite(slot, image, spriteUrl) {
 	nextImage.alt = image.alt;
 	image.replaceWith(nextImage);
 	slot.classList.add("prome-actor-ready");
+	updateStageOverlap();
 
 	if (
 		!image.naturalWidth ||
@@ -65,7 +66,6 @@ async function updateSprite(slot, image, spriteUrl) {
 	image.style.width = `${width}px`;
 	image.style.height = `${height}px`;
 	wrapper.appendChild(image);
-	updateStageOverlap();
 
 	const fade = { duration: 200, easing: "ease-in-out" };
 	nextImage.animate([{ opacity: 0 }, { opacity: 1 }], fade);
@@ -162,8 +162,12 @@ export function renderActors(actors = []) {
 		stage.appendChild(slot);
 	}
 
-	setFocusedActor(currentSpeakerId);
 	setShakingActor(shakingActorId);
+	updateStageLayers();
+}
+
+export function updateStageLayers() {
+	setFocusedActor(currentSpeakerId);
 	updateStageOverlap();
 }
 
@@ -212,6 +216,7 @@ export function setFocusedActor(actorId) {
 		previousSpeakerId = currentSpeakerId;
 		currentSpeakerId = actorId;
 	} else if (!actorId) {
+		previousSpeakerId = null;
 		currentSpeakerId = null;
 	}
 	if (!stage) return; // Stage is not mounted
@@ -258,6 +263,10 @@ export function unmountStage() {
 	if (!stage) return; // Stage is not mounted
 
 	window.removeEventListener("resize", onStageResize);
+	clearTimeout(resizeTimeout);
+	previousSpeakerId = null;
+	currentSpeakerId = null;
+	shakingActorId = null;
 
 	// Remove the Prome stage element from the DOM
 	stage.remove();

@@ -42,19 +42,9 @@ export function setSpriteFolderOverride(actorId, folder, settings) {
  */
 export async function fetchSprites(folderName) {
 	if (!folderName) return [];
-
-	try {
-		const res = await fetch(
-			`/api/sprites/get?name=${encodeURIComponent(folderName)}`,
-		);
-		return res.ok ? await res.json() : [];
-	} catch (error) {
-		console.error(
-			`[${extensionName}] Failed to fetch sprites for ${folderName}:`,
-			error,
-		);
-		return [];
-	}
+	const res = await fetch(`/api/sprites/get?name=${encodeURIComponent(folderName)}`);
+	if (!res.ok) throw new Error(`Could not load sprite folder "${folderName}" (HTTP ${res.status}).`);
+	return res.json();
 }
 
 /**

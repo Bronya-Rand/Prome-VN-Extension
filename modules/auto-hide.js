@@ -70,7 +70,7 @@ export async function initAutoHideModule() {
 
 	$("#prome-sprite-max-visible").on("input", (e) => {
 		const val = Number(e.target.value);
-		if (val >= 1 && val <= 8) {
+		if (Number.isInteger(val) && val >= 1 && val <= 8) {
 			settings.maxViewableCharacters = val;
 			saveSettingsDebounced();
 			emitPromeEvent("PROME_STAGE_REFRESH_REQUESTED");

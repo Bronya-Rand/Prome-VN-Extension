@@ -76,6 +76,16 @@
 	translate: -50% 0;
 }
 
+body.prome-hide-sheld #sheld {
+	display: none;
+}
+
+/* ST checks the group wrapper's layout box when switching expression renderers. */
+body.prome-vn-active :is(#expression-wrapper, #visual-novel-wrapper) {
+	visibility: hidden;
+	pointer-events: none;
+}
+
 body.prome-vn-active #sheld {
 	top: auto;
 	bottom: 0;
@@ -89,6 +99,10 @@ body.prome-vn-active #sheld {
 	#prome-stage:has(> .prome-sprite-focus) > .prome-actor-slot:not(.prome-sprite-focus),
 	#prome-stage:not(:has(> .prome-sprite-focus)) > .prome-actor-slot:not(:first-child) {
 		display: none;
+	}
+
+	#prome-stage .prome-actor-slot:not(:first-child) {
+		margin-left: 0;
 	}
 
 	#prome-stage .prome-actor-sprite {

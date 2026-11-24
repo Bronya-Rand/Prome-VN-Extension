@@ -5,8 +5,13 @@ import {
 	eventSource,
 	saveSettingsDebounced,
 } from "../../../../script.js";
-import { extension_settings, getContext } from "../../../extensions.js";
-import { user_avatar } from "../../../personas.js";
+import {
+	extension_settings,
+	getContext,
+	renderExtensionTemplateAsync,
+} from "../../../extensions.js";
+import { getUserAvatar, user_avatar } from "../../../personas.js";
+import { callGenericPopup, POPUP_TYPE } from "../../../popup.js";
 import { power_user } from "../../../power-user.js";
 
 /* Prome Core Imports */
@@ -50,26 +55,14 @@ const spriteSelectionsByActor = new Map();
 const pendingByAvatar = new Map();
 
 function loadSettings() {
-	extension_settings[extensionName] = extension_settings[extensionName] || {};
-	if (Object.keys(extension_settings[extensionName]).length === 0) {
-		Object.assign(extension_settings[extensionName], defaultSettings);
-		if (power_user.waifuMode) {
-			extension_settings[extensionName].enableVN_UI = power_user.waifuMode;
-		}
+	const settings = (extension_settings[extensionName] ??= {});
+	if (Object.keys(settings).length === 0 && power_user.waifuMode) {
+		settings.enableVN_UI = true;
 	}
-
-	// Check if new settings are added to extension_settings
-	for (const key in defaultSettings) {
-		if (extension_settings[extensionName][key] === undefined) {
-			console.debug(`[${extensionName}] New setting added: ${key}`);
-			extension_settings[extensionName][key] = defaultSettings[key];
-		}
+	for (const [key, value] of Object.entries(defaultSettings)) {
+		if (settings[key] === undefined) settings[key] = structuredClone(value);
 	}
-
-	$("#prome-enable-vn").prop(
-		"checked",
-		extension_settings[extensionName].enableVN_UI,
-	);
+	$("#prome-enable-vn").prop("checked", settings.enableVN_UI);
 }
 
 async function classifyActor(avatar, message, spritePackName) {
@@ -102,6 +95,18 @@ async function classifyActor(avatar, message, spritePackName) {
 	return true;
 }
 
+// ST locks named personas to a thumbnail URL. Older chats can store the avatar path
+// directly, while unlocked user messages follow the currently selected persona.
+function matchesCurrentPersona(message) {
+	const avatar = message.force_avatar;
+	if (!avatar) return true;
+	if (avatar.startsWith("/thumbnail?")) {
+		const params = new URLSearchParams(avatar.slice(avatar.indexOf("?") + 1));
+		return params.get("type") === "persona" && params.get("file") === user_avatar;
+	}
+	return avatar === getUserAvatar(user_avatar);
+}
+
 /**
  * Updates the expression of the speaker based on their message.
  * @param {*} messageId The ID of the message that was rendered.
@@ -119,7 +124,7 @@ async function updateSpeakerExpression(messageId) {
 	let spritePackName;
 
 	if (message.is_user) {
-		if (!settings.enableUserSprite || !user_avatar) return;
+		if (!settings.enableUserSprite || !user_avatar || !matchesCurrentPersona(message)) return;
 
 		actorId = `persona:${user_avatar}`;
 		spritePackName = resolveSpriteFolder(
@@ -144,7 +149,8 @@ async function updateSpeakerExpression(messageId) {
 	// Classify and update expression for the actor
 	if (
 		settings.classifierMode === CLASSIFIER_MODES.NONE ||
-		(await classifyActor(actorId, message.mes, spritePackName))
+		(await classifyActor(actorId, message.mes, spritePackName)) ||
+		(settings.autoHideSprites && isGroupChat())
 	) {
 		await refreshStage();
 	}
@@ -184,6 +190,7 @@ async function loadCharacterActor(character) {
  * @returns A promise that resolves when the stage has been refreshed.
  */
 async function refreshStage() {
+	if (!document.body.classList.contains("prome-vn-active")) return;
 	const revision = ++stageRevision;
 	const context = getContext();
 	const settings = extension_settings[extensionName];
@@ -264,6 +271,7 @@ async function restoreStageExpressions({
 	const chat = context.chat;
 	const chatId = context.getCurrentChatId();
 	if (!chatId || !Array.isArray(chat) || chat.length === 0) return;
+	if (!restoreSpeaker && extension_settings[extensionName].classifierMode === CLASSIFIER_MODES.NONE) return;
 
 	const settings = extension_settings[extensionName];
 
@@ -307,6 +315,7 @@ async function restoreStageExpressions({
 		let avatar = null;
 
 		if (message.is_user) {
+			if (!matchesCurrentPersona(message)) continue;
 			avatar = personaId;
 		} else {
 			avatar = isGroupChat()
@@ -486,6 +495,13 @@ jQuery(async () => {
 
 	$("#prome-enable-vn").on("click", onVNUI_Click);
 
+	for (const page of ["keybinds", "commands"]) {
+		$(`#prome-${page}`).on("click", async () => {
+			const html = await renderExtensionTemplateAsync(`third-party/${extensionName}/html`, page);
+			await callGenericPopup(html, POPUP_TYPE.TEXT);
+		});
+	}
+
 	// Inject shortcut in ST User Settings
 	injectUserSettingsShortcut();
 	eventSource.on(event_types.APP_READY, injectUserSettingsShortcut);
@@ -509,6 +525,12 @@ jQuery(async () => {
 	eventSource.on(event_types.PERSONA_CHANGED, async () => {
 		if (syncVNMode()) {
 			void refreshStage();
+			if (extension_settings[extensionName].enableUserSprite && user_avatar) {
+				void restoreStageExpressions({
+					restoreSpeaker: false,
+					onlyActorId: `persona:${user_avatar}`,
+				});
+			}
 		}
 	});
 	eventSource.on(event_types.GROUP_UPDATED, async () => {
@@ -562,22 +584,10 @@ jQuery(async () => {
 		const settings = extension_settings[extensionName];
 		if (!syncVNMode() || !settings.enableUserSprite) return;
 		if (!user_avatar) return;
-		const actorId = `persona:${user_avatar}`;
-		const folder = resolveSpriteFolder(actorId, settings.userSprite, settings);
-		if (!folder) return;
-
-		const chat = getContext().chat;
-		if (!Array.isArray(chat) || chat.length === 0) return;
-
-		// Find the latest valid user message
-		const lastUserMessage = chat.findLast(
-			(message) => message.is_user && !message.is_system && message.mes?.trim(),
-		);
-		if (!lastUserMessage) return;
-
-		if (await classifyActor(actorId, lastUserMessage.mes, folder)) {
-			await refreshStage();
-		}
+		await restoreStageExpressions({
+			restoreSpeaker: false,
+			onlyActorId: `persona:${user_avatar}`,
+		});
 	});
 	promeBus.addEventListener("PROME_SET_EXPRESSION", (event) => {
 		const { actorId, expression, spritePath } = event.detail || {};

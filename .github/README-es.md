@@ -16,7 +16,7 @@ El extensión de novela visual Prome es una extensión para SillyTavern que mode
 
 ## Características
 
-1. Facil integración con SillyTavern y su Modo Novela Visual.
+1. Prome muestra su propio escenario de novela visual en chats individuales y de grupo. Puedes usarlo con el modo de novela visual y la extensión Character Expressions de SillyTavern desactivados.
 2. Tinte de Mundo y/o Personaje - El mayor característica de Prome hasta hoy. ¿Quieres hacer un conversación en la tarde por esa 'cita especial' o experimentar una versión alterada de un mundo de videojuego, pero no puedes conseguir el clima o eventos que quieres (como un ciclo de día permanente en Honkai: Star Rail)? Ahora puedes ajustar los colores del mundo y/o de los personajes como **tú** quieras.
 
 > [!NOTE]
@@ -28,19 +28,14 @@ El extensión de novela visual Prome es una extensión para SillyTavern que mode
 
 3. **[BETA]** Sprites de Usuario - La segunda mayor característica de Prome. ¿Quieres ser parte de la conversación? Presta los sprites de otra persona/personaje o usa los tuyos mientras usas todas las otras características de Prome.
 
-> [!IMPORTANT]
-> 1. En raras ocasiones, SillyTavern puede mostrar una advertencia que dice _'prome-user' is not in the list of group members_ en un Grupo de Chat. Ignora esta advertencia ya que este es tu personaje y Prome ya lo ha añadido al grupo de chat.
-> 2. Al cambiar de chat, puedes ver un personaje "quebrado" en la lista de personajes/grupos llamado `Prome User Sprite (Do Not Click)`. No interactúes con él ya que este es Prome creando un "personaje ficticio" para tu personaje en un grupo de chat. Sin embargo, puedes mover su posición a otro lugar en el grupo de chat.
-> 3. Si decides usar el nombre de un personaje que existe en el grupo de chat o tu nombre de personaje es el mismo que un personaje en el chat, tu sprite de usuario *puede* cambiar expresiones al de dicho personaje. Esta es principalmente una limitación de ST pero siempre puedes revertirlo a través de `/express` o duplicando la carpeta del personaje y renombrándola a otra cosa.
+> [!NOTE]
+> Elige la carpeta predeterminada en los ajustes de sprites de usuario. En la galería puedes elegir otra carpeta para una persona concreta. Usa `/express expression=joy` para cambiar la expresión de la persona activa.
 
    <center>
       <img src="./user-sprite.png">
    </center>
 
-4. Emulación de Sprites - ¿Alguna vez has querido hacer un grupo de chat con todos tus personajes favoritos pero hay un personaje que no puedes encontrar sprites? Con Emulación de Sprites, Prome le dirá a SillyTavern que use la imagen de la tarjeta de dicho personaje y lo incluya en el grupo de chat.
-
-> [!NOTE]
-> Emulación de Sprites solo funciona en chats de grupo o chats individuales con Sprites de Usuario activados.
+4. Emulación de Sprites - Cuando un personaje carece de sprites, Prome puede mostrar el retrato de su tarjeta en chats individuales y de grupo.
 
    <center>
     <img src="./card-emulation.png"/>

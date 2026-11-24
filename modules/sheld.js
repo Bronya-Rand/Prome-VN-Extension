@@ -4,7 +4,7 @@ import { extensionFolderPath, extensionName } from "../constants.js";
 
 function applySheldSettings() {
 	const settings = extension_settings[extensionName];
-	$("#sheld").toggleClass("displayNone", settings.hideSheld);
+	document.body.classList.toggle("prome-hide-sheld", settings.hideSheld);
 }
 
 // --- Module Lifecycle ---
@@ -29,6 +29,12 @@ export async function initSheldModule() {
 		settings.hideSheld = Boolean($(e.target).prop("checked"));
 		saveSettingsDebounced();
 		applySheldSettings();
+	});
+
+	document.addEventListener("keydown", (event) => {
+		if (event.key !== "F1" || !event.ctrlKey || event.repeat || event.defaultPrevented) return;
+		event.preventDefault();
+		document.getElementById("prome-hide-sheld")?.click();
 	});
 
 	applySheldSettings();

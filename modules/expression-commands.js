@@ -11,11 +11,12 @@ import { extensionName } from "../constants.js";
 import { emitPromeEvent, PROME_SET_EXPRESSION } from "../core/bus.js";
 import { getSpriteFilename } from "../core/sprite-variants.js";
 import {
-	fetchSprites,
 	normalizeSpriteFolderOverride,
 	resolveSpriteFolder,
 	setSpriteFolderOverride,
 } from "../core/sprites.js";
+import { updateStageLayers } from "../core/stage.js";
+import { getSpriteList, isGroupChat } from "../utils.js";
 
 function resolveActor(context, target, settings) {
 	const inGroup = context.groupId != null;
@@ -87,7 +88,11 @@ async function setExpression({ actor, type = "label" }, requested) {
 	}
 
 	const folder = resolveSpriteFolder(target.id, target.defaultFolder, settings);
-	const sprites = await fetchSprites(folder);
+	const { sprites, err } = await getSpriteList(folder);
+	if (err) {
+		toastr.error("Could not load the selected sprite folder.");
+		return "";
+	}
 	if (
 		getContext().getCurrentChatId() !== chatId ||
 		resolveSpriteFolder(target.id, target.defaultFolder, settings) !== folder
@@ -133,6 +138,21 @@ function setCostume({ actor }, requested) {
 }
 
 export function registerExpressionCommands() {
+	SlashCommandParser.addCommandObject(
+		SlashCommand.fromProps({
+			name: "update-layers",
+			callback: () => {
+				if (!document.body.classList.contains("prome-vn-active") || !isGroupChat()) {
+					toastr.warning("Open a group chat with the Prome stage enabled.");
+					return false;
+				}
+				updateStageLayers();
+				return true;
+			},
+			helpString: "Recalculate sprite overlap and speaker layers on the Prome group stage.",
+		}),
+	);
+
 	const actorArgument = () =>
 		SlashCommandNamedArgument.fromProps({
 			name: "actor",

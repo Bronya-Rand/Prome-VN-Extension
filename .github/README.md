@@ -16,7 +16,7 @@ The Prome Visual Novel Extension is a extension for SillyTavern that remodernize
 
 ## Features
 
-1. Easy integration with SillyTavern and it's Visual Novel Mode
+1. Prome renders its own visual novel stage in individual and group chats. You can use it with SillyTavern’s Visual Novel Mode and Character Expressions switched off.
 2. World + Character Tinting - Prome's biggest feature to date. Wanted to make a chat take place in the evening for that special 'date' or experience a post-alter version of a game world, but were unable to get such weather/events to happen (such as a locked day cycle in Honkai: Star Rail)? Now you can by setting the world and/or character colors to be how **YOU** want it to be.
 
 > [!NOTE]
@@ -28,19 +28,14 @@ The Prome Visual Novel Extension is a extension for SillyTavern that remodernize
 
 3. **[BETA]** User Sprites - Prome's second biggest feature. Want to be part of the conversation? Borrow someone else's sprites or use your own for your own persona whilst using all of Prome's other features!
 
-> [!IMPORTANT]
-> 1. On rare occasions, SillyTavern may display a warning saying _'prome-user' is not in the list of group members_ in a Group Chat. Ignore this warning as this is your persona and Prome has already added it to the group chat.
-> 2. When changing chats, you might spot a "broken" character in the character/group list named `Prome User Sprite (Do Not Click)`. Do not interact with it as this is Prome making a "dummy character" for your persona to use in a group chat. You can however move it's position to be elsewhere in a group chat.
-> 3. If you decide to use the name of a character that exists in the group chat or your persona name is the same as a character in chat, your user sprite *may* change expressions to that of said character. This is primarily a ST limitation but you can always revert it via `/express` or by duplicating the character folder and renaming it to something else.
+> [!NOTE]
+> Choose a default persona sprite folder in User Sprite Settings. The Sprite Gallery lets you override it for a specific persona. Use `/express expression=joy` to change the active persona’s expression.
 
    <center>
       <img src="./user-sprite.png">
    </center>
 
-4. Sprite Emulation - Ever wanted to make a group chat of all your favorite characters but there is that one character who you can't find sprites for? With Sprite Emulation, Prome will just tell SillyTavern to use said character's character card and include them in the group chat!
-
-> [!NOTE]
-> Sprite Emulation only works in group chats or individual chats with User Sprites enabled.
+4. Sprite Emulation - When a character has no sprite pack, Prome can display their card portrait in individual and group chats.
 
    <center>
     <img src="./card-emulation.png"/>

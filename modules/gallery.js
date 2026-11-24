@@ -26,13 +26,13 @@ import {
 import { getSpriteFilename, getSpriteStem } from "../core/sprite-variants.js";
 import {
 	deleteSprite,
-	fetchSprites,
 	normalizeSpriteFolderOverride,
 	resolveSpriteFolder,
 	setSpriteFolderOverride,
 	uploadSprite,
 	uploadSpritePack,
 } from "../core/sprites.js";
+import { getSpriteList } from "../utils.js";
 
 // SillyTavern's six-label Cohee/bert-base-uncased-emotion-onnx model.
 const coreLabels = new Set([
@@ -314,7 +314,7 @@ function bindGalleryEvents(modal) {
 		coreGrid.empty();
 		extraGrid.empty();
 		sprites = null;
-		zipBtn.add(addExpressionBtn).prop("disabled", !folder);
+		zipBtn.add(addExpressionBtn).prop("disabled", true);
 		filterCards(searchInput.val(), grid, countDisplay);
 		status
 			.prop("hidden", false)
@@ -327,8 +327,13 @@ function bindGalleryEvents(modal) {
 			);
 		if (!folder) return;
 
-		const loaded = await fetchSprites(folder);
+		const { sprites: loaded, err } = await getSpriteList(folder);
 		if (isClosed || revision !== loadRevision) return;
+		if (err) {
+			status.text("Could not load sprites. Reopen the gallery to retry.");
+			return;
+		}
+		zipBtn.add(addExpressionBtn).prop("disabled", false);
 		sprites = loaded;
 		status.prop("hidden", true);
 		redrawCards();
