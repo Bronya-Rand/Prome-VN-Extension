@@ -32,8 +32,8 @@ The Prome Visual Novel Extension is a extension for SillyTavern that remodernize
 
 5. User Sprites - Want to be part of the conversation? Borrow someone else's sprites or use your own for your own persona whilst using all of Prome's other features!
 
-   > [!NOTE]
-   > Choose a default persona sprite folder in User Sprite Settings, or use the Sprite Gallery to override it for a specific persona. Use `/express expression=joy` or `/set-user-set name=…` to change your active expression or sprite set.
+> [!NOTE]
+> > Choose a default persona sprite folder in User Sprite Settings, or use the Sprite Gallery to override it for a specific persona. Use `/express expression=joy` or `/set-user-set name=…` to change your active expression or sprite set.
 
    <center>
       <img src="./user-sprite.png">
