@@ -1,0 +1,31 @@
+<details class="prome-module-scale">
+    <summary data-i18n="Scale Settings">Scale Settings</summary>
+
+    <div class="prome_vn_block flex-container flexFlowColumn prome_details_padding">
+        <label class="checkbox_label" for="prome-sprite-scale"
+            title="Toggles sprite scaling for character sprites."
+            data-i18n="[title]Toggles sprite scaling for character sprites.">
+            <input id="prome-sprite-scale" type="checkbox" />
+            <span data-i18n="Enable Sprite Scale">Enable Sprite Scale</span>
+        </label>
+
+        <div class="prome_vn_block flex-container flexFlowRow">
+            <div class="prome_vn_block flex-container flexFlowColumn">
+                <label for="prome-sprite-scale-size" class="title_restorable">
+                    <span data-i18n="Sprite Scale">Sprite Scale</span>
+                    <div id="prome-sprite-scale-size-restore" title="Restore default value"
+                        data-i18n="[title]Restore default value" class="right_menu_button">
+                        <i class="fa-solid fa-clock-rotate-left fa-sm"></i>
+                    </div>
+                </label>
+                <small data-i18n="Set the size scale of the character sprites.">Set the size
+                    scale of the character
+                    sprite.</small>
+                <input class="neo-range-slider" id="prome-sprite-scale-size" type="range" min="0.1"
+                    max="2.0" step="0.01" />
+                <input class="neo-range-input" id="prome-sprite-scale-size-counter" type="number"
+                    min="0.1" max="2.0" step="0.01" data-for="prome-sprite-scale-size" />
+            </div>
+        </div>
+    </div>
+</details>

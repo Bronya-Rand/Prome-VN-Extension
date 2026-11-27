@@ -1,99 +1,74 @@
-import { extensionName, defaultSettings } from "../constants.js";
-import { extension_settings } from "../../../../extensions.js";
 import { saveSettingsDebounced } from "../../../../../script.js";
-import { isGroupChat } from "../utils.js";
+import { extension_settings } from "../../../../extensions.js";
+import {
+	defaultSettings,
+	extensionFolderPath,
+	extensionName,
+} from "../constants.js";
 
-/* Sprite Scale Functions */
-export function applySpriteScale() {
-	if (extension_settings[extensionName].scaleSprites === (null || undefined)) {
-		console.debug(
-			`[${extensionName}] scaleSprites returned null or undefined.`,
+// --- CSS Class / Helpers ---
+function applyScaleSettings() {
+	const settings = extension_settings[extensionName];
+
+	$("body").toggleClass("spriteScale", Boolean(settings.scaleSprites));
+
+	document.documentElement.style.setProperty(
+		"--prome-sprite-scale",
+		settings.maxSpriteScale,
+	);
+}
+
+// --- Module Lifecycle ---
+export async function initScaleModule() {
+	try {
+		const html = await $.get(`${extensionFolderPath}/html/modules/scale.html`);
+		$("#prome-module-settings").append(html);
+	} catch (error) {
+		console.error(
+			`[${extensionName}] Failed to load scale module settings:`,
+			error,
 		);
 	}
 
-	console.debug(
-		`[${extensionName}] Sprite Scale?: ${extension_settings[extensionName].scaleSprites}`,
-	);
+	const settings = extension_settings[extensionName];
 
-	$("body").toggleClass(
-		"spriteScale",
-		extension_settings[extensionName].scaleSprites,
-	);
+	// Sync UI state with settings
+	$("#prome-sprite-scale").prop("checked", settings.scaleSprites);
+	$("#prome-sprite-scale-size").val(settings.maxSpriteScale);
+	$("#prome-sprite-scale-size-counter").val(settings.maxSpriteScale);
 
-	applyScale();
+	// Bind event handlers
+	$("#prome-sprite-scale").on("click", (e) => {
+		settings.scaleSprites = Boolean($(e.target).prop("checked"));
+		saveSettingsDebounced();
+		applyScaleSettings();
+	});
+
+	$("#prome-sprite-scale-size").on("input", updateScale);
+	$("#prome-sprite-scale-size-counter").on("input", updateScale);
+	$("#prome-sprite-scale-size-restore").on("click", () => {
+		settings.maxSpriteScale = defaultSettings.maxSpriteScale;
+		$("#prome-sprite-scale-size").val(defaultSettings.maxSpriteScale);
+		$("#prome-sprite-scale-size-counter").val(defaultSettings.maxSpriteScale);
+		saveSettingsDebounced();
+		applyScaleSettings();
+	});
+
+	applyScaleSettings();
 }
 
-function resetSpriteScale() {
-	extension_settings[extensionName].maxSpriteScale =
-		defaultSettings.maxSpriteScale;
-	$("#prome-sprite-scale-size").val(defaultSettings.maxSpriteScale);
-	$("#prome-sprite-scale-size-counter").val(defaultSettings.maxSpriteScale);
-	saveSettingsDebounced();
-	applyScale();
-}
+function updateScale(event) {
+	const value = Number(event.target.value);
+	if (value >= 0.1 && value <= 2) {
+		extension_settings[extensionName].maxSpriteScale = value;
 
-export function onSpriteScale_Click(event) {
-	const value = Boolean($(event.target).prop("checked"));
-	extension_settings[extensionName].scaleSprites = value;
-	saveSettingsDebounced();
-	applySpriteScale();
-}
-
-export function onSpriteScale_Change() {
-	const value = Number(this.value);
-	if (value < 0.1 || value > 2) {
-		console.error(`[${extensionName}] Invalid scale value: ${value}`);
-		return;
-	}
-	extension_settings[extensionName].maxSpriteScale = value;
-	$("#prome-sprite-scale-size").val(value);
-	$("#prome-sprite-scale-size-counter").val(value);
-	saveSettingsDebounced();
-	applyScale();
-}
-
-export function applyScale() {
-	// apply sprite scale to all sprites
-	document.documentElement.style.setProperty(
-		"--prome-sprite-scale",
-		extension_settings[extensionName].maxSpriteScale,
-	);
-
-	let sprites;
-	if (isGroupChat()) {
-		sprites = $("#visual-novel-wrapper").children("div");
-	} else {
-		sprites = $("#expression-wrapper").find("div");
-	}
-
-	// loop through all divs
-	for (const d of sprites) {
-		if (extension_settings[extensionName].scaleSprites) {
-			// apply scale
-			$(d).addClass("prome-sprite-scale");
+		if (event.target.id === "prome-sprite-scale-size") {
+			$("#prome-sprite-scale-size-counter").val(value);
 		} else {
-			// remove scale
-			$(d).removeClass("prome-sprite-scale");
+			$("#prome-sprite-scale-size").val(value);
 		}
+
+		saveSettingsDebounced();
+		applyScaleSettings();
 	}
-}
-
-export function setupScaleHTML() {
-	$("#prome-sprite-scale").prop(
-		"checked",
-		extension_settings[extensionName].scaleSprites,
-	);
-	$("#prome-sprite-scale-size").val(
-		extension_settings[extensionName].maxSpriteScale,
-	);
-	$("#prome-sprite-scale-size-counter").val(
-		extension_settings[extensionName].maxSpriteScale,
-	);
-}
-
-export function setupScaleJQuery() {
-	$("#prome-sprite-scale").on("click", onSpriteScale_Click);
-	$("#prome-sprite-scale-size").on("input", onSpriteScale_Change);
-	$("#prome-sprite-scale-size-counter").on("input", onSpriteScale_Change);
-	$("#prome-sprite-scale-size-restore").on("click", resetSpriteScale);
 }

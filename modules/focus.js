@@ -1,140 +1,233 @@
-import { extensionName, defaultSettings } from "../constants.js";
-import { extension_settings } from "../../../../extensions.js";
 import { saveSettingsDebounced } from "../../../../../script.js";
-import { applyZoomDebounce, applyDefocusDebounce } from "../listeners.js";
+import { extension_settings } from "../../../../extensions.js";
+import { SlashCommand } from "../../../../slash-commands/SlashCommand.js";
+import {
+	ARGUMENT_TYPE,
+	SlashCommandNamedArgument,
+} from "../../../../slash-commands/SlashCommandArgument.js";
+import {
+	enumTypes,
+	SlashCommandEnumValue,
+} from "../../../../slash-commands/SlashCommandEnumValue.js";
+import { SlashCommandParser } from "../../../../slash-commands/SlashCommandParser.js";
+import { extensionFolderPath, extensionName } from "../constants.js";
+import { PROME_SPEAKER_CHANGED, promeBus } from "../core/bus.js";
+import { setFocusedActor } from "../core/stage.js";
 
-/* Sprite Zoom Functions */
-export function applySpriteZoom() {
-	if (extension_settings[extensionName].spriteZoom === (null || undefined)) {
-		console.debug(`[${extensionName}] spriteZoom returned null or undefined.`);
-	}
+// --- CSS Class / Helpers ---
+export function applyFocusSettings() {
+	const settings = extension_settings[extensionName];
 
-	console.debug(
-		`[${extensionName}] Sprite Zoom?: ${extension_settings[extensionName].spriteZoom}`,
-	);
-
-	$("body").toggleClass(
-		"spriteZoom",
-		extension_settings[extensionName].spriteZoom,
-	);
-
-	applyZoomDebounce();
-	if (extension_settings[extensionName].spriteDefocusTint) {
-		applyDefocusDebounce();
-	}
-}
-
-export function applySpriteDefocusTint() {
-	if (
-		extension_settings[extensionName].spriteDefocusTint === (null || undefined)
-	) {
-		console.debug(
-			`[${extensionName}] spriteDefocusTint returned null or undefined.`,
-		);
-	}
-
-	console.debug(
-		`[${extensionName}] Sprite Defocus Tint?: ${extension_settings[extensionName].spriteDefocusTint}`,
-	);
-
+	$("body").toggleClass("spriteZoom", Boolean(settings.spriteZoom));
 	$("body").toggleClass(
 		"spriteDefocusTint",
-		extension_settings[extensionName].spriteDefocusTint,
+		Boolean(settings.spriteDefocusTint),
 	);
 
-	applyDefocusDebounce();
-	if (extension_settings[extensionName].spriteZoom) {
-		applyZoomDebounce();
-	}
-}
-
-export function applySpriteZoomTimer() {
 	document.documentElement.style.setProperty(
 		"--prome-sprite-zoom-speed",
-		`${extension_settings[extensionName].zoomSpeed}s`,
+		`${settings.zoomSpeed}s`,
 	);
-}
-
-export function applySpriteZoomAnimation() {
 	document.documentElement.style.setProperty(
 		"--prome-sprite-zoom-animation",
-		extension_settings[extensionName].zoomAnimation,
+		settings.zoomAnimation,
 	);
 }
 
-/* Event Handlers */
-export function onSpriteZoomTimer_Change() {
-	const value = this.value;
-	if (value < 0 || value > 1) {
-		console.error(`[${extensionName}] Invalid zoom speed value: ${value}`);
-		return;
-	}
-	extension_settings[extensionName].zoomSpeed = value;
-	$("#prome-sprite-zoom-speed").val(value);
-	$("#prome-sprite-zoom-speed-counter").val(value);
-	saveSettingsDebounced();
-	applySpriteZoomTimer();
-}
-
-function resetSpriteZoomTimer() {
-	extension_settings[extensionName].zoomSpeed = defaultSettings.zoomSpeed;
-	$("#prome-sprite-zoom-speed").val(defaultSettings.zoomSpeed).trigger("input");
-	$("#prome-sprite-zoom-speed-counter").val(defaultSettings.zoomSpeed);
-	saveSettingsDebounced();
-}
-
-function onSpriteZoom_Click(event) {
-	const value = Boolean($(event.target).prop("checked"));
-	extension_settings[extensionName].spriteZoom = value;
-	saveSettingsDebounced();
-	applySpriteZoom();
-}
-
-export function onSpriteDefocusTint_Click(event) {
-	const value = Boolean($(event.target).prop("checked"));
-	extension_settings[extensionName].spriteDefocusTint = value;
-	saveSettingsDebounced();
-	applySpriteDefocusTint();
-}
-
-function onSpriteZoomAnimation_Select() {
-	const value = String(this.value);
-	if (
-		value !== "ease" &&
-		value !== "ease-in" &&
-		value !== "ease-out" &&
-		value !== "ease-in-out"
-	) {
+// --- Module Lifecycle ---
+export async function initFocusModule() {
+	// Add module settings to the settings page
+	try {
+		const html = await $.get(`${extensionFolderPath}/html/modules/focus.html`);
+		$("#prome-module-settings").append(html);
+	} catch (error) {
 		console.error(
-			`[${extensionName}] Invalid sprite zoom animation value: ${value}`,
+			`[${extensionName}] Failed to load focus module settings:`,
+			error,
 		);
-		return;
 	}
-	extension_settings[extensionName].zoomAnimation = value;
-	saveSettingsDebounced();
-	applySpriteZoomAnimation();
-}
 
-export function setupFocusModeHTML() {
-	$("#prome-sprite-zoom").prop(
-		"checked",
-		extension_settings[extensionName].spriteZoom,
-	);
-	$("#prome-sprite-zoom-speed")
-		.val(extension_settings[extensionName].zoomSpeed)
+	const settings = extension_settings[extensionName];
+
+	// Sync UI state with settings
+	$("#prome-sprite-zoom").prop("checked", settings.spriteZoom);
+	$("#prome-sprite-defocus-tint").prop("checked", settings.spriteDefocusTint);
+	$("#prome-sprite-zoom-animation").val(settings.zoomAnimation);
+	$("#prome-sprite-zoom-speed").val(settings.zoomSpeed).trigger("input");
+	$("#prome-sprite-zoom-speed-counter")
+		.val(settings.zoomSpeed)
 		.trigger("input");
-	$("#prome-sprite-zoom-speed-counter").val(
-		extension_settings[extensionName].zoomSpeed,
-	);
-	$("#prome-sprite-zoom-animation")
-		.val(extension_settings[extensionName].zoomAnimation)
-		.trigger("change");
+
+	// Bind event handlers
+	$("#prome-sprite-zoom").on("click", (e) => {
+		settings.spriteZoom = Boolean($(e.target).prop("checked"));
+		saveSettingsDebounced();
+		applyFocusSettings();
+	});
+	$("#prome-sprite-defocus-tint").on("click", (e) => {
+		settings.spriteDefocusTint = Boolean($(e.target).prop("checked"));
+		saveSettingsDebounced();
+		applyFocusSettings();
+	});
+	$("#prome-sprite-zoom-animation").on("change", function () {
+		settings.zoomAnimation = this.value;
+		saveSettingsDebounced();
+		applyFocusSettings();
+	});
+	$("#prome-sprite-zoom-speed").on("input", updateZoomSpeed);
+	$("#prome-sprite-zoom-speed-counter").on("input", updateZoomSpeed);
+
+	// Subscribe to PromeBus events
+	promeBus.addEventListener(PROME_SPEAKER_CHANGED, (event) => {
+		const { actorId } = event.detail || {};
+		setFocusedActor(actorId);
+	});
+
+	registerFocusCommands();
+	applyFocusSettings();
 }
 
-export function setupFocusModeJQuery() {
-	$("#prome-sprite-zoom").on("click", onSpriteZoom_Click);
-	$("#prome-sprite-zoom-speed").on("input", onSpriteZoomTimer_Change);
-	$("#prome-sprite-zoom-speed-counter").on("input", onSpriteZoomTimer_Change);
-	$("#prome-sprite-zoom-speed-restore").on("click", resetSpriteZoomTimer);
-	$("#prome-sprite-zoom-animation").on("change", onSpriteZoomAnimation_Select);
+function updateZoomSpeed(event) {
+	const value = Number(event.target.value);
+	if (value >= 0.1 && value <= 1) {
+		extension_settings[extensionName].zoomSpeed = value;
+
+		if (event.target.id === "prome-sprite-zoom-speed") {
+			$("#prome-sprite-zoom-speed-counter").val(value);
+		} else {
+			$("#prome-sprite-zoom-speed").val(value);
+		}
+
+		saveSettingsDebounced();
+		applyFocusSettings();
+	}
+}
+
+// --- Focus Mode Commands ---
+function registerFocusCommands() {
+	const settings = extension_settings[extensionName];
+
+	SlashCommandParser.addCommandObject(
+		SlashCommand.fromProps({
+			name: "sprite-focus",
+			callback: async () => {
+				switchFocusMode(!settings.spriteZoom);
+				toastr.success(
+					`Focus Mode is now ${settings.spriteZoom ? "enabled" : "disabled"}.`,
+					"Focus Mode Status",
+				);
+				return settings.spriteZoom;
+			},
+			helpString:
+				"(Prome Visual Novel Extension) Toggles focus mode on character sprites.",
+		}),
+	);
+
+	SlashCommandParser.addCommandObject(
+		SlashCommand.fromProps({
+			name: "sprite-defocus",
+			callback: async () => {
+				switchUnfocusMode();
+				toastr.success(
+					`Defocus tint is now ${
+						settings.spriteDefocusTint ? "enabled" : "disabled"
+					}.`,
+					"Defocus Tint Status",
+				);
+				return settings.spriteDefocusTint;
+			},
+			helpString:
+				"(Prome Visual Novel Extension) Toggles the defocus tint on non-speaking character sprites.",
+		}),
+	);
+
+	SlashCommandParser.addCommandObject(
+		SlashCommand.fromProps({
+			name: "set-focus-animation",
+			/** @type {(args: { animation: string | undefined }) => void} */
+			callback: async (args, _) => {
+				if (
+					args.animation === "ease" ||
+					args.animation === "ease-in" ||
+					args.animation === "ease-out" ||
+					args.animation === "ease-in-out" ||
+					args.animation === "linear"
+				) {
+					switchFocusModeAnimation(args.animation);
+					toastr.success(
+						`Now set to ${args.animation}.`,
+						"Focus Mode Animation Set",
+					);
+					return settings.zoomAnimation;
+				}
+				toastr.error(
+					'Please use "ease", "ease-in", "ease-out", "ease-in-out" or "linear".',
+					"Invalid Animation",
+				);
+				return null;
+			},
+			namedArgumentList: [
+				SlashCommandNamedArgument.fromProps({
+					name: "animation",
+					description: "The animation to use for sprite zoom.",
+					isRequired: true,
+					typeList: [ARGUMENT_TYPE.STRING],
+					enumList: [
+						new SlashCommandEnumValue(
+							"ease",
+							"Ease animation.",
+							enumTypes.namedArgument,
+						),
+						new SlashCommandEnumValue(
+							"ease-in",
+							"Ease-in animation.",
+							enumTypes.namedArgument,
+						),
+						new SlashCommandEnumValue(
+							"ease-out",
+							"Ease-out animation.",
+							enumTypes.namedArgument,
+						),
+						new SlashCommandEnumValue(
+							"ease-in-out",
+							"Ease-in-out animation.",
+							enumTypes.namedArgument,
+						),
+						new SlashCommandEnumValue(
+							"linear",
+							"Linear animation.",
+							enumTypes.namedArgument,
+						),
+					],
+				}),
+			],
+			helpString:
+				'(Prome Visual Novel Extension) Switches the focus mode animation when "Focus Mode" is enabled.',
+		}),
+	);
+}
+
+function switchFocusMode(mode) {
+	extension_settings[extensionName].spriteZoom = mode;
+	saveSettingsDebounced();
+	$("#prome-sprite-zoom").prop("checked", mode);
+	applyFocusSettings();
+}
+
+function switchUnfocusMode() {
+	extension_settings[extensionName].spriteDefocusTint =
+		!extension_settings[extensionName].spriteDefocusTint;
+	saveSettingsDebounced();
+	$("#prome-sprite-defocus-tint").prop(
+		"checked",
+		extension_settings[extensionName].spriteDefocusTint,
+	);
+	applyFocusSettings();
+}
+
+function switchFocusModeAnimation(animation) {
+	extension_settings[extensionName].zoomAnimation = animation;
+	saveSettingsDebounced();
+	$("#prome-sprite-zoom-animation").val(animation);
+	applyFocusSettings();
 }

@@ -1,74 +1,116 @@
-import { extension_settings } from "../../../../extensions.js";
-import { extensionName } from "../constants.js";
-import { saveSettingsDebounced } from "../../../../../script.js";
-import { getChatId } from "../utils.js";
+import {
+	event_types,
+	eventSource,
+	saveSettingsDebounced,
+} from "../../../../../script.js";
+import {
+	extension_settings,
+	renderExtensionTemplateAsync,
+} from "../../../../extensions.js";
+import { t } from "../../../../i18n.js";
+import { extensionFolderPath, extensionName } from "../constants.js";
 
-/* Sheld Functions */
-export function applySheldVisibility() {
-	if (extension_settings[extensionName].hideSheld === (null || undefined)) {
-		console.debug(`[${extensionName}] hideSheld returned null or undefined.`);
-	}
-
-	console.debug(
-		`[${extensionName}] Hide Sheld?: ${extension_settings[extensionName].hideSheld}`,
-	);
-
-	$("#sheld").toggleClass(
-		"displayNone",
-		extension_settings[extensionName].hideSheld,
-	);
+function setSheldHidden(hidden) {
+	const settings = extension_settings[extensionName];
+	settings.hideSheld = hidden;
+	$("#prome-hide-sheld").prop("checked", hidden);
+	document.body.classList.toggle("prome-hide-sheld", hidden);
+	saveSettingsDebounced();
 }
 
-export function applySheldMode() {
-	if (
-		extension_settings[extensionName].showOnlyLastMessage ===
-		(null || undefined)
-	) {
-		console.debug(
-			`[${extensionName}] showOnlyLastMessage returned null or undefined`,
+async function initTraditionalVN(settings) {
+	const chat = document.getElementById("chat");
+	const wand = document.getElementById("extensionsMenu");
+	if (!chat || !wand) return;
+
+	const html = await renderExtensionTemplateAsync(
+		`third-party/${extensionName}/html`,
+		"wand_buttons",
+	);
+	const menuItem = $(html).appendTo(wand);
+	const historyButton = menuItem.find("#prome-wand-chat-history");
+	const historyLabel = historyButton.find("span");
+
+	function showHistory(show) {
+		document.body.classList.toggle("prome-chat-history-open", show);
+		historyLabel.text(show ? t`Show latest message` : t`Show chat history`);
+	}
+
+	function applyMode() {
+		document.body.classList.toggle(
+			"prome-traditional-vn",
+			settings.showOnlyLastMessage,
+		);
+		showHistory(false);
+	}
+
+	historyButton.on("click", () => {
+		const distanceFromBottom =
+			chat.scrollHeight - chat.clientHeight - chat.scrollTop;
+		const show = !document.body.classList.contains("prome-chat-history-open");
+		showHistory(show);
+		chat.scrollTop = chat.scrollHeight - chat.clientHeight - distanceFromBottom;
+	});
+
+	$("#prome-sheld-last_mes")
+		.prop("checked", settings.showOnlyLastMessage)
+		.on("change", (event) => {
+			settings.showOnlyLastMessage = event.target.checked;
+			applyMode();
+			saveSettingsDebounced();
+		});
+	eventSource.on(event_types.CHAT_CHANGED, () => showHistory(false));
+	$("#prome-enable-vn").on("click", () => showHistory(false));
+	applyMode();
+}
+
+// --- Module Lifecycle ---
+export async function initSheldModule() {
+	try {
+		const html = await $.get(`${extensionFolderPath}/html/modules/sheld.html`);
+		$("#prome-module-settings").append(html);
+		await initTraditionalVN(extension_settings[extensionName]);
+	} catch (error) {
+		console.error(
+			`[${extensionName}] Failed to load sheld module settings:`,
+			error,
 		);
 	}
 
-	console.debug(
-		`[${extensionName}] Show Only Last Message?: ${extension_settings[extensionName].showOnlyLastMessage}`,
+	const settings = extension_settings[extensionName];
+
+	// Sync UI state with settings
+	$("#prome-hide-sheld").prop("checked", settings.hideSheld);
+
+	// Bind event handlers
+	$("#prome-hide-sheld").on("change", (event) => {
+		setSheldHidden(event.target.checked);
+	});
+
+	window.addEventListener(
+		"keydown",
+		(event) => {
+			if (event.defaultPrevented || event.isComposing || event.metaKey) return;
+			const controlF1 =
+				event.key === "F1" && event.ctrlKey && !event.altKey && !event.shiftKey;
+			const altShiftH =
+				event.code === "KeyH" &&
+				event.altKey &&
+				event.shiftKey &&
+				!event.ctrlKey;
+			if (!controlF1 && !altShiftH) return;
+			event.preventDefault();
+			if (!event.repeat) setSheldHidden(!settings.hideSheld);
+		},
+		{ capture: true },
 	);
 
-	const currentChatId = getChatId();
-	if (!currentChatId) return;
+	document.body.classList.toggle("prome-hide-sheld", settings.hideSheld);
 
-	if (!extension_settings[extensionName].enableVN_UI) {
-		// revert all changes if VN mode is disabled
-		$("#chat [id='show_more_messages']").removeClass("displayNone");
-		$("#chat .mes").removeClass("displayNone");
-	} else {
-		// hide "Show more messages" as it's obsolete for single message mode
-		// show it if the mode is disabled
-		$("#chat [id='show_more_messages']").toggleClass(
-			"displayNone",
-			extension_settings[extensionName].showOnlyLastMessage,
+	if (settings.hideSheld) {
+		toastr.info(
+			"Head to Extensions > Prome (Visual Novel Extension) > Sheld Settings and uncheck 'Hide Sheld' to show it again.",
+			"Sheld is currently hidden by the Prome Visual Novel Extension.",
 		);
-
-		// remove previous messages that were hidden in the chat div
-		$("#chat .mes").removeClass("displayNone");
-
-		// now hide all messages except the last one ("mes last_mes")
-		if (extension_settings[extensionName].showOnlyLastMessage) {
-			$("#chat .mes:not(.last_mes)").addClass("displayNone"); // hide all messages except the last one
-		}
 	}
-}
-
-/* Event Handlers */
-export function onSheld_Click(event) {
-	const value = Boolean($(event.target).prop("checked"));
-	extension_settings[extensionName].hideSheld = value;
-	saveSettingsDebounced();
-	applySheldVisibility();
-}
-
-export function onSheldMode_Click(event) {
-	const value = Boolean($(event.target).prop("checked"));
-	extension_settings[extensionName].showOnlyLastMessage = value;
-	saveSettingsDebounced();
-	applySheldMode();
 }
