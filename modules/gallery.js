@@ -26,6 +26,7 @@ import {
 import { getSpriteFilename, getSpriteStem } from "../core/sprite-variants.js";
 import {
 	deleteSprite,
+	invalidateSpritePack,
 	normalizeSpriteFolderOverride,
 	resolveSpriteFolder,
 	setSpriteFolderOverride,
@@ -266,6 +267,7 @@ function bindGalleryEvents(modal) {
 	const pinBtn = modal.find("#prome-gallery-pin-btn");
 	const zipBtn = modal.find("#prome-gallery-zip-btn");
 	const addExpressionBtn = modal.find("#prome-gallery-add-emotion-btn");
+	const reloadBtn = modal.find("#prome-gallery-reload-btn");
 	const zipInput = modal.find("#prome-gallery-zip-input");
 	const fileInput = modal.find("#prome-gallery-file-input");
 
@@ -314,7 +316,7 @@ function bindGalleryEvents(modal) {
 		coreGrid.empty();
 		extraGrid.empty();
 		sprites = null;
-		zipBtn.add(addExpressionBtn).prop("disabled", true);
+		zipBtn.add(addExpressionBtn).add(reloadBtn).prop("disabled", true);
 		filterCards(searchInput.val(), grid, countDisplay);
 		status
 			.prop("hidden", false)
@@ -329,8 +331,9 @@ function bindGalleryEvents(modal) {
 
 		const { sprites: loaded, err } = await getSpriteList(folder);
 		if (isClosed || revision !== loadRevision) return;
+		reloadBtn.prop("disabled", false);
 		if (err) {
-			status.text("Could not load sprites. Reopen the gallery to retry.");
+			status.text("Could not load sprites. Use Reload sprites to retry.");
 			return;
 		}
 		zipBtn.add(addExpressionBtn).prop("disabled", false);
@@ -339,10 +342,17 @@ function bindGalleryEvents(modal) {
 		redrawCards();
 	}
 
-	function refreshAfterEdit(folder) {
+	function refreshSpriteViews(folder) {
 		emitPromeEvent(PROME_STAGE_REFRESH_REQUESTED);
 		if (!isClosed && folder === selectedFolder()) void loadTargetSprites();
 	}
+
+	reloadBtn.on("click", () => {
+		const folder = selectedFolder();
+		if (!folder) return;
+		invalidateSpritePack(folder);
+		refreshSpriteViews(folder);
+	});
 
 	function syncOverrideControls() {
 		const target = selectedTarget();
@@ -511,10 +521,10 @@ function bindGalleryEvents(modal) {
 		if (isClosed || result !== POPUP_RESULT.AFFIRMATIVE) return;
 		if (await deleteSprite(folder, label, stem)) {
 			toastr.success(`Deleted ${target}.`);
-			refreshAfterEdit(folder);
 		} else {
 			toastr.error(`Failed to delete sprite "${filename}".`);
 		}
+		refreshSpriteViews(folder);
 	});
 
 	grid.on("click", ".prome-btn-upload, .prome-btn-add-variant", function () {
@@ -562,10 +572,10 @@ function bindGalleryEvents(modal) {
 				toastr.success(`Uploaded "${filename}".`);
 				if (upload.folder === selectedFolder())
 					selectedFilenames.set(upload.label, filename);
-				refreshAfterEdit(upload.folder);
 			} else {
 				toastr.error(`Failed to upload sprite "${upload.stem}".`);
 			}
+			refreshSpriteViews(upload.folder);
 		} finally {
 			uploadInProgress = false;
 		}
@@ -592,10 +602,10 @@ function bindGalleryEvents(modal) {
 			const result = await uploadSpritePack(folder, file);
 			if (result?.ok) {
 				toastr.success(`Uploaded ${result.count ?? ""} sprites for ${folder}!`);
-				refreshAfterEdit(folder);
 			} else {
 				toastr.error("Failed to upload sprite pack.");
 			}
+			refreshSpriteViews(folder);
 		} finally {
 			uploadInProgress = false;
 			toastr.clear(toast);

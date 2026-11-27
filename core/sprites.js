@@ -5,6 +5,9 @@ import {
 import { extensionName } from "../constants.js";
 import { emitPromeEvent, PROME_SPRITE_FOLDER_CHANGED } from "./bus.js";
 
+const SPRITE_PACK_TTL_MS = 60_000;
+const spritePacks = new Map();
+
 export function resolveSpriteFolder(actorId, defaultFolder, settings) {
 	return settings.spriteFolderOverrides?.[actorId] || defaultFolder || "";
 }
@@ -42,14 +45,51 @@ export function setSpriteFolderOverride(actorId, folder, settings) {
  */
 export async function fetchSprites(folderName) {
 	if (!folderName) return [];
+
+	const now = performance.now();
+	const cached = spritePacks.get(folderName);
+	if (cached && cached.expiresAt > now) return cached.promise;
+
+	for (const [folder, entry] of spritePacks) {
+		if (entry.expiresAt <= now) spritePacks.delete(folder);
+	}
+
+	const entry = { expiresAt: Infinity, promise: null };
+	entry.promise = requestSpritePack(folderName).then(
+		(sprites) => {
+			// A write or manual reload can invalidate the folder while this read is pending.
+			if (spritePacks.get(folderName) !== entry) return fetchSprites(folderName);
+			entry.expiresAt = performance.now() + SPRITE_PACK_TTL_MS;
+			return sprites;
+		},
+		(error) => {
+			if (spritePacks.get(folderName) !== entry) return fetchSprites(folderName);
+			spritePacks.delete(folderName);
+			throw error;
+		},
+	);
+	spritePacks.set(folderName, entry);
+	return entry.promise;
+}
+
+export function invalidateSpritePack(folderName) {
+	spritePacks.delete(folderName);
+}
+
+async function requestSpritePack(folderName) {
 	const res = await fetch(
 		`/api/sprites/get?name=${encodeURIComponent(folderName)}`,
+		{ cache: "no-cache" },
 	);
 	if (!res.ok)
 		throw new Error(
 			`Could not load sprite folder "${folderName}" (HTTP ${res.status}).`,
 		);
-	return res.json();
+	const sprites = await res.json();
+	if (!Array.isArray(sprites)) {
+		throw new Error(`Unexpected sprite list for "${folderName}".`);
+	}
+	return sprites;
 }
 
 /**
@@ -77,6 +117,8 @@ export async function uploadSprite(folderName, label, file, spriteName = null) {
 	} catch (error) {
 		console.error(`[${extensionName}] Failed to upload sprite:`, error);
 		return false;
+	} finally {
+		invalidateSpritePack(folderName);
 	}
 }
 
@@ -101,6 +143,8 @@ export async function uploadSpritePack(folderName, zipFile) {
 	} catch (error) {
 		console.error(`[${extensionName}] Failed to upload sprite pack:`, error);
 		return null;
+	} finally {
+		invalidateSpritePack(folderName);
 	}
 }
 
@@ -126,5 +170,7 @@ export async function deleteSprite(folderName, label, spriteName = null) {
 	} catch (error) {
 		console.error(`[${extensionName}] Failed to delete sprite:`, error);
 		return false;
+	} finally {
+		invalidateSpritePack(folderName);
 	}
 }
