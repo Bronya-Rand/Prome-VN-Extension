@@ -1,131 +1,89 @@
-import { extensionName } from "../constants.js";
-import { extension_settings } from "../../../../extensions.js";
 import { saveSettingsDebounced } from "../../../../../script.js";
+import { extension_settings } from "../../../../extensions.js";
 import {
-	getGroupIndex,
-	getRecentTalkingCharacters,
-	isAutoHideSpritesEnabled,
-	isUserSpriteEnabled,
-} from "../utils.js";
-import { visualNovelUpdateLayers } from "../../../expressions/index.js";
+	defaultSettings,
+	extensionFolderPath,
+	extensionName,
+} from "../constants.js";
+import { emitPromeEvent } from "../core/bus.js";
+import { getRecentTalkingCharacters, isGroupChat } from "../utils.js";
 
-export function applyAutoHideSprites() {
-	if (
-		extension_settings[extensionName].autoHideSprites === (null || undefined)
-	) {
-		console.debug(
-			`[${extensionName}] autoHideSprites returned null or undefined.`,
-		);
+export function filterActiveGroupCharacters(characters) {
+	const settings = extension_settings[extensionName];
+	if (!isGroupChat() || !settings.autoHideSprites) {
+		return characters;
 	}
 
-	console.debug(
-		`[${extensionName}] Auto Hide Sprites?: ${extension_settings[extensionName].autoHideSprites}`,
+	const maxVisible = Number(settings.maxViewableCharacters) || 5;
+	if (characters.length <= maxVisible) {
+		return characters;
+	}
+
+	const eligibleAvatars = new Set(
+		characters.map((character) => character.avatar),
 	);
+	const recentAvatars = getRecentTalkingCharacters()
+		.filter((avatar) => eligibleAvatars.has(avatar))
+		.slice(0, maxVisible);
+	const recentSet = new Set(recentAvatars);
 
-	handleAutoHideSprites();
+	// Keep the recent speakers
+	const visibleCharacters = characters.filter((c) => recentSet.has(c.avatar));
+
+	// If chat history has fewer speakers than maxVisible (e.g. early in chat),
+	// fill the remaining slots with other group members so the stage isn't empty
+	if (visibleCharacters.length < maxVisible) {
+		for (const char of characters) {
+			if (!visibleCharacters.includes(char)) {
+				visibleCharacters.push(char);
+				if (visibleCharacters.length >= maxVisible) break;
+			}
+		}
+	}
+	return visibleCharacters;
 }
 
-export function onAutoHideSprites_Click(event) {
-	const value = Boolean($(event.target).prop("checked"));
-	extension_settings[extensionName].autoHideSprites = value;
-	saveSettingsDebounced();
-	applyAutoHideSprites();
-}
-
-export async function onAutoHideMaxSprites_Change() {
-	const vnWrapper = $("#visual-novel-wrapper");
-	const value = Number(this.value);
-	if (value < 0 || value > 8) {
+// --- Module Lifecycle ---
+export async function initAutoHideModule() {
+	try {
+		const html = await $.get(
+			`${extensionFolderPath}/html/modules/auto-hide.html`,
+		);
+		$("#prome-module-settings").append(html);
+	} catch (error) {
 		console.error(
-			`[${extensionName}] Invalid max value for auto-hide sprites: ${value}`,
+			`[${extensionName}] Failed to load auto-hide module settings:`,
+			error,
 		);
-		return;
-	}
-	extension_settings[extensionName].maxViewableCharacters = value;
-	$("#prome-sprite-max-visible").val(value);
-	saveSettingsDebounced();
-	handleAutoHideSprites();
-	await visualNovelUpdateLayers(vnWrapper);
-}
-
-export function setupAutoHideHTML() {
-	$("#prome-auto-hide-sprites").prop(
-		"checked",
-		extension_settings[extensionName].autoHideSprites,
-	);
-	$("#prome-sprite-max-visible").val(
-		extension_settings[extensionName].maxViewableCharacters,
-	);
-}
-
-export function setupAutoHideJQuery() {
-	$("#prome-auto-hide-sprites").on("click", onAutoHideSprites_Click);
-	$("#prome-sprite-max-visible").on("change", onAutoHideMaxSprites_Change);
-}
-
-export async function handleAutoHideSprites() {
-	const groupIndex = getGroupIndex();
-	// Get all characters within the '#visual-novel-wrapper' div
-	const vnWrapper = $("#visual-novel-wrapper");
-	const allSprites = vnWrapper.children('div');
-
-	// If the user is not in a group or auto-hide is disabled, exit
-	if (groupIndex === -1 || !isAutoHideSpritesEnabled()) {
-		allSprites.removeClass("displayNone").css("display", "inherit");
-		if (groupIndex !== -1) await visualNovelUpdateLayers(vnWrapper);
-		return;
 	}
 
-	const maxVisibleCharacters =
-		extension_settings[extensionName].maxViewableCharacters;
+	const settings = extension_settings[extensionName];
 
-	// Exit if not enough characters to hide
-	if (allSprites.length <= maxVisibleCharacters) {
-		allSprites.removeClass("displayNone");
-		allSprites.css("display", "inherit");
-	} else {
-		const recentTalkingCharacters =
-			getRecentTalkingCharacters(maxVisibleCharacters);
-		const visibleCharacterIds = new Set(recentTalkingCharacters);
+	// Sync UI state with settings
+	$("#prome-auto-hide-sprites").prop("checked", settings.autoHideSprites);
+	$("#prome-sprite-max-visible").val(settings.maxViewableCharacters);
 
-		const spritesToShow = [];
-		const spritesToHide = [];
+	// Bind event handlers
+	$("#prome-auto-hide-sprites").on("click", (e) => {
+		settings.autoHideSprites = Boolean($(e.target).prop("checked"));
+		saveSettingsDebounced();
+		emitPromeEvent("PROME_STAGE_REFRESH_REQUESTED");
+	});
 
-		allSprites.each((_, sprite) => {
-			const $sprite = $(sprite);
-
-			// Skip if User Sprite
-			if (
-				isUserSpriteEnabled() &&
-				$sprite.attr("id") === "expression-prome-user"
-			) {
-				spritesToShow.push($sprite);
-				return;
-			}
-
-			const characterId = $sprite.data().avatar;
-
-			if (visibleCharacterIds.has(characterId)) {
-				spritesToShow.push($sprite);
-			} else {
-				spritesToHide.push($sprite);
-			}
-		});
-
-		if (spritesToShow.length > 0) {
-			for (const sprite of spritesToShow) {
-				sprite.removeClass("displayNone");
-				sprite.css("display", "inherit");
-			}
+	$("#prome-sprite-max-visible").on("input", (e) => {
+		const val = Number(e.target.value);
+		if (Number.isInteger(val) && val >= 1 && val <= 8) {
+			settings.maxViewableCharacters = val;
+			saveSettingsDebounced();
+			emitPromeEvent("PROME_STAGE_REFRESH_REQUESTED");
 		}
+	});
 
-		if (spritesToHide.length > 0) {
-			for (const sprite of spritesToHide) {
-				sprite.addClass("displayNone");
-			}
-		}
-	}
-
-	await visualNovelUpdateLayers(vnWrapper);
-	return;
+	$("#prome-sprite-max-visible-restore").on("click", () => {
+		const def = defaultSettings.maxViewableCharacters;
+		settings.maxViewableCharacters = def;
+		$("#prome-sprite-max-visible").val(def);
+		saveSettingsDebounced();
+		emitPromeEvent("PROME_STAGE_REFRESH_REQUESTED");
+	});
 }

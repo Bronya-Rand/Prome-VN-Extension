@@ -1,61 +1,135 @@
-import { extension_settings } from "../../../../extensions.js";
 import { saveSettingsDebounced } from "../../../../../script.js";
-import { extensionName } from "../constants.js";
-import { POPUP_TYPE, callGenericPopup } from "../../../../popup.js";
+import { extension_settings } from "../../../../extensions.js";
+import { callGenericPopup, POPUP_TYPE } from "../../../../popup.js";
+import { SlashCommand } from "../../../../slash-commands/SlashCommand.js";
+import { SlashCommandParser } from "../../../../slash-commands/SlashCommandParser.js";
+import { extensionFolderPath, extensionName } from "../constants.js";
 
+const FILTER_PROPS = [
+	"blur",
+	"brightness",
+	"contrast",
+	"grayscale",
+	"hue",
+	"invert",
+	"saturate",
+	"sepia",
+];
+
+// --- CSS Class / Helpers ---
 export function applyTint() {
-	if (extension_settings[extensionName].worldTint === (null || undefined)) {
-		console.debug(`[${extensionName}] worldTint returned null or undefined.`);
-	}
-	if (
-		extension_settings[extensionName].currentTintValues.shared ===
-		(null || undefined)
-	) {
-		console.debug(`[${extensionName}] tintShared returned null or undefined.`);
-	}
-
-	console.debug(
-		`[${extensionName}] World Tint?: ${extension_settings[extensionName].worldTint}`,
-	);
-	console.debug(
-		`[${extensionName}] Shared Tint?: ${extension_settings[extensionName].currentTintValues.shared}`,
-	);
-
-	$("body").toggleClass(
-		"worldTint",
-		extension_settings[extensionName].worldTint,
-	);
-
-	$("body").toggleClass(
-		"tintWorld",
-		extension_settings[extensionName].currentTintValues.world.enabled,
-	);
-
-	$("body").toggleClass(
-		"tintCharacter",
-		extension_settings[extensionName].currentTintValues.character.enabled,
-	);
-
-	$("body").toggleClass(
-		"tintShared",
-		extension_settings[extensionName].currentTintValues.shared,
-	);
-
+	const settings = extension_settings[extensionName];
+	const current = settings.currentTintValues;
+	$("body").toggleClass("worldTint", Boolean(settings.worldTint));
+	$("body").toggleClass("tintWorld", Boolean(current?.world?.enabled));
+	$("body").toggleClass("tintCharacter", Boolean(current?.character?.enabled));
+	$("body").toggleClass("tintShared", Boolean(current?.shared));
 	addTint();
 }
 
 function addTint() {
-	const worldTintFilter = `blur(${extension_settings[extensionName].currentTintValues.world.blur}px) brightness(${extension_settings[extensionName].currentTintValues.world.brightness}%) contrast(${extension_settings[extensionName].currentTintValues.world.contrast}%) grayscale(${extension_settings[extensionName].currentTintValues.world.grayscale}%) hue-rotate(${extension_settings[extensionName].currentTintValues.world.hue}deg) invert(${extension_settings[extensionName].currentTintValues.world.invert}%) saturate(${extension_settings[extensionName].currentTintValues.world.saturate}%) sepia(${extension_settings[extensionName].currentTintValues.world.sepia}%)`;
-	const characterTintFilter = `blur(${extension_settings[extensionName].currentTintValues.character.blur}px) brightness(${extension_settings[extensionName].currentTintValues.character.brightness}%) contrast(${extension_settings[extensionName].currentTintValues.character.contrast}%) grayscale(${extension_settings[extensionName].currentTintValues.character.grayscale}%) hue-rotate(${extension_settings[extensionName].currentTintValues.character.hue}deg) invert(${extension_settings[extensionName].currentTintValues.character.invert}%) saturate(${extension_settings[extensionName].currentTintValues.character.saturate}%) sepia(${extension_settings[extensionName].currentTintValues.character.sepia}%)`;
+	const current = extension_settings[extensionName].currentTintValues;
+	if (!current) return;
+
+	const buildFilter = (cfg) =>
+		`blur(${cfg.blur}px) brightness(${cfg.brightness}%) contrast(${cfg.contrast}%) ` +
+		`grayscale(${cfg.grayscale}%) hue-rotate(${cfg.hue}deg) invert(${cfg.invert}%) ` +
+		`saturate(${cfg.saturate}%) sepia(${cfg.sepia}%)`;
 
 	document.documentElement.style.setProperty(
 		"--prome-background-tint-filter",
-		worldTintFilter,
+		buildFilter(current.world),
 	);
 	document.documentElement.style.setProperty(
 		"--prome-character-tint-filter",
-		characterTintFilter,
+		buildFilter(current.character),
 	);
+}
+
+// --- Module Lifecycle ---
+export async function initTintModule() {
+	try {
+		const html = await $.get(`${extensionFolderPath}/html/modules/tint.html`);
+		$("#prome-module-settings").append(html);
+	} catch (error) {
+		console.error(
+			`[${extensionName}] Failed to load tint module settings:`,
+			error,
+		);
+	}
+
+	const settings = extension_settings[extensionName];
+	const preset = settings.currentTintValues;
+
+	// Sync UI state with settings
+	$("#prome-tint-enable").prop("checked", settings.worldTint);
+	$("#prome-tint-preset").val(preset.name);
+	$("#prome-tint-share").prop("checked", preset.shared);
+	$("#prome-world-tint").prop("checked", preset.world.enabled);
+	$("#prome-character-tint").prop("checked", preset.character.enabled);
+
+	for (const target of ["world", "character"]) {
+		for (const prop of FILTER_PROPS) {
+			$(`#prome-${target}-${prop}`).val(preset[target][prop]);
+		}
+	}
+
+	// Populate preset dropdown
+	$("#prome-tint-preset").empty();
+	for (const tint of settings.tintPresets) {
+		const option = document.createElement("option");
+		option.value = tint.name;
+		option.text = tint.name;
+		option.selected = tint.name === settings.selectedTint;
+		$("#prome-tint-preset").append(option);
+	}
+
+	// Bind event handlers
+	$("#prome-tint-enable").on("click", (e) => {
+		settings.worldTint = Boolean($(e.target).prop("checked"));
+		saveSettingsDebounced();
+		applyTint();
+	});
+	$("#prome-tint-share").on("click", (e) => {
+		settings.currentTintValues.shared = Boolean($(e.target).prop("checked"));
+		saveSettingsDebounced();
+		applyTint();
+	});
+	$("#prome-world-tint").on("click", (e) => {
+		settings.currentTintValues.world.enabled = Boolean(
+			$(e.target).prop("checked"),
+		);
+		saveSettingsDebounced();
+		applyTint();
+	});
+	$("#prome-character-tint").on("click", (e) => {
+		settings.currentTintValues.character.enabled = Boolean(
+			$(e.target).prop("checked"),
+		);
+		saveSettingsDebounced();
+		applyTint();
+	});
+
+	for (const target of ["world", "character"]) {
+		for (const prop of FILTER_PROPS) {
+			$(`#prome-${target}-${prop}`).on("input", function () {
+				const val = Number(this.value);
+				if (val >= 0) {
+					settings.currentTintValues[target][prop] = val;
+					saveSettingsDebounced();
+					addTint();
+				}
+			});
+		}
+	}
+
+	// Bind preset buttons
+	$("#prome-tint-preset").on("change", onTintPreset_Select);
+	$("#prome-tint-save").on("click", onTintPreset_Save);
+	$("#prome-tint-delete").on("click", onTintPreset_Delete);
+
+	registerTintCommands();
+	applyTint();
 }
 
 function onTintPreset_Select() {
@@ -110,7 +184,7 @@ async function onTintPreset_Delete() {
 	if (!presetObject) return;
 
 	const confirm = await callGenericPopup(
-		`Are you sure you want to delete the tint preset: ${selectedStyle}?`,
+		$("<p>").text(`Delete tint preset "${selectedStyle}"?`),
 		POPUP_TYPE.CONFIRM,
 		"",
 		{ okButton: "Delete", cancelButton: "Cancel" },
@@ -122,7 +196,9 @@ async function onTintPreset_Delete() {
 	if (index === -1) return;
 
 	extension_settings[extensionName].tintPresets.splice(index, 1);
-	$("#prome-tint-preset").find(`option[value="${selectedStyle}"]`).remove();
+	$("#prome-tint-preset option")
+		.filter((_, option) => option.value === selectedStyle)
+		.remove();
 
 	if (extension_settings[extensionName].tintPresets.length > 0) {
 		extension_settings[extensionName].selectedTint =
@@ -190,399 +266,160 @@ async function onTintPreset_Save() {
 	);
 
 	if (!userInput) return;
-
 	const name = String(userInput).trim();
-	const shared = Boolean($("#prome-tint-share").val());
-	const worldEnabled = Boolean($("#prome-world-tint").val());
-	const worldBlur = Number($("#prome-world-blur").val());
-	const worldBrightness = Number($("#prome-world-brightness").val());
-	const worldContrast = Number($("#prome-world-contrast").val());
-	const worldGrayscale = Number($("#prome-world-grayscale").val());
-	const worldHue = Number($("#prome-world-hue").val());
-	const worldInvert = Number($("#prome-world-invert").val());
-	const worldSaturate = Number($("#prome-world-saturate").val());
-	const worldSepia = Number($("#prome-world-sepia").val());
-	const characterEnabled = Boolean($("#prome-character-tint").val());
-	const characterBlur = Number($("#prome-character-blur").val());
-	const characterBrightness = Number($("#prome-character-brightness").val());
-	const characterContrast = Number($("#prome-character-contrast").val());
-	const characterGrayscale = Number($("#prome-character-grayscale").val());
-	const characterHue = Number($("#prome-character-hue").val());
-	const characterInvert = Number($("#prome-character-invert").val());
-	const characterSaturate = Number($("#prome-character-saturate").val());
-	const characterSepia = Number($("#prome-character-sepia").val());
+	if (!name) return;
 
-	const alreadyExists = extension_settings[extensionName].tintPresets.find(
+	const settings = extension_settings[extensionName];
+
+	// Deep copy the current tint values
+	const newPreset = JSON.parse(JSON.stringify(settings.currentTintValues));
+	newPreset.name = name;
+
+	// Check if a preset with the same name already exists
+	const existingPresetIndex = settings.tintPresets.findIndex(
 		(preset) => preset.name === name,
 	);
 
-	if (alreadyExists) {
-		alreadyExists.shared = shared;
-		alreadyExists.world.enabled = worldEnabled;
-		alreadyExists.world.blur = worldBlur;
-		alreadyExists.world.brightness = worldBrightness;
-		alreadyExists.world.contrast = worldContrast;
-		alreadyExists.world.grayscale = worldGrayscale;
-		alreadyExists.world.hue = worldHue;
-		alreadyExists.world.invert = worldInvert;
-		alreadyExists.world.saturate = worldSaturate;
-		alreadyExists.world.sepia = worldSepia;
-		alreadyExists.character.enabled = characterEnabled;
-		alreadyExists.character.blur = characterBlur;
-		alreadyExists.character.brightness = characterBrightness;
-		alreadyExists.character.contrast = characterContrast;
-		alreadyExists.character.grayscale = characterGrayscale;
-		alreadyExists.character.hue = characterHue;
-		alreadyExists.character.invert = characterInvert;
-		alreadyExists.character.saturate = characterSaturate;
-		alreadyExists.character.sepia = characterSepia;
-		$("#prome-tint-preset").val(name);
-		saveSettingsDebounced();
-	}
-
-	const tintObject = {
-		name: name,
-		shared: shared,
-		world: {
-			enabled: worldEnabled,
-			blur: worldBlur,
-			brightness: worldBrightness,
-			contrast: worldContrast,
-			grayscale: worldGrayscale,
-			hue: worldHue,
-			invert: worldInvert,
-			saturate: worldSaturate,
-			sepia: worldSepia,
-		},
-		character: {
-			enabled: characterEnabled,
-			blur: characterBlur,
-			brightness: characterBrightness,
-			contrast: characterContrast,
-			grayscale: characterGrayscale,
-			hue: characterHue,
-			invert: characterInvert,
-			saturate: characterSaturate,
-			sepia: characterSepia,
-		},
-	};
-
-	extension_settings[extensionName].tintPresets.push(tintObject);
-	const option = document.createElement("option");
-	option.value = name;
-	option.text = name;
-	option.selected = true;
-	$("#prome-tint-preset").append(option);
-	$("#prome-tint-preset").val(tintObject.name);
-	extension_settings[extensionName].selectedTint = name;
-	extension_settings[extensionName].currentTintValues = JSON.parse(
-		JSON.stringify(tintObject),
-	);
-	saveSettingsDebounced();
-}
-
-/* UI Functions */
-function onTintEnable_Click(event) {
-	const value = Boolean($(event.target).prop("checked"));
-	extension_settings[extensionName].worldTint = value;
-	saveSettingsDebounced();
-	applyTint();
-}
-
-/* Preset Functions */
-function onTintShare_Click(event) {
-	const value = Boolean($(event.target).prop("checked"));
-	extension_settings[extensionName].currentTintValues.shared = value;
-	saveSettingsDebounced();
-	applyTint();
-}
-
-function onWorldTint_Click() {
-	const value = Boolean($(event.target).prop("checked"));
-	extension_settings[extensionName].currentTintValues.world.enabled = value;
-	saveSettingsDebounced();
-	applyTint();
-}
-
-function onCharacterTint_Click() {
-	const value = Boolean($(event.target).prop("checked"));
-	extension_settings[extensionName].currentTintValues.character.enabled = value;
-	saveSettingsDebounced();
-	applyTint();
-}
-
-function onWorldTintBlur_Change() {
-	const value = this.value;
-	if (value < 0) {
-		console.error(`[${extensionName}] Invalid world blur value: ${value}`);
-		return;
-	}
-	extension_settings[extensionName].currentTintValues.world.blur = value;
-	$("#prome-world-blur").val(value);
-	saveSettingsDebounced();
-	addTint();
-}
-
-function onWorldTintBrightness_Change() {
-	const value = this.value;
-	if (value < 0) {
-		console.error(
-			`[${extensionName}] Invalid world brightness value: ${value}`,
-		);
-		return;
-	}
-	extension_settings[extensionName].currentTintValues.world.brightness = value;
-	$("#prome-world-brightness").val(value);
-	saveSettingsDebounced();
-	addTint();
-}
-
-function onWorldTintContrast_Change() {
-	const value = this.value;
-	if (value < 0) {
-		console.error(`[${extensionName}] Invalid world contrast value: ${value}`);
-		return;
-	}
-	extension_settings[extensionName].currentTintValues.world.contrast = value;
-	$("#prome-world-contrast").val(value);
-	saveSettingsDebounced();
-	addTint();
-}
-
-function onWorldTintGrayscale_Change() {
-	const value = this.value;
-	if (value < 0) {
-		console.error(`[${extensionName}] Invalid world grayscale value: ${value}`);
-		return;
-	}
-	extension_settings[extensionName].currentTintValues.world.grayscale = value;
-	$("#prome-world-grayscale").val(value);
-	saveSettingsDebounced();
-	addTint();
-}
-
-function onWorldTintHue_Change() {
-	const value = this.value;
-	if (value < 0) {
-		console.error(`[${extensionName}] Invalid world hue value: ${value}`);
-		return;
-	}
-	extension_settings[extensionName].currentTintValues.world.hue = value;
-	$("#prome-world-hue").val(value);
-	saveSettingsDebounced();
-	addTint();
-}
-
-function onWorldTintInvert_Change() {
-	const value = this.value;
-	if (value < 0) {
-		console.error(`[${extensionName}] Invalid world invert value: ${value}`);
-		return;
-	}
-	extension_settings[extensionName].currentTintValues.world.invert = value;
-	$("#prome-world-invert").val(value);
-	saveSettingsDebounced();
-	addTint();
-}
-
-function onWorldTintSaturate_Change() {
-	const value = this.value;
-	if (value < 0) {
-		console.error(`[${extensionName}] Invalid world saturate value: ${value}`);
-		return;
-	}
-	extension_settings[extensionName].currentTintValues.world.saturate = value;
-	$("#prome-world-saturate").val(value);
-	saveSettingsDebounced();
-	addTint();
-}
-
-function onWorldTintSepia_Change() {
-	const value = this.value;
-	if (value < 0) {
-		console.error(`[${extensionName}] Invalid world sepia value: ${value}`);
-		return;
-	}
-	extension_settings[extensionName].currentTintValues.world.sepia = value;
-	$("#prome-world-sepia").val(value);
-	saveSettingsDebounced();
-	addTint();
-}
-
-function onCharacterTintBlur_Change() {
-	const value = this.value;
-	if (value < 0) {
-		console.error(`[${extensionName}] Invalid character blur value: ${value}`);
-		return;
-	}
-	extension_settings[extensionName].currentTintValues.character.blur = value;
-	$("#prome-character-blur").val(value);
-	saveSettingsDebounced();
-	addTint();
-}
-
-function onCharacterTintBrightness_Change() {
-	const value = this.value;
-	if (value < 0) {
-		console.error(
-			`[${extensionName}] Invalid character brightness value: ${value}`,
-		);
-		return;
-	}
-	extension_settings[extensionName].currentTintValues.character.brightness =
-		value;
-	$("#prome-character-brightness").val(value);
-	saveSettingsDebounced();
-	addTint();
-}
-
-function onCharacterTintContrast_Change() {
-	const value = this.value;
-	if (value < 0) {
-		console.error(
-			`[${extensionName}] Invalid character contrast value: ${value}`,
-		);
-		return;
-	}
-	extension_settings[extensionName].currentTintValues.character.contrast =
-		value;
-	$("#prome-character-contrast").val(value);
-	saveSettingsDebounced();
-	addTint();
-}
-
-function onCharacterTintGrayscale_Change() {
-	const value = this.value;
-	if (value < 0) {
-		console.error(
-			`[${extensionName}] Invalid character grayscale value: ${value}`,
-		);
-		return;
-	}
-	extension_settings[extensionName].currentTintValues.character.grayscale =
-		value;
-	$("#prome-character-grayscale").val(value);
-	saveSettingsDebounced();
-	addTint();
-}
-
-function onCharacterTintHue_Change() {
-	const value = this.value;
-	if (value < 0) {
-		console.error(`[${extensionName}] Invalid character hue value: ${value}`);
-		return;
-	}
-	extension_settings[extensionName].currentTintValues.character.hue = value;
-	$("#prome-character-hue").val(value);
-	saveSettingsDebounced();
-	addTint();
-}
-
-function onCharacterTintInvert_Change() {
-	const value = this.value;
-	if (value < 0) {
-		console.error(
-			`[${extensionName}] Invalid character invert value: ${value}`,
-		);
-		return;
-	}
-	extension_settings[extensionName].currentTintValues.character.invert = value;
-	$("#prome-character-invert").val(value);
-	saveSettingsDebounced();
-	addTint();
-}
-
-function onCharacterTintSaturate_Change() {
-	const value = this.value;
-	if (value < 0) {
-		console.error(
-			`[${extensionName}] Invalid character saturate value: ${value}`,
-		);
-		return;
-	}
-	extension_settings[extensionName].currentTintValues.character.saturate =
-		value;
-	$("#prome-character-saturate").val(value);
-	saveSettingsDebounced();
-	addTint();
-}
-
-function onCharacterTintSepia_Change() {
-	const value = this.value;
-	if (value < 0) {
-		console.error(`[${extensionName}] Invalid character sepia value: ${value}`);
-		return;
-	}
-	extension_settings[extensionName].currentTintValues.character.sepia = value;
-	$("#prome-character-sepia").val(value);
-	saveSettingsDebounced();
-	addTint();
-}
-
-export function setupTintHTML() {
-	const preset = extension_settings[extensionName].currentTintValues;
-	$("#prome-tint-enable").prop(
-		"checked",
-		extension_settings[extensionName].worldTint,
-	);
-	$("#prome-tint-preset").val(preset.name);
-	$("#prome-tint-share").prop("checked", preset.shared);
-	$("#prome-world-tint").prop("checked", preset.world.enabled);
-	$("#prome-world-blur").val(preset.world.blur);
-	$("#prome-world-brightness").val(preset.world.brightness);
-	$("#prome-world-contrast").val(preset.world.contrast);
-	$("#prome-world-grayscale").val(preset.world.grayscale);
-	$("#prome-world-hue").val(preset.world.hue);
-	$("#prome-world-invert").val(preset.world.invert);
-	$("#prome-world-saturate").val(preset.world.saturate);
-	$("#prome-world-sepia").val(preset.world.sepia);
-	$("#prome-character-tint").prop("checked", preset.character.enabled);
-	$("#prome-character-blur").val(preset.character.blur);
-	$("#prome-character-brightness").val(preset.character.brightness);
-	$("#prome-character-contrast").val(preset.character.contrast);
-	$("#prome-character-grayscale").val(preset.character.grayscale);
-	$("#prome-character-hue").val(preset.character.hue);
-	$("#prome-character-invert").val(preset.character.invert);
-	$("#prome-character-saturate").val(preset.character.saturate);
-	$("#prome-character-sepia").val(preset.character.sepia);
-
-	for (const tint of extension_settings[extensionName].tintPresets) {
+	if (existingPresetIndex !== -1) {
+		// Update the existing preset
+		settings.tintPresets[existingPresetIndex] = newPreset;
+	} else {
+		// Add the new preset
+		settings.tintPresets.push(newPreset);
 		const option = document.createElement("option");
-		option.value = tint.name;
-		option.text = tint.name;
-		option.selected =
-			tint.name === extension_settings[extensionName].selectedTint;
+		option.value = name;
+		option.text = name;
 		$("#prome-tint-preset").append(option);
 	}
 
+	// Mark the new preset as selected
+	settings.selectedTint = name;
+	settings.currentTintValues = structuredClone(newPreset);
+	$("#prome-tint-preset").val(name);
+
+	saveSettingsDebounced();
+	toastr.success(`Tint preset "${name}" has been saved.`, "Tint Preset Saved");
+}
+
+// --- Tint Preset Commands ---
+function registerTintCommands() {
+	const settings = extension_settings[extensionName];
+
+	SlashCommandParser.addCommandObject(
+		SlashCommand.fromProps({
+			name: "tint",
+			callback: async () => {
+				switchTintMode();
+				toastr.success(
+					`World tint is now ${settings.worldTint ? "enabled" : "disabled"}.`,
+					"World Tint Status",
+				);
+				return settings.worldTint;
+			},
+			helpString:
+				"(Prome Visual Novel Extension) Toggles world/character tint on the VN UI.",
+		}),
+	);
+
+	SlashCommandParser.addCommandObject(
+		SlashCommand.fromProps({
+			name: "tint-world",
+			callback: async () => {
+				switchTintWorldMode();
+				toastr.success(
+					`World tint is now ${
+						settings.currentTintValues.world.enabled ? "enabled" : "disabled"
+					}.`,
+					"World Tint Status",
+				);
+				return settings.currentTintValues.world.enabled;
+			},
+			helpString:
+				"(Prome Visual Novel Extension) Toggles the world tint on the VN UI.",
+		}),
+	);
+
+	SlashCommandParser.addCommandObject(
+		SlashCommand.fromProps({
+			name: "tint-characters",
+			callback: async () => {
+				switchTintCharacterMode();
+				toastr.success(
+					`Character tint is now ${
+						settings.currentTintValues.character.enabled
+							? "enabled"
+							: "disabled"
+					}.`,
+					"Character Tint Status",
+				);
+				return settings.currentTintValues.character.enabled;
+			},
+			helpString:
+				"(Prome Visual Novel Extension) Toggles the character tint on the VN UI.",
+		}),
+	);
+
+	SlashCommandParser.addCommandObject(
+		SlashCommand.fromProps({
+			name: "tint-share",
+			callback: async () => {
+				switchTintSharedMode();
+				toastr.success(
+					`Shared tint is now ${
+						settings.currentTintValues.shared ? "enabled" : "disabled"
+					}.`,
+					"Shared Tint Status",
+				);
+				return settings.currentTintValues.shared;
+			},
+			helpString:
+				"(Prome Visual Novel Extension) Toggles sharing world tint with character sprites (This will override Character Tint).",
+		}),
+	);
+}
+
+function switchTintMode() {
+	extension_settings[extensionName].worldTint =
+		!extension_settings[extensionName].worldTint;
+	saveSettingsDebounced();
+	$("#prome-tint-enable")
+		.prop("checked", extension_settings[extensionName].worldTint)
+		.trigger("input");
 	applyTint();
 }
 
-export function setupTintJQuery() {
-	$("#prome-tint-enable").on("click", onTintEnable_Click);
-	$("#prome-tint-preset").on("change", onTintPreset_Select);
-	$("#prome-tint-share").on("click", onTintShare_Click);
-	$("#prome-tint-save").on("click", onTintPreset_Save);
-	$("#prome-tint-delete").on("click", onTintPreset_Delete);
-	$("#prome-world-tint").on("click", onWorldTint_Click);
-	$("#prome-character-tint").on("click", onCharacterTint_Click);
-	$("#prome-world-blur").on("input", onWorldTintBlur_Change);
-	$("#prome-world-brightness").on("input", onWorldTintBrightness_Change);
-	$("#prome-world-contrast").on("input", onWorldTintContrast_Change);
-	$("#prome-world-grayscale").on("input", onWorldTintGrayscale_Change);
-	$("#prome-world-hue").on("input", onWorldTintHue_Change);
-	$("#prome-world-invert").on("input", onWorldTintInvert_Change);
-	$("#prome-world-saturate").on("input", onWorldTintSaturate_Change);
-	$("#prome-world-sepia").on("input", onWorldTintSepia_Change);
-	$("#prome-character-blur").on("input", onCharacterTintBlur_Change);
-	$("#prome-character-brightness").on(
-		"input",
-		onCharacterTintBrightness_Change,
-	);
-	$("#prome-character-contrast").on("input", onCharacterTintContrast_Change);
-	$("#prome-character-grayscale").on("input", onCharacterTintGrayscale_Change);
-	$("#prome-character-hue").on("input", onCharacterTintHue_Change);
-	$("#prome-character-invert").on("input", onCharacterTintInvert_Change);
-	$("#prome-character-saturate").on("input", onCharacterTintSaturate_Change);
-	$("#prome-character-sepia").on("input", onCharacterTintSepia_Change);
+function switchTintWorldMode() {
+	extension_settings[extensionName].currentTintValues.world.enabled =
+		!extension_settings[extensionName].currentTintValues.world.enabled;
+	saveSettingsDebounced();
+	$("#prome-world-tint")
+		.prop(
+			"checked",
+			extension_settings[extensionName].currentTintValues.world.enabled,
+		)
+		.trigger("input");
+	applyTint();
+}
+
+function switchTintCharacterMode() {
+	extension_settings[extensionName].currentTintValues.character.enabled =
+		!extension_settings[extensionName].currentTintValues.character.enabled;
+	saveSettingsDebounced();
+	$("#prome-character-tint")
+		.prop(
+			"checked",
+			extension_settings[extensionName].currentTintValues.character.enabled,
+		)
+		.trigger("input");
+	applyTint();
+}
+
+function switchTintSharedMode() {
+	extension_settings[extensionName].currentTintValues.shared =
+		!extension_settings[extensionName].currentTintValues.shared;
+	saveSettingsDebounced();
+	$("#prome-tint-share")
+		.prop("checked", extension_settings[extensionName].currentTintValues.shared)
+		.trigger("input");
+	applyTint();
 }

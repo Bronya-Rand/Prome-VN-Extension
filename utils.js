@@ -1,5 +1,6 @@
-import { getContext, extension_settings } from "../../../extensions.js";
+import { extension_settings, getContext } from "../../../extensions.js";
 import { extensionName, VN_MODES } from "./constants.js";
+import { fetchSprites } from "./core/sprites.js";
 
 /**
  * Returns the last character chat message
@@ -93,11 +94,7 @@ export function isAutoHideSpritesEnabled() {
  */
 export async function getSpriteList(name) {
 	try {
-		const result = await fetch(
-			`/api/sprites/get?name=${encodeURIComponent(name)}`,
-		);
-		const sprites = result.ok ? await result.json() : [];
-		return { sprites, err: null };
+		return { sprites: await fetchSprites(name), err: null };
 	} catch (err) {
 		return { sprites: [], err };
 	}
@@ -138,11 +135,13 @@ export function isDisabledMember(name) {
 
 /**
  * Checks if a sprite pack exists
- * @param {string} spritePack - The name of the sprite pack
+ * @param {string?} spritePack - The name of the sprite pack
  * @returns {Promise<boolean>} - Whether the sprite pack exists
  */
 export async function spritePackExists(spritePack) {
-	if (spritePack.length === 0) return false;
+	if (!spritePack) return false;
+	if (spritePack.trim().length === 0) return false;
+
 	const { sprites, err } = await getSpriteList(spritePack);
 	if (err) {
 		console.error(
