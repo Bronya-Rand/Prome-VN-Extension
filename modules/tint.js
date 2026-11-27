@@ -196,7 +196,9 @@ async function onTintPreset_Delete() {
 	if (index === -1) return;
 
 	extension_settings[extensionName].tintPresets.splice(index, 1);
-	$("#prome-tint-preset option").filter((_, option) => option.value === selectedStyle).remove();
+	$("#prome-tint-preset option")
+		.filter((_, option) => option.value === selectedStyle)
+		.remove();
 
 	if (extension_settings[extensionName].tintPresets.length > 0) {
 		extension_settings[extensionName].selectedTint =

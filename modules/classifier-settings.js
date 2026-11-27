@@ -15,7 +15,10 @@ import {
 import { PROME_CUSTOM_EXPRESSIONS_CHANGED, promeBus } from "../core/bus.js";
 import { openSpriteGallery } from "./gallery.js";
 
-export async function initClassifierSettings({ onClassifierChange, onSpriteSettingsChange }) {
+export async function initClassifierSettings({
+	onClassifierChange,
+	onSpriteSettingsChange,
+}) {
 	try {
 		const html = await $.get(
 			`${extensionFolderPath}/html/modules/classifier.html`,
@@ -71,7 +74,9 @@ export async function initClassifierSettings({ onClassifierChange, onSpriteSetti
 		mainApiSettings.toggle(mainApi);
 		$("#prome-classifier-prompt-settings").toggle(mainApi || webLlm);
 		$("#prome-classifier-webllm-help").toggle(webLlm);
-		$("#prome-filter-available-expressions-setting").toggle(mode !== CLASSIFIER_MODES.NONE);
+		$("#prome-filter-available-expressions-setting").toggle(
+			mode !== CLASSIFIER_MODES.NONE,
+		);
 		$("#prome-local-sampling-setting").toggle(mode !== CLASSIFIER_MODES.NONE);
 	}
 
@@ -144,7 +149,8 @@ export async function initClassifierSettings({ onClassifierChange, onSpriteSetti
 		onSpriteSettingsChange();
 	});
 	const reroll = $("#prome-reroll-same-sprite");
-	reroll.prop("checked", settings.rerollSameSprite)
+	reroll
+		.prop("checked", settings.rerollSameSprite)
 		.prop("disabled", !settings.allowMultipleSprites)
 		.on("change", function () {
 			settings.rerollSameSprite = this.checked;

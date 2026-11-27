@@ -194,7 +194,9 @@ export function updateStageOverlap() {
 		);
 		let w = 0;
 		if (img?.complete && img?.naturalWidth > 0 && img?.naturalHeight > 0) {
-			w = img.offsetWidth || (fallbackHeight * (img.naturalWidth / img.naturalHeight));
+			w =
+				img.offsetWidth ||
+				fallbackHeight * (img.naturalWidth / img.naturalHeight);
 		}
 		if (!w) {
 			w = slot.offsetWidth > 100 ? slot.offsetWidth : fallbackWidth;

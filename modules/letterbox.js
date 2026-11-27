@@ -26,7 +26,7 @@ export function applyLetterboxSettings() {
 	$("body").toggleClass("hLetterBox", mode === VN_MODES.HORIZONTAL);
 	$("body").toggleClass("vLetterBox", mode === VN_MODES.VERTICAL);
 
-	const unit = mode === VN_MODES.HORIZONTAL ? "vh" : "vw";
+	const unit = mode === VN_MODES.HORIZONTAL ? "dvh" : "vw";
 	document.documentElement.style.setProperty(
 		"--prome-letterbox-size",
 		`${settings.letterboxSize}${unit}`,

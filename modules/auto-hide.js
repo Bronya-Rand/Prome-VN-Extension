@@ -19,7 +19,9 @@ export function filterActiveGroupCharacters(characters) {
 		return characters;
 	}
 
-	const eligibleAvatars = new Set(characters.map((character) => character.avatar));
+	const eligibleAvatars = new Set(
+		characters.map((character) => character.avatar),
+	);
 	const recentAvatars = getRecentTalkingCharacters()
 		.filter((avatar) => eligibleAvatars.has(avatar))
 		.slice(0, maxVisible);

@@ -142,14 +142,18 @@ export function registerExpressionCommands() {
 		SlashCommand.fromProps({
 			name: "update-layers",
 			callback: () => {
-				if (!document.body.classList.contains("prome-vn-active") || !isGroupChat()) {
+				if (
+					!document.body.classList.contains("prome-vn-active") ||
+					!isGroupChat()
+				) {
 					toastr.warning("Open a group chat with the Prome stage enabled.");
 					return false;
 				}
 				updateStageLayers();
 				return true;
 			},
-			helpString: "Recalculate sprite overlap and speaker layers on the Prome group stage.",
+			helpString:
+				"Recalculate sprite overlap and speaker layers on the Prome group stage.",
 		}),
 	);
 

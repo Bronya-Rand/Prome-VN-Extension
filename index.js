@@ -55,7 +55,8 @@ const spriteSelectionsByActor = new Map();
 const pendingByAvatar = new Map();
 
 function loadSettings() {
-	const settings = (extension_settings[extensionName] ??= {});
+	extension_settings[extensionName] ??= {};
+	const settings = extension_settings[extensionName];
 	if (Object.keys(settings).length === 0 && power_user.waifuMode) {
 		settings.enableVN_UI = true;
 	}
@@ -102,7 +103,9 @@ function matchesCurrentPersona(message) {
 	if (!avatar) return true;
 	if (avatar.startsWith("/thumbnail?")) {
 		const params = new URLSearchParams(avatar.slice(avatar.indexOf("?") + 1));
-		return params.get("type") === "persona" && params.get("file") === user_avatar;
+		return (
+			params.get("type") === "persona" && params.get("file") === user_avatar
+		);
 	}
 	return avatar === getUserAvatar(user_avatar);
 }
@@ -124,7 +127,12 @@ async function updateSpeakerExpression(messageId) {
 	let spritePackName;
 
 	if (message.is_user) {
-		if (!settings.enableUserSprite || !user_avatar || !matchesCurrentPersona(message)) return;
+		if (
+			!settings.enableUserSprite ||
+			!user_avatar ||
+			!matchesCurrentPersona(message)
+		)
+			return;
 
 		actorId = `persona:${user_avatar}`;
 		spritePackName = resolveSpriteFolder(
@@ -271,7 +279,11 @@ async function restoreStageExpressions({
 	const chat = context.chat;
 	const chatId = context.getCurrentChatId();
 	if (!chatId || !Array.isArray(chat) || chat.length === 0) return;
-	if (!restoreSpeaker && extension_settings[extensionName].classifierMode === CLASSIFIER_MODES.NONE) return;
+	if (
+		!restoreSpeaker &&
+		extension_settings[extensionName].classifierMode === CLASSIFIER_MODES.NONE
+	)
+		return;
 
 	const settings = extension_settings[extensionName];
 
@@ -497,7 +509,10 @@ jQuery(async () => {
 
 	for (const page of ["keybinds", "commands"]) {
 		$(`#prome-${page}`).on("click", async () => {
-			const html = await renderExtensionTemplateAsync(`third-party/${extensionName}/html`, page);
+			const html = await renderExtensionTemplateAsync(
+				`third-party/${extensionName}/html`,
+				page,
+			);
 			await callGenericPopup(html, POPUP_TYPE.TEXT);
 		});
 	}

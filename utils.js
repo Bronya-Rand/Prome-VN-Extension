@@ -1,6 +1,6 @@
 import { extension_settings, getContext } from "../../../extensions.js";
-import { fetchSprites } from "./core/sprites.js";
 import { extensionName, VN_MODES } from "./constants.js";
+import { fetchSprites } from "./core/sprites.js";
 
 /**
  * Returns the last character chat message

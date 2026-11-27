@@ -127,7 +127,10 @@ function registerUserCommands() {
 				$("#prome-user-sprite-input").val(pack);
 				emitPromeEvent("PROME_STAGE_REFRESH_REQUESTED");
 
-				toastr.success(`Default user sprite pack set to "${pack}".`, "User Sprite");
+				toastr.success(
+					`Default user sprite pack set to "${pack}".`,
+					"User Sprite",
+				);
 				return pack;
 			},
 			namedArgumentList: [

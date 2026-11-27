@@ -9,8 +9,8 @@ import {
 } from "../../../../popup.js";
 import { power_user } from "../../../../power-user.js";
 import {
-	defaultSettings,
 	DEFAULT_EXPRESSIONS,
+	defaultSettings,
 	extensionFolderPath,
 	extensionName,
 } from "../constants.js";

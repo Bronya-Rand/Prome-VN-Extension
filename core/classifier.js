@@ -5,14 +5,25 @@ import {
 } from "../../../../../script.js";
 import { getContext } from "../../../../extensions.js";
 import {
+	getKoboldGenerationData,
+	kai_flags,
+	kai_settings,
+} from "../../../../kai-settings.js";
+import {
+	createGenerationParameters,
+	getChatCompletionModel,
+	oai_settings,
+} from "../../../../openai.js";
+import { power_user } from "../../../../power-user.js";
+import { parseReasoningFromString } from "../../../../reasoning.js";
+import {
+	createTextGenGenerationData,
+	textgenerationwebui_settings,
+} from "../../../../textgen-settings.js";
+import {
 	ConnectionManagerRequestService,
 	generateWebLlmChatPrompt,
 } from "../../../shared.js";
-import { kai_flags, kai_settings, getKoboldGenerationData } from "../../../../kai-settings.js";
-import { createGenerationParameters, getChatCompletionModel, oai_settings } from "../../../../openai.js";
-import { power_user } from "../../../../power-user.js";
-import { parseReasoningFromString } from "../../../../reasoning.js";
-import { createTextGenGenerationData, textgenerationwebui_settings } from "../../../../textgen-settings.js";
 import {
 	CLASSIFIER_MODES,
 	DEFAULT_CLASSIFIER_PROMPT,
@@ -37,7 +48,9 @@ export async function classifyExpression(text, spriteLabels, settings) {
 	const filterAvailable = settings.filterAvailableExpressions;
 	const localLabels = filterAvailable ? packLabels : null;
 	const runLocal = () => {
-		const input = settings.sampleLocalMessages ? sampleLocalClassificationText(text) : text;
+		const input = settings.sampleLocalMessages
+			? sampleLocalClassificationText(text)
+			: text;
 		return classifyLocal(input || text, localLabels, removedLabels);
 	};
 	const webLlm = mode === CLASSIFIER_MODES.WEBLLM;
@@ -53,7 +66,11 @@ export async function classifyExpression(text, spriteLabels, settings) {
 		...new Set(
 			filterAvailable
 				? packLabels
-				: [...packLabels, ...DEFAULT_EXPRESSIONS, ...(settings.customExpressions ?? [])],
+				: [
+						...packLabels,
+						...DEFAULT_EXPRESSIONS,
+						...(settings.customExpressions ?? []),
+					],
 		),
 	];
 	if (!labels.length) return null;
@@ -64,10 +81,9 @@ export async function classifyExpression(text, spriteLabels, settings) {
 			? 'Return only a JSON object with an "emotion" field containing that label.'
 			: "Return only the label.",
 	};
-	const prompt = (settings.classifierPrompt || DEFAULT_CLASSIFIER_PROMPT).replace(
-		/\{\{(labels|outputFormat)\}\}/g,
-		(_, name) => promptValues[name],
-	);
+	const prompt = (
+		settings.classifierPrompt || DEFAULT_CLASSIFIER_PROMPT
+	).replace(/\{\{(labels|outputFormat)\}\}/g, (_, name) => promptValues[name]);
 	try {
 		const content = webLlm
 			? await generateWebLlmChatPrompt(
@@ -85,10 +101,15 @@ export async function classifyExpression(text, spriteLabels, settings) {
 				);
 		const label = parseLabel(content, labels, structured);
 		if (label) return label;
-		console.warn(`[${extensionName}] Classifier returned no matching expression. Using Local.`);
+		console.warn(
+			`[${extensionName}] Classifier returned no matching expression. Using Local.`,
+		);
 	} catch (error) {
 		const backend = webLlm ? "WebLLM" : "Main API";
-		console.warn(`[${extensionName}] ${backend} classification failed. Using Local.`, error);
+		console.warn(
+			`[${extensionName}] ${backend} classification failed. Using Local.`,
+			error,
+		);
 	}
 	return runLocal();
 }
@@ -101,25 +122,34 @@ function getOutputConstraint(api, textType, labels, structured) {
 		required: ["emotion"],
 		additionalProperties: false,
 	};
-	if (api === "openai") return { json_schema: { name: "prome_expression", value: schema } };
-	if (api === "textgenerationwebui" && ["tabby", "llamacpp"].includes(textType)) {
+	if (api === "openai")
+		return { json_schema: { name: "prome_expression", value: schema } };
+	if (
+		api === "textgenerationwebui" &&
+		["tabby", "llamacpp"].includes(textType)
+	) {
 		return { json_schema: schema };
 	}
 	if (
 		(api === "textgenerationwebui" && textType === "koboldcpp") ||
 		(api === "kobold" && kai_flags.can_use_grammar)
 	) {
-		const choices = labels.map((emotion) => JSON.stringify(JSON.stringify({ emotion })));
+		const choices = labels.map((emotion) =>
+			JSON.stringify(JSON.stringify({ emotion })),
+		);
 		return { grammar: `root ::= ${choices.join(" | ")}` };
 	}
-	throw new Error("Structured classification is unavailable for this connection.");
+	throw new Error(
+		"Structured classification is unavailable for this connection.",
+	);
 }
 
 async function requestClassification(messages, labels, structured, profileId) {
 	const context = getContext();
 	if (profileId) {
 		const profile = ConnectionManagerRequestService.getProfile(profileId);
-		const { selected: api, type } = ConnectionManagerRequestService.validateProfile(profile);
+		const { selected: api, type } =
+			ConnectionManagerRequestService.validateProfile(profile);
 		const constraint = getOutputConstraint(api, type, labels, structured);
 		const response = await ConnectionManagerRequestService.sendRequest(
 			profileId,
@@ -132,7 +162,12 @@ async function requestClassification(messages, labels, structured, profileId) {
 	}
 
 	const api = context.mainApi;
-	const constraint = getOutputConstraint(api, textgenerationwebui_settings.type, labels, structured);
+	const constraint = getOutputConstraint(
+		api,
+		textgenerationwebui_settings.type,
+		labels,
+		structured,
+	);
 	if (api === "openai") {
 		const settings = {
 			...oai_settings,
@@ -158,7 +193,10 @@ async function requestClassification(messages, labels, structured, profileId) {
 	}
 
 	const prompt = power_user.instruct.enabled
-		? context.TextCompletionService.constructPrompt(messages, power_user.instruct)
+		? context.TextCompletionService.constructPrompt(
+				messages,
+				power_user.instruct,
+			)
 		: messages.map((message) => message.content).join("\n\n");
 	if (api === "textgenerationwebui") {
 		const settings = {
@@ -169,7 +207,12 @@ async function requestClassification(messages, labels, structured, profileId) {
 			min_length: 0,
 			ban_eos_token: false,
 		};
-		const payload = createTextGenGenerationData(settings, null, prompt, MAX_RESPONSE_TOKENS);
+		const payload = createTextGenGenerationData(
+			settings,
+			null,
+			prompt,
+			MAX_RESPONSE_TOKENS,
+		);
 		const response = await context.TextCompletionService.processRequest({
 			...payload,
 			stream: false,
@@ -182,16 +225,31 @@ async function requestClassification(messages, labels, structured, profileId) {
 		return response.content;
 	}
 	if (api === "kobold") {
-		const payload = getKoboldGenerationData(prompt, kai_settings, MAX_RESPONSE_TOKENS, context.maxContext, false, "quiet");
+		const payload = getKoboldGenerationData(
+			prompt,
+			kai_settings,
+			MAX_RESPONSE_TOKENS,
+			context.maxContext,
+			false,
+			"quiet",
+		);
 		const response = await fetch(getGenerateUrl(api), {
 			method: "POST",
 			headers: getRequestHeaders(),
-			body: JSON.stringify({ ...payload, grammar: undefined, stop_sequence: [], ...constraint }),
+			body: JSON.stringify({
+				...payload,
+				grammar: undefined,
+				stop_sequence: [],
+				...constraint,
+			}),
 		});
-		if (!response.ok) throw new Error(`Kobold classification failed (${response.status}).`);
+		if (!response.ok)
+			throw new Error(`Kobold classification failed (${response.status}).`);
 		return extractMessageFromData(await response.json(), api);
 	}
-	throw new Error("Main API classification is unavailable for this connection.");
+	throw new Error(
+		"Main API classification is unavailable for this connection.",
+	);
 }
 
 function parseLabel(content, labels, structured) {
@@ -219,7 +277,9 @@ function parseLabel(content, labels, structured) {
 function matchLabel(candidate, labels) {
 	if (typeof candidate !== "string") return null;
 	const normalized = candidate.trim().toLowerCase();
-	return labels.find((label) => label.trim().toLowerCase() === normalized) ?? null;
+	return (
+		labels.find((label) => label.trim().toLowerCase() === normalized) ?? null
+	);
 }
 
 export async function classifyLocal(
@@ -237,7 +297,10 @@ export async function classifyLocal(
 		if (response.ok) {
 			const data = await response.json();
 			for (const { label } of data.classification ?? []) {
-				if (typeof label !== "string" || removedLabels.includes(label.trim().toLowerCase())) {
+				if (
+					typeof label !== "string" ||
+					removedLabels.includes(label.trim().toLowerCase())
+				) {
 					continue;
 				}
 				if (!availableLabels) return label;
