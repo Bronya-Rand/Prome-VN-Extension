@@ -32,8 +32,8 @@ La extensión de novela visual Prome es una extensión para SillyTavern que mode
 
 5. Sprites de Usuario - ¿Quieres ser parte de la conversación? Presta los sprites de otra persona/personaje o usa los tuyos mientras usas todas las otras características de Prome.
 
-   > [!NOTE]
-   > Elige la carpeta predeterminada de sprites de persona en los ajustes de Sprites de Usuario, o usa la Galería de Sprites para anularla en una persona específica. Usa `/express expression=joy` o `/set-user-set name=…` para cambiar tu expresión o conjunto de sprites activo.
+> [!NOTE]
+> Elige la carpeta predeterminada de sprites de persona en los ajustes de Sprites de Usuario, o usa la Galería de Sprites para anularla en una persona específica. Usa `/express expression=joy` o `/set-user-set name=…` para cambiar tu expresión o conjunto de sprites activo.
 
    <center>
       <img src="./user-sprite.png">
